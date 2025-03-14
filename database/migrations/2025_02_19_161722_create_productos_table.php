@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre');
             $table->text('descripcion')->nullable();
-            $table->decimal('precio', 10, 2);
+            $table->decimal('precio', 10, 20);
             $table->integer('stock');
             $table->string('imagen')->nullable();
             $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');

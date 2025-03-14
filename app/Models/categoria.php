@@ -9,5 +9,6 @@ class Categoria extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nombre']; // Agrega solo los campos que se pueden asignar masivamente
+    protected $fillable = ['nombre', 'descripcion', 'estado']; // Agrega solo los campos que se pueden asignar masivamente
 }
+ 

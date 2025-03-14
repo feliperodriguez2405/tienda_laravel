@@ -16,13 +16,7 @@ return new class extends Migration
             $table->timestamps();
             $table->string('nombre');
             $table->string('descripcion');
-            $table->string('icono')->nullable();
-            $table->unsignedBigInteger('empresa_id');
-            $table->foreign('empresa_id')->references('id')->on('empresas')->onDelete('cascade');
-            $table->unsignedBigInteger('moneda_id');
-            $table->foreign('moneda_id')->references('id')->on('monedas')->onDelete('cascade');
-            $table->unsignedBigInteger('tipo_cambio_id');
-            $table->foreign('tipo_cambio_id')->references('id')->on('tipos_cambios')->onDelete('cascade');
+
         });
     }
 

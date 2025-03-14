@@ -71,13 +71,24 @@
                                 <button type="submit" class="btn btn-primary login-btn">
                                     {{ __('Login') }}
                                 </button>
-                                @if (Route::has('password.request'))
-                                    <a class="btn btn-link forgot-link" href="{{ route('password.request') }}">
-                                        {{ __('Forgot Your Password?') }}
+                                @if (Route::has('register'))
+                                    <a href="{{ route('register') }}" class="btn btn-secondary register-btn">
+                                        {{ __('Register') }}
                                     </a>
                                 @endif
                             </div>
                         </div>
+
+                        <!-- Forgot Password Link -->
+                        @if (Route::has('password.request'))
+                            <div class="row mt-3 d-flex justify-content-center">
+                                <div class="col-md-6 text-center">
+                                    <a class="btn btn-link forgot-link" href="{{ route('password.request') }}">
+                                        {{ __('Forgot Your Password?') }}
+                                    </a>
+                                </div>
+                            </div>
+                        @endif
                     </form>
                 </div>
             </div>
@@ -116,12 +127,12 @@
         box-shadow: 0 0 5px rgba(128, 189, 255, 0.5);
     }
 
-    .login-btn {
+    .login-btn, .register-btn {
         padding: 0.5rem 1.5rem;
         transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
     }
 
-    .login-btn:hover {
+    .login-btn:hover, .register-btn:hover {
         transform: scale(1.02);
     }
 
@@ -133,6 +144,15 @@
     .forgot-link:hover {
         color: #0056b3;
         text-decoration: underline;
+    }
+
+    .register-btn {
+        background-color: #6c757d; /* Gris por defecto para el botón de registro */
+        color: white;
+    }
+
+    .register-btn:hover {
+        background-color: #5a6268; /* Un gris más oscuro al pasar el mouse */
     }
 </style>
 @endsection

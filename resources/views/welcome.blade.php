@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -186,55 +188,61 @@
         </style>
     </head>
     <body>
-        <!-- Navbar -->
-        <nav class="navbar">
-            <div class="navbar-container">
-                <div class="logo">
-                    <img src="{{ asset('images/tienda.jpg') }}" alt="D'Jenny Logo">
-                    <span>D'Jenny</span>
-                </div>
-                <div class="nav-links">
-                    @if (Route::has('login'))
-                        @auth
-                            <a href="{{ url('/home') }}">Home</a>
-                        @else
-                            <a href="{{ route('login') }}">Iniciar Sesión</a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}">Registrarse</a>
-                            @endif
-                        @endauth
-                    @endif
-                </div>
-            </div>
-        </nav>
-
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <div class="hero-header">
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="logo">
                 <img src="{{ asset('images/tienda.jpg') }}" alt="D'Jenny Logo">
-                <h1>Bienvenidos a D'Jenny Supermercado</h1>
+                <span>D'Jenny</span>
             </div>
-            <div class="content-grid">
-                <div class="content-card">
-                    <strong>Misión</strong>
-                    <p>Ofrecer productos frescos y de calidad con un servicio excepcional que haga de cada compra una experiencia agradable y conveniente.</p>
-                </div>
-                <div class="content-card">
-                    <strong>Visión</strong>
-                    <p>Ser el supermercado preferido de la comunidad, destacándonos por nuestra variedad, precios competitivos y atención personalizada.</p>
-                </div>
-                <div class="content-card">
-                    <strong>Nuestro Sistema</strong>
-                    <p>Gestiona eficientemente nuestro inventario y ventas, proporcionando reportes detallados para optimizar tu experiencia de compra.</p>
-                </div>
+            <div class="nav-links">
+                <!-- Lógica de navegación -->
+                @if (Route::has('login'))
+                    @auth
+                        <a href="{{ url('/home') }}">Inicio</a>
+                        <form method="POST" action="{{ route('logout') }}" style="display:inline;">
+                            @csrf
+                            <button type="submit" class="nav-link-btn">Cerrar Sesión</button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}">Iniciar Sesión</a>
+                        @if (Route::has('register'))
+                            <a href="{{ route('register') }}">Registrarse</a>
+                        @endif
+                    @endauth
+                @endif
             </div>
-        </section>
+        </div>
+    </nav>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <p>© 2025 D'Jenny Supermercado. Todos los derechos reservados.</p>
+    <!-- Contenido principal -->
+    <section class="hero-section">
+        <div class="hero-header">
+            <img src="{{ asset('images/tienda.jpg') }}" alt="D'Jenny Logo">
+            <h1>Bienvenidos a D'Jenny Supermercado</h1>
+        </div>
+        <div class="content-grid">
+            <div class="content-card">
+                <strong>Misión</strong>
+                <p>Ofrecer productos frescos y de calidad con un servicio excepcional que haga de cada compra una experiencia agradable y conveniente.</p>
             </div>
-        </footer>
-    </body>
+            <div class="content-card">
+                <strong>Visión</strong>
+                <p>Ser el supermercado preferido de la comunidad, destacándonos por nuestra variedad, precios competitivos y atención personalizada.</p>
+            </div>
+            <div class="content-card">
+                <strong>Nuestro Sistema</strong>
+                <p>Gestiona eficientemente nuestro inventario y ventas, proporcionando informes detallados para optimizar tu experiencia de compra.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pie de página -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>© 2025 Supermercado D'Jenny. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+</body>
 </html>
+

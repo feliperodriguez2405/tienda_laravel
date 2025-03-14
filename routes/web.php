@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
+
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\CategoriaController;
@@ -54,13 +55,22 @@ Route::middleware(['auth', 'role:usuario'])->group(function () {
 });
 
 // Rutas para administradores con rol "admin"
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboar');
-});
-// Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard
-// Rutas para administradores con rol "admin" y permiso "administrar productos" 
-Route::middleware(['auth', 'role:admin', 'permission:administrar productos'])->group(function () {
-    Route::get('/admin/products', [AdminController::class, 'products'])->name('admin.products');
+
+
+
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/usuarios', [AdminController::class, 'usuarios'])->name('admin.usuarios');
+    Route::get('/orders', [AdminController::class, 'orders'])->name('admin.orders');
+    Route::get('/reports', [AdminController::class, 'reports'])->name('admin.reports');
+
+    // Rutas para gestión de usuarios
+    Route::get('/users', [AdminController::class, 'usersIndex'])->name('admin.users.index');
+    Route::get('/users/create', [AdminController::class, 'create'])->name('admin.users.create');
+    Route::post('/users', [AdminController::class, 'store'])->name('admin.users.store');
+    Route::get('/users/{user}/edit', [AdminController::class, 'edit'])->name('admin.users.edit');
+    Route::put('/users/{user}', [AdminController::class, 'update'])->name('admin.users.update');
+    Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('admin.users.destroy');
 });
 
 // Rutas para administradores con rol "admin" y permiso "administrar categorías"

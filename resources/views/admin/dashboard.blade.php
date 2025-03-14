@@ -25,11 +25,13 @@
 
     <div class="row">
         <!-- Sidebar -->
-        <div class="col-md-3">
-            <div class="list-group sidebar">
-                <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action active">
-                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
-                </a>
+       <div class="col-md-3">
+    <div class="list-group sidebar">
+        <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action active">
+            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+        </a>
+    </div>
+</div>
                 <a href="{{ route('productos.index') }}" class="list-group-item list-group-item-action">
                     <i class="bi bi-box-seam me-2"></i> Gestionar Productos
                 </a>

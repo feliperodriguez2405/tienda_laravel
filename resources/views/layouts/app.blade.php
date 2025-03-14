@@ -128,6 +128,21 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.usuarios') }}">
+                            <i class="bi bi-people me-1"></i>Usuarios
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.orders') }}">
+                            <i class="bi bi-cart-check me-1"></i>Pedidos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.reports') }}">
+                            <i class="bi bi-bar-chart me-1"></i>Reportes
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link logout-link" 
                            href="{{ route('logout') }}"
                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

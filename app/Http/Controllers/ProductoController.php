@@ -9,10 +9,36 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $productos = Producto::all();
-        return view('productos.index', compact('productos'));
+        $query = Producto::query();
+
+        // Filtro por búsqueda de nombre
+        if ($request->filled('search')) {
+            $query->where('nombre', 'like', '%' . $request->search . '%');
+        }
+
+        // Filtro por categoría
+        if ($request->filled('category')) {
+            $query->where('categoria_id', $request->category);
+        }
+
+        // Filtro por nivel de stock
+        if ($request->filled('stock')) {
+            if ($request->stock == 'low') {
+                $query->where('stock', '<=', 10);
+            } elseif ($request->stock == 'medium') {
+                $query->whereBetween('stock', [11, 50]);
+            } elseif ($request->stock == 'high') {
+                $query->where('stock', '>', 50);
+            }
+        }
+
+        // Obtener productos paginados y categorías para el filtro
+        $productos = $query->paginate(9); // 9 productos por página (3 por fila)
+        $categorias = Categoria::all();
+
+        return view('productos.index', compact('productos', 'categorias'));
     }
 
     public function create()

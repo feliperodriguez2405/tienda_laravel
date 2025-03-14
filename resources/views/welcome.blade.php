@@ -3,140 +3,238 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <title>D'Jenny</title>
+        <title>D'Jenny Supermercado</title>
 
         <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 
         <!-- Styles -->
         <style>
-            /* Estilos básicos */
-            body {
-                font-family: 'Nunito', sans-serif;
-                background-color: #f8fafc;
+            * {
                 margin: 0;
                 padding: 0;
+                box-sizing: border-box;
             }
 
-            .bg-primary {
-                background-color: #EF3B2D; /* Color principal de la tienda */
-            }
-
-            .logo {
-                font-size: 2rem;
-                font-weight: bold;
-                color: #fff;
-                text-transform: uppercase;
+            body {
+                font-family: 'Poppins', sans-serif;
+                background-color: #f5f7fa;
+                color: #2d3436;
+                line-height: 1.6;
             }
 
             /* Navbar */
             .navbar {
-                background-color: #EF3B2D;
-                padding: 1rem;
-                color: white;
+                background: linear-gradient(90deg, #EF3B2D 0%, #ff6348 100%);
+                padding: 1.5rem 2rem;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+            }
+
+            .navbar-container {
+                max-width: 1200px;
+                margin: 0 auto;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
             }
 
-            .navbar a {
-                color: white;
-                text-decoration: none;
-                margin: 0 1rem;
-                font-weight: 600;
+            .logo {
+                display: flex;
+                align-items: center;
+                gap: 10px;
             }
 
-            .navbar a:hover {
-                text-decoration: underline;
+            .logo img {
+                width: 50px;
+                height: 50px;
+                object-fit: contain;
+            }
+
+            .logo span {
+                color: white;
+                font-size: 1.8rem;
+                font-weight: 600;
+                text-transform: uppercase;
+            }
+
+            .nav-links a {
+                color: white;
+                text-decoration: none;
+                margin-left: 2rem;
+                font-weight: 500;
+                transition: all 0.3s ease;
+            }
+
+            .nav-links a:hover {
+                color: #ffeaa7;
+                transform: translateY(-2px);
             }
 
             /* Hero Section */
             .hero-section {
+                max-width: 1200px;
+                margin: 4rem auto;
+                padding: 3rem;
+                background: white;
+                border-radius: 20px;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .hero-section::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 5px;
+                background: linear-gradient(90deg, #EF3B2D, #ffeaa7);
+            }
+
+            .hero-header {
                 text-align: center;
-                margin-top: 50px;
-                padding: 20px;
-                background-color: #fff;
-                border-radius: 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                margin-bottom: 2rem;
             }
 
-            .hero-section img {
-                width: 150px;
-                margin-bottom: 30px;
+            .hero-header img {
+                width: 120px;
+                margin-bottom: 1.5rem;
+                border-radius: 50%;
+                border: 4px solid #EF3B2D;
             }
 
-            .hero-section h1 {
-                font-size: 3rem;
+            .hero-header h1 {
                 color: #EF3B2D;
+                font-size: 2.5rem;
                 font-weight: 700;
+                margin-bottom: 1rem;
             }
 
-            .hero-section p {
-                font-size: 1.2rem;
-                color: #333;
-                margin-top: 20px;
-                line-height: 1.6;
+            .content-grid {
+                display: grid;
+                gap: 2rem;
+                margin: 0 1rem;
+            }
+
+            .content-card {
+                background: #fff;
+                padding: 1.5rem;
+                border-radius: 10px;
+                border-left: 4px solid #EF3B2D;
+                transition: transform 0.3s ease;
+            }
+
+            .content-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .content-card strong {
+                color: #EF3B2D;
+                display: block;
+                margin-bottom: 0.5rem;
+                font-size: 1.1rem;
             }
 
             /* Footer */
             .footer {
-                background-color: #333;
-                color: #fff;
-                text-align: center;
-                padding: 1rem 0;
-                position: fixed;
-                width: 100%;
-                bottom: 0;
+                background: #2d3436;
+                color: white;
+                padding: 2rem;
+                margin-top: 4rem;
             }
 
-            .footer p {
-                margin: 0;
+            .footer-content {
+                max-width: 1200px;
+                margin: 0 auto;
+                text-align: center;
+            }
+
+            .footer-content p {
+                opacity: 0.9;
+                font-size: 0.9rem;
+            }
+
+            /* Supermarket Elements */
+            .cart-icon {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                opacity: 0.1;
+                font-size: 100px;
+            }
+
+            @media (max-width: 768px) {
+                .navbar-container {
+                    flex-direction: column;
+                    gap: 1rem;
+                }
+
+                .nav-links a {
+                    margin: 0.5rem;
+                }
+
+                .hero-section {
+                    margin: 2rem 1rem;
+                    padding: 2rem 1rem;
+                }
             }
         </style>
     </head>
     <body>
         <!-- Navbar -->
-        <div class="navbar">
-            <div class="max-w-6xl mx-auto sm:px-6 lg:px-8 flex justify-between items-center">
-                <!-- Logo de la empresa -->
+        <nav class="navbar">
+            <div class="navbar-container">
                 <div class="logo">
-                <img src="{{ asset('images/tienda.jpg') }}" alt="D'Jenny Logo">
+                    <img src="{{ asset('images/tienda.jpg') }}" alt="D'Jenny Logo">
+                    <span>D'Jenny</span>
                 </div>
-                <div>
+                <div class="nav-links">
                     @if (Route::has('login'))
-                        <div class="hidden fixed top-0 right-0 px-6 py-4 sm:block">
-                            @auth
-                                <a href="{{ url('/home') }}" class="text-sm text-white">Home</a>
-                            @else
-                                <a href="{{ route('login') }}" class="text-sm text-white">Log in</a>
-                                @if (Route::has('register'))
-                                    <a href="{{ route('register') }}" class="ml-4 text-sm text-white">Register</a>
-                                @endif
-                            @endauth
-                        </div>
+                        @auth
+                            <a href="{{ url('/home') }}">Home</a>
+                        @else
+                            <a href="{{ route('login') }}">Iniciar Sesión</a>
+                            @if (Route::has('register'))
+                                <a href="{{ route('register') }}">Registrarse</a>
+                            @endif
+                        @endauth
                     @endif
                 </div>
             </div>
-        </div>
+        </nav>
 
         <!-- Hero Section -->
-        <div class="hero-section max-w-6xl mx-auto">
-            <!-- Logo de la empresa -->
-            <img src="{{ asset('images/tienda.jpg') }}" alt="D'Jenny Logo">
-            <h1>Bienvenidos a D'Jenny</h1>
-            
-            <!-- Misión y Visión -->
-            <p><strong>Misión:</strong> Ofrecemos productos de calidad, exclusivos y personalizados, con el objetivo de proporcionar una experiencia única de compra a nuestros clientes.</p>
-            <p><strong>Visión:</strong> Ser una empresa líder en el mercado, ofreciendo soluciones innovadoras a través de productos únicos y un servicio excepcional.</p>
-
-            <!-- Propósito del software -->
-            <p><strong>Propósito del software:</strong> Este software ha sido diseñado para gestionar el inventario de productos disponibles en la tienda y generar reportes detallados de ventas. Su objetivo es optimizar la administración del negocio y facilitar la toma de decisiones estratégicas a través de la visualización de productos y los reportes de rendimiento de ventas.</p>
-        </div>
+        <section class="hero-section">
+            <div class="hero-header">
+                <img src="{{ asset('images/tienda.jpg') }}" alt="D'Jenny Logo">
+                <h1>Bienvenidos a D'Jenny Supermercado</h1>
+            </div>
+            <div class="content-grid">
+                <div class="content-card">
+                    <strong>Misión</strong>
+                    <p>Ofrecer productos frescos y de calidad con un servicio excepcional que haga de cada compra una experiencia agradable y conveniente.</p>
+                </div>
+                <div class="content-card">
+                    <strong>Visión</strong>
+                    <p>Ser el supermercado preferido de la comunidad, destacándonos por nuestra variedad, precios competitivos y atención personalizada.</p>
+                </div>
+                <div class="content-card">
+                    <strong>Nuestro Sistema</strong>
+                    <p>Gestiona eficientemente nuestro inventario y ventas, proporcionando reportes detallados para optimizar tu experiencia de compra.</p>
+                </div>
+            </div>
+        </section>
 
         <!-- Footer -->
-        <div class="footer">
-            <p>&copy; 2025 D'Jenny. Todos los derechos reservados.</p>
-        </div>
+        <footer class="footer">
+            <div class="footer-content">
+                <p>© 2025 D'Jenny Supermercado. Todos los derechos reservados.</p>
+            </div>
+        </footer>
     </body>
 </html>

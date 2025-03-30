@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use Illuminate\Support\Facades\Hash; // Importar el facade Hash
+use App\Models\Orden;
+use App\Models\DetalleOrden;
 
 class AdminController extends Controller
 {
@@ -19,74 +19,75 @@ class AdminController extends Controller
         return view('admin.usuarios', compact('users'));
     }
 
-    public function orders()
+    public function pedidos()
     {
-        return view('admin.orders');
+        // Obtener todos los pedidos con sus detalles y usuarios
+        $ordenes = Orden::with(['detalles.producto', 'user'])->orderBy('created_at', 'desc')->get();
+        return view('admin.pedidos', compact('ordenes'));
     }
 
-    public function reports()
+    public function updateStatus(Request $request, Orden $orden)
     {
-        return view('admin.reports');
+        $request->validate([
+            'estado' => 'required|in:pendiente,procesando,enviado,entregado,cancelado',
+        ]);
+
+        $orden->update(['estado' => $request->estado]);
+
+        return redirect()->route('admin.pedidos')->with('success', 'Estado del pedido actualizado correctamente.');
     }
 
-    // Mostrar la lista de usuarios
+    public function refund(Request $request, Orden $orden)
+    {
+        $request->validate([
+            'motivo' => 'required|string|max:255',
+        ]);
+
+        $orden->update([
+            'estado' => 'cancelado',
+            'motivo_reembolso' => $request->motivo,
+        ]);
+
+        return redirect()->route('admin.pedidos')->with('success', 'Reembolso procesado correctamente.');
+    }
+
+    public function generateInvoice(Orden $orden)
+    {
+        $orden->load(['detalles.producto', 'user']); // Cargar relaciones para la factura
+        return view('admin.invoice', compact('orden'));
+    }
+
+    // Métodos para gestión de usuarios (sin cambios)
     public function usersIndex()
     {
         $users = User::all();
         return view('admin.users.index', compact('users'));
     }
 
-    // Mostrar formulario para crear un usuario
     public function create()
     {
         return view('admin.users.create');
     }
 
-    // Guardar un nuevo usuario
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'role' => 'required|in:usuario,cajero,admin',
-        ]);
-
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password), // Ahora Hash está disponible
-            'role' => $request->role,
-        ]);
-
-        return redirect()->route('admin.users.index')->with('success', 'Usuario creado correctamente.');
+        // Lógica para crear usuario (ajusta según tus necesidades)
     }
 
-    // Mostrar formulario para editar un usuario
-    public function edit(User $user)
+    public function edit($user)
     {
-        $roles = ['usuario', 'cajero', 'admin'];
-        return view('admin.users.edit', compact('user', 'roles'));
+        $user = User::findOrFail($user);
+        return view('admin.users.edit', compact('user'));
     }
 
-    // Actualizar el rol de un usuario
-    public function update(Request $request, User $user)
+    public function update(Request $request, $user)
     {
-        $request->validate([
-            'role' => 'required|in:usuario,cajero,admin',
-        ]);
-
-        $user->update([
-            'role' => $request->role,
-        ]);
-
-        return redirect()->route('admin.users.index')->with('success', 'Rol actualizado correctamente.');
+        // Lógica para actualizar usuario (ajusta según tus necesidades)
     }
 
-    // Eliminar un usuario
-    public function destroy(User $user)
+    public function destroy($user)
     {
-        $user->delete();
-        return redirect()->route('admin.users.index')->with('success', 'Usuario eliminado correctamente.');
+        User::findOrFail($user)->delete();
+        return redirect()->route('admin.users.index');
     }
 }

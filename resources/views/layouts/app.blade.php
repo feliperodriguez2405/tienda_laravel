@@ -24,7 +24,6 @@
             flex-direction: column;
         }
 
-        /* Navbar */
         .navbar {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
             padding: 1rem 0;
@@ -61,12 +60,10 @@
             color: #dc3545 !important;
         }
 
-        /* Main Content */
         main {
             flex: 1 0 auto;
         }
 
-        /* Footer */
         footer {
             background: linear-gradient(90deg, #343a40 0%, #495057 100%);
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
@@ -79,7 +76,6 @@
             opacity: 0.9;
         }
 
-        /* Responsive adjustments */
         @media (max-width: 768px) {
             .navbar-nav {
                 text-align: center;
@@ -95,7 +91,6 @@
     @stack('styles')
 </head>
 <body>
-    <!-- Barra de navegación -->
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ route('admin.dashboard') }}">
@@ -133,12 +128,12 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.orders') }}">
+                        <a class="nav-link" href="{{ route('admin.pedidos') }}">
                             <i class="bi bi-cart-check me-1"></i>Pedidos
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.reports') }}">
+                        <a class="nav-link" href="{{ route('informes.index') }}">
                             <i class="bi bi-bar-chart me-1"></i>Reportes
                         </a>
                     </li>
@@ -157,19 +152,16 @@
         </div>
     </nav>
 
-    <!-- Contenido dinámico -->
     <main class="container mt-4 mb-4">
         @yield('content')
     </main>
 
-    <!-- Footer -->
     <footer class="text-white text-center py-3">
         <div class="container">
             <p>© {{ date('Y') }} Supermercado Online - Panel de Administración</p>
         </div>
     </footer>
 
-    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/app.js') }}"></script>
 

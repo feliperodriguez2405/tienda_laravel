@@ -3,11 +3,12 @@
 @section('title', 'Panel de Administración')
 
 @section('content')
-<div class="container">
+<div class="container py-4">
     <!-- Barra superior con búsqueda -->
     <div class="row mb-4 align-items-center">
         <div class="col-md-6">
-            <h2 class="mb-0">Panel de Administración</h2>
+            <h2 class="mb-0 text-primary fw-bold">Panel de Administración</h2>
+            <p class="text-muted">Bienvenido, <strong>{{ Auth::user()->name }}</strong></p>
         </div>
         <div class="col-md-6 text-end">
             <form class="d-flex justify-content-end" action="{{ route('productos.index') }}" method="GET">
@@ -16,69 +17,47 @@
                        name="search" 
                        placeholder="Buscar productos..." 
                        aria-label="Search">
-                <button class="btn btn-outline-primary search-btn" type="submit">
+                <button class="btn btn-primary search-btn" type="submit">
                     <i class="bi bi-search"></i>
                 </button>
             </form>
         </div>
     </div>
 
+    <!-- Contenido principal -->
     <div class="row">
-        <!-- Sidebar -->
-       <div class="col-md-3">
-    <div class="list-group sidebar">
-        <a href="{{ route('admin.dashboard') }}" class="list-group-item list-group-item-action active">
-            <i class="bi bi-speedometer2 me-2"></i> Dashboard
-        </a>
-    </div>
-</div>
-                <a href="{{ route('productos.index') }}" class="list-group-item list-group-item-action">
-                    <i class="bi bi-box-seam me-2"></i> Gestionar Productos
-                </a>
-                <a href="{{ route('categorias.index') }}" class="list-group-item list-group-item-action">
-                    <i class="bi bi-tags me-2"></i> Gestionar Categorías
-                </a>
-                <a href="{{ route('logout') }}" 
-                   class="list-group-item list-group-item-action text-danger" 
-                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                    <i class="bi bi-box-arrow-right me-2"></i> Cerrar Sesión
-                </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                    @csrf
-                </form>
-            </div>
-        </div>
-
-        <!-- Contenido principal -->
-        <div class="col-md-9">
-            <div class="card main-card">
-                <div class="card-header bg-primary text-white d-flex align-items-center">
-                    <i class="bi bi-speedometer2 me-2"></i>
-                    <h5 class="mb-0">Dashboard Administrativo</h5>
+        <div class="col-md-12">
+            <div class="card main-card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-speedometer2 me-2 fs-4"></i>
+                        <h5 class="mb-0">Dashboard Administrativo</h5>
+                    </div>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                        @csrf
+                    </form>
                 </div>
                 <div class="card-body">
-                    <p class="lead mb-4">Bienvenido, <strong>{{ Auth::user()->name }}</strong>. Gestiona la tienda desde aquí.</p>
-
-                    <div class="row">
+                    <div class="row g-4">
                         <div class="col-md-6">
-                            <div class="card border-info mb-3 option-card">
+                            <div class="card border-info option-card shadow-sm h-100">
                                 <div class="card-body d-flex align-items-center">
-                                    <i class="bi bi-box-seam me-3 text-info" style="font-size: 2rem;"></i>
+                                    <i class="bi bi-box-seam me-3 text-info" style="font-size: 2.5rem;"></i>
                                     <div>
-                                        <h6 class="card-title">Gestionar Productos</h6>
-                                        <p class="card-text">Administra el inventario de productos.</p>
+                                        <h6 class="card-title fw-semibold">Gestionar Productos</h6>
+                                        <p class="card-text text-muted">Administra el inventario de productos de la tienda.</p>
                                         <a href="{{ route('productos.index') }}" class="btn btn-outline-info btn-sm">Ver Productos</a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card border-warning mb-3 option-card">
+                            <div class="card border-warning option-card shadow-sm h-100">
                                 <div class="card-body d-flex align-items-center">
-                                    <i class="bi bi-tags me-3 text-warning" style="font-size: 2rem;"></i>
+                                    <i class="bi bi-tags me-3 text-warning" style="font-size: 2.5rem;"></i>
                                     <div>
-                                        <h6 class="card-title">Gestionar Categorías</h6>
-                                        <p class="card-text">Organiza las categorías de la tienda.</p>
+                                        <h6 class="card-title fw-semibold">Gestionar Categorías</h6>
+                                        <p class="card-text text-muted">Organiza las categorías de la tienda.</p>
                                         <a href="{{ route('categorias.index') }}" class="btn btn-outline-warning btn-sm">Ver Categorías</a>
                                     </div>
                                 </div>
@@ -86,7 +65,7 @@
                         </div>
                     </div>
 
-                    <hr>
+                    <hr class="my-4">
                     <p class="text-muted text-center mb-0">© {{ date('Y') }} Supermercado Online | Panel de Administración</p>
                 </div>
             </div>
@@ -95,64 +74,89 @@
 </div>
 
 <style>
-    /* Estilos personalizados */
+    /* Estilos mejorados */
+    .container {
+        max-width: 1200px; /* Más ancho para aprovechar el espacio */
+    }
+
     .search-input {
-        border-radius: 20px;
-        transition: box-shadow 0.2s ease-in-out;
+        border-radius: 50px;
+        border: 1px solid #ced4da;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
     }
 
     .search-input:focus {
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        border-color: #0d6efd;
+        box-shadow: 0 0 8px rgba(13, 110, 253, 0.2);
+        outline: none;
     }
 
     .search-btn {
-        border-radius: 20px;
-        transition: transform 0.2s ease-in-out;
+        border-radius: 50px;
+        padding: 0.5rem 1.25rem;
+        transition: all 0.3s ease;
     }
 
     .search-btn:hover {
+        background-color: #0056b3;
         transform: scale(1.05);
     }
 
-    .sidebar {
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    .list-group-item {
-        transition: background-color 0.2s ease-in-out;
-    }
-
-    .list-group-item:hover {
-        background-color: #f8f9fa;
-    }
-
     .main-card {
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s ease-in-out;
+        border-radius: 12px;
+        border: none;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .main-card:hover {
-        transform: translateY(-2px);
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
 
     .option-card {
-        transition: transform 0.2s ease-in-out;
+        border-radius: 10px;
+        border-width: 2px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .option-card:hover {
-        transform: translateY(-2px);
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .card-text {
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
     }
 
     .btn-sm {
-        padding: 0.25rem 1rem;
+        padding: 0.35rem 1.25rem;
+        border-radius: 20px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-sm:hover {
+        transform: translateY(-2px);
     }
 
     h2 {
-        font-weight: 600;
-        color: #0d6efd;
+        font-size: 2rem;
+        letter-spacing: -0.5px;
+    }
+
+    .card-header {
+        border-radius: 12px 12px 0 0;
+        padding: 1rem 1.5rem;
+    }
+
+    .shadow-sm {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
 </style>
 @endsection

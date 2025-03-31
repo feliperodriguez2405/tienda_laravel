@@ -133,6 +133,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="{{ route('admin.proveedores') }}">
+                            <i class="bi bi-truck me-1"></i>Proveedores
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{{ route('informes.index') }}">
                             <i class="bi bi-bar-chart me-1"></i>Reportes
                         </a>

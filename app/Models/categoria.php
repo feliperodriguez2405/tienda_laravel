@@ -11,4 +11,3 @@ class Categoria extends Model
 
     protected $fillable = ['nombre', 'descripcion', 'estado']; // Agrega solo los campos que se pueden asignar masivamente
 }
- 

@@ -66,6 +66,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/pedidos/{orden}/update-status', [AdminController::class, 'updateStatus'])->name('admin.pedidos.updateStatus');
     Route::post('/pedidos/{orden}/refund', [AdminController::class, 'refund'])->name('admin.pedidos.refund');
     Route::get('/pedidos/{orden}/invoice', [AdminController::class, 'generateInvoice'])->name('admin.pedidos.invoice');
+
+    // Rutas para gestión de proveedores
+    Route::get('/proveedores', [AdminController::class, 'proveedores'])->name('admin.proveedores');
+    Route::get('/proveedores/create', [AdminController::class, 'proveedorCreate'])->name('admin.proveedores.create');
+    Route::post('/proveedores', [AdminController::class, 'proveedorStore'])->name('admin.proveedores.store');
+    Route::get('/proveedores/{proveedor}/edit', [AdminController::class, 'proveedorEdit'])->name('admin.proveedores.edit');
+    Route::put('/proveedores/{proveedor}', [AdminController::class, 'proveedorUpdate'])->name('admin.proveedores.update');
+    Route::delete('/proveedores/{proveedor}', [AdminController::class, 'proveedorDestroy'])->name('admin.proveedores.destroy');
+
+    // Nuevas rutas para órdenes de compra y historial
+    Route::get('/proveedores/{proveedor}/ordenes/create', [AdminController::class, 'ordenCompraCreate'])->name('admin.proveedores.ordenes.create');
+    Route::post('/proveedores/{proveedor}/ordenes', [AdminController::class, 'ordenCompraStore'])->name('admin.proveedores.ordenes.store');
+    Route::get('/proveedores/{proveedor}/historial', [AdminController::class, 'historialCompras'])->name('admin.proveedores.historial');
+
+    // Rutas para configurar el correo de notificaciones
+    Route::get('/proveedores/configurar-correo', [AdminController::class, 'configurarCorreo'])->name('admin.proveedores.configurar-correo');
+    Route::post('/proveedores/configurar-correo', [AdminController::class, 'guardarCorreo'])->name('admin.proveedores.guardar-correo');
 });
 
 // Rutas para administradores con rol "admin" y permiso "administrar categorías"

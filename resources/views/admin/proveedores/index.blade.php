@@ -53,8 +53,8 @@
                                 @endif
                             </td>
                             <td>
-                                <a href="{{ route('admin.proveedores.historial', $proveedor) }}" class="btn btn-sm btn-info">
-                                    <i class="bi bi-clock-history"></i> Historial
+                                <a href="{{ route('admin.proveedores.ordenes.historial', $proveedor) }}" class="btn btn-sm btn-info">
+                                    <i class="bi bi-clock-history"></i> Historial/Ordenes
                                 </a>
                                 <a href="{{ route('admin.proveedores.edit', $proveedor) }}" class="btn btn-sm btn-warning">
                                     <i class="bi bi-pencil"></i>

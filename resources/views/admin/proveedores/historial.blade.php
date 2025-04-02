@@ -24,51 +24,89 @@
         <div class="alert alert-warning">{{ session('warning') }}</div>
     @endif
 
+    <!-- Filtro por estado -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <form method="GET" action="{{ route('admin.proveedores.ordenes.historial', $proveedor) }}">
+                <div class="input-group">
+                    <select name="estado" class="form-select" onchange="this.form.submit()">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+                        <option value="completada" {{ request('estado') == 'completada' ? 'selected' : '' }}>Completada</option>
+                        <option value="cancelada" {{ request('estado') == 'cancelada' ? 'selected' : '' }}>Cancelada</option>
+                    </select>
+                    <button type="submit" class="btn btn-outline-primary">Filtrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card shadow-sm">
         <div class="card-body">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Monto</th>
-                        <th>Estado</th>
-                        <th>Detalles</th>
-                        <th>Notificación</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($ordenes as $orden)
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
                         <tr>
-                            <td>{{ $orden->fecha->format('d/m/Y H:i') }}</td>
-                            <td>{{ number_format($orden->monto, 2) }}</td>
-                            <td>{{ ucfirst($orden->estado) }}</td>
-                            <td>
-                                @if ($orden->detalles)
-                                    <ul>
-                                        @foreach ($orden->detalles as $detalle)
-                                            <li>
-                                                {{ $detalle['producto'] }} ({{ $detalle['cantidad'] }})
-                                                @if (!empty($detalle['descripcion']))
-                                                    - {{ $detalle['descripcion'] }}
-                                                @endif
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @else
-                                    Sin detalles
-                                @endif
-                            </td>
-                            <td>
-                                @if ($proveedor->email && $proveedor->recibir_notificaciones)
-                                    <span class="badge bg-success">Enviada</span>
-                                @else
-                                    <span class="badge bg-secondary">No enviada</span>
-                                @endif
-                            </td>
+                            <th>Fecha</th>
+                           
+                            <th>Estado</th>
+                            <th>Detalles</th>
+                            <th>Notificación</th>
+                            <th>Acciones</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @forelse ($ordenes as $orden)
+                            <tr>
+                                <td>{{ $orden->fecha->format('d/m/Y H:i') }}</td>
+                               
+                                <td>
+                                    <span class="badge {{ $orden->estado == 'pendiente' ? 'bg-warning' : ($orden->estado == 'completada' ? 'bg-success' : 'bg-danger') }}">
+                                        {{ ucfirst($orden->estado) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @if ($orden->detalles)
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach ($orden->detalles as $detalle)
+                                                <li>
+                                                    {{ $detalle['producto'] }} ({{ $detalle['cantidad'] }})
+                                                    @if (!empty($detalle['descripcion']))
+                                                        - {{ $detalle['descripcion'] }}
+                                                    @endif
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        Sin detalles
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($proveedor->email && $proveedor->recibir_notificaciones)
+                                        <span class="badge bg-success">Enviada</span>
+                                    @else
+                                        <span class="badge bg-secondary">No enviada</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('admin.proveedores.ordenes.show', [$proveedor, $orden]) }}" class="btn btn-sm btn-info">
+                                        <i class="bi bi-eye"></i> Ver
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="6" class="text-center">No hay órdenes registradas.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <div class="d-flex justify-content-center mt-4">
+                {{ $ordenes->links() }}
+            </div>
         </div>
     </div>
 </div>

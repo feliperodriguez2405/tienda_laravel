@@ -64,9 +64,7 @@
                             </div>
                         </div>
                     </div>
-
                     <hr class="my-4">
-                    <p class="text-muted text-center mb-0">© {{ date('Y') }} Supermercado Online | Panel de Administración</p>
                 </div>
             </div>
         </div>

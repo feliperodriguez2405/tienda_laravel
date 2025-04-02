@@ -8,6 +8,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\CategoriaController;
 use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -52,7 +53,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/usuarios', [AdminController::class, 'usuarios'])->name('admin.usuarios');
     Route::get('/pedidos', [AdminController::class, 'pedidos'])->name('admin.pedidos');
-    Route::get('/informes', [ReporteController::class, 'index'])->name('informes.index');
+    Route::get('/reportes', [AdminController::class, 'reportes'])->name('admin.reportes');
 
     // Rutas para gestión de usuarios
     Route::get('/users', [AdminController::class, 'usersIndex'])->name('admin.users.index');
@@ -75,10 +76,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::put('/proveedores/{proveedor}', [AdminController::class, 'proveedorUpdate'])->name('admin.proveedores.update');
     Route::delete('/proveedores/{proveedor}', [AdminController::class, 'proveedorDestroy'])->name('admin.proveedores.destroy');
 
-    // Nuevas rutas para órdenes de compra y historial
+    // Rutas para órdenes de compra (ajustadas para consistencia)
+    Route::get('/proveedores/{proveedor}/ordenes', [AdminController::class, 'historialCompras'])->name('admin.proveedores.ordenes.historial'); // Cambio aquí
     Route::get('/proveedores/{proveedor}/ordenes/create', [AdminController::class, 'ordenCompraCreate'])->name('admin.proveedores.ordenes.create');
     Route::post('/proveedores/{proveedor}/ordenes', [AdminController::class, 'ordenCompraStore'])->name('admin.proveedores.ordenes.store');
-    Route::get('/proveedores/{proveedor}/historial', [AdminController::class, 'historialCompras'])->name('admin.proveedores.historial');
+    Route::get('/proveedores/{proveedor}/ordenes/{orden}', [AdminController::class, 'ordenCompraShow'])->name('admin.proveedores.ordenes.show'); // Agregada para el botón "Ver"
+    Route::put('/ordenes/{orden}', [AdminController::class, 'ordenCompraUpdate'])->name('admin.ordenes.update');
 
     // Rutas para configurar el correo de notificaciones
     Route::get('/proveedores/configurar-correo', [AdminController::class, 'configurarCorreo'])->name('admin.proveedores.configurar-correo');
@@ -90,12 +93,10 @@ Route::middleware(['auth', 'role:admin', 'permission:administrar categorías'])-
     Route::get('/admin/categories', [AdminController::class, 'categories'])->name('admin.categories');
 });
 
-use App\Http\Controllers\AuthController;
-
+// Rutas de autenticación personalizadas
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 
@@ -103,6 +104,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::middleware(['auth', 'role:admin'])->get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
 Route::middleware(['auth', 'role:usuario'])->get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
 
+// Rutas adicionales para usuarios autenticados
 Route::middleware(['auth'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::get('/user/products', [UserController::class, 'products'])->name('user.products');

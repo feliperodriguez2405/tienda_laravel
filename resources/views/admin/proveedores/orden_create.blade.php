@@ -1,109 +1,133 @@
 @extends('layouts.app')
 
-@section('title', 'Registrar Orden de Compra')
+@section('title', 'Nueva Orden de Compra - ' . $proveedor->nombre)
 
 @section('content')
 <div class="container py-4">
-    <h2 class="text-primary fw-bold mb-4">Registrar Orden de Compra para {{ $proveedor->nombre }}</h2>
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-6">
+            <h2 class="mb-0 text-primary fw-bold">Nueva Orden de Compra - {{ $proveedor->nombre }}</h2>
+            <p class="text-muted">Complete los detalles de la orden</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{{ route('admin.proveedores.ordenes.historial', $proveedor) }}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Volver al Historial
+            </a>
+        </div>
+    </div>
+
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     <div class="card shadow-sm">
         <div class="card-body">
-            @if ($proveedor->email && $proveedor->recibir_notificaciones)
-                <div class="alert alert-info">
-                    Se enviará una notificación automática al proveedor ({{ $proveedor->email }}) tras registrar la orden.
-                </div>
-            @else
-                <div class="alert alert-warning">
-                    No se enviará notificación al proveedor porque no tiene email o no desea recibir notificaciones.
-                </div>
-            @endif
-
-            <form action="{{ route('admin.proveedores.ordenes.store', $proveedor) }}" method="POST">
+            <form method="POST" action="{{ route('admin.proveedores.ordenes.store', $proveedor) }}" id="orden-form">
                 @csrf
+
                 <div class="mb-3">
                     <label for="fecha" class="form-label">Fecha</label>
-                    <input type="datetime-local" class="form-control @error('fecha') is-invalid @enderror" id="fecha" name="fecha" required value="{{ old('fecha') }}">
-                    @error('fecha')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                    <input type="datetime-local" name="fecha" id="fecha" class="form-control" value="{{ old('fecha', now()->format('Y-m-d\TH:i')) }}" required>
                 </div>
-                <div class="mb-3">
-                    <label for="monto" class="form-label">Monto</label>
-                    <input type="number" step="0.01" class="form-control @error('monto') is-invalid @enderror" id="monto" name="monto" required value="{{ old('monto') }}">
-                    @error('monto')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
+
                 <div class="mb-3">
                     <label for="estado" class="form-label">Estado</label>
-                    <select class="form-control @error('estado') is-invalid @enderror" id="estado" name="estado" required>
+                    <select name="estado" id="estado" class="form-select" required>
                         <option value="pendiente" {{ old('estado') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
-                        <option value="procesando" {{ old('estado') == 'procesando' ? 'selected' : '' }}>Procesando</option>
-                        <option value="enviado" {{ old('estado') == 'enviado' ? 'selected' : '' }}>Enviado</option>
-                        <option value="entregado" {{ old('estado') == 'entregado' ? 'selected' : '' }}>Entregado</option>
-                        <option value="cancelado" {{ old('estado') == 'cancelado' ? 'selected' : '' }}>Cancelado</option>
+                        <option value="completada" {{ old('estado') == 'completada' ? 'selected' : '' }}>Completada</option>
+                        <option value="cancelada" {{ old('estado') == 'cancelada' ? 'selected' : '' }}>Cancelada</option>
                     </select>
-                    @error('estado')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
                 </div>
+
                 <div class="mb-3">
-                    <label class="form-label">Detalles de Pedidos Nuevos</label>
+                    <label class="form-label">Detalles</label>
                     <div id="detalles-container">
-                        <div class="row mb-2 detalle-item">
+                        <div class="row mb-2 detalle-row" data-index="0">
                             <div class="col-md-4">
-                                <input type="text" name="detalles[0][producto]" class="form-control" placeholder="Producto" value="{{ old('detalles.0.producto') }}">
+                                <input type="text" name="detalles[0][producto]" class="form-control" placeholder="Producto" value="{{ old('detalles.0.producto') }}" required>
                             </div>
                             <div class="col-md-2">
-                                <input type="number" name="detalles[0][cantidad]" class="form-control" placeholder="Cantidad" min="1" value="{{ old('detalles.0.cantidad') }}">
+                                <input type="number" name="detalles[0][cantidad]" class="form-control" placeholder="Cantidad" value="{{ old('detalles.0.cantidad') }}" min="1" required>
                             </div>
                             <div class="col-md-4">
-                                <input type="text" name="detalles[0][descripcion]" class="form-control" placeholder="Descripción" value="{{ old('detalles.0.descripcion') }}">
+                                <input type="text" name="detalles[0][descripcion]" class="form-control" placeholder="Descripción (opcional)" value="{{ old('detalles.0.descripcion') }}">
                             </div>
                             <div class="col-md-2">
-                                <button type="button" class="btn btn-danger remove-detalle">Eliminar</button>
+                                <button type="button" class="btn btn-danger btn-sm remove-detalle" disabled>Eliminar</button>
                             </div>
                         </div>
                     </div>
-                    <button type="button" id="add-detalle" class="btn btn-secondary">Agregar Producto</button>
-                    @error('detalles.*')
-                        <div class="text-danger">{{ $message }}</div>
-                    @enderror
+                    <button type="button" class="btn btn-outline-primary btn-sm" id="add-detalle">Agregar Detalle</button>
                 </div>
-                <button type="submit" class="btn btn-primary">Registrar Orden</button>
-                <a href="{{ route('admin.proveedores.historial', $proveedor) }}" class="btn btn-secondary">Cancelar</a>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">Guardar Orden</button>
+                </div>
             </form>
         </div>
     </div>
 </div>
+@endsection
 
+@section('scripts')
 <script>
     let detalleIndex = 1;
+
+    // Función para actualizar el estado de los botones "Eliminar"
+    function updateRemoveButtons() {
+        const rows = document.querySelectorAll('.detalle-row');
+        rows.forEach((row, index) => {
+            const removeButton = row.querySelector('.remove-detalle');
+            if (rows.length === 1) {
+                removeButton.disabled = true; // Deshabilita el botón si solo hay un detalle
+            } else {
+                removeButton.disabled = false; // Habilita el botón si hay más de un detalle
+            }
+        });
+    }
+
+    // Agregar un nuevo detalle
     document.getElementById('add-detalle').addEventListener('click', function() {
         const container = document.getElementById('detalles-container');
-        const newItem = `
-            <div class="row mb-2 detalle-item">
-                <div class="col-md-4">
-                    <input type="text" name="detalles[${detalleIndex}][producto]" class="form-control" placeholder="Producto">
-                </div>
-                <div class="col-md-2">
-                    <input type="number" name="detalles[${detalleIndex}][cantidad]" class="form-control" placeholder="Cantidad" min="1">
-                </div>
-                <div class="col-md-4">
-                    <input type="text" name="detalles[${detalleIndex}][descripcion]" class="form-control" placeholder="Descripción">
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-danger remove-detalle">Eliminar</button>
-                </div>
-            </div>`;
-        container.insertAdjacentHTML('beforeend', newItem);
+        const newRow = document.createElement('div');
+        newRow.classList.add('row', 'mb-2', 'detalle-row');
+        newRow.setAttribute('data-index', detalleIndex);
+        newRow.innerHTML = `
+            <div class="col-md-4">
+                <input type="text" name="detalles[${detalleIndex}][producto]" class="form-control" placeholder="Producto" required>
+            </div>
+            <div class="col-md-2">
+                <input type="number" name="detalles[${detalleIndex}][cantidad]" class="form-control" placeholder="Cantidad" min="1" required>
+            </div>
+            <div class="col-md-4">
+                <input type="text" name="detalles[${detalleIndex}][descripcion]" class="form-control" placeholder="Descripción (opcional)">
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-danger btn-sm remove-detalle">Eliminar</button>
+            </div>
+        `;
+        container.appendChild(newRow);
         detalleIndex++;
+        updateRemoveButtons(); // Actualiza el estado de los botones después de agregar
     });
 
+    // Eliminar un detalle
     document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-detalle')) {
-            e.target.closest('.detalle-item').remove();
+        if (e.target.classList.contains('remove-detalle') && !e.target.disabled) {
+            e.target.closest('.detalle-row').remove();
+            updateRemoveButtons(); // Actualiza el estado de los botones después de eliminar
         }
+    });
+
+    // Inicializar el estado de los botones al cargar la página
+    document.addEventListener('DOMContentLoaded', function() {
+        updateRemoveButtons();
     });
 </script>
 @endsection

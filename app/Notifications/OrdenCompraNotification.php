@@ -33,30 +33,48 @@ class OrdenCompraNotification extends Notification
             : 'No aplica (vencido o no definido)';
 
         $mail = (new MailMessage)
-            ->subject('Nueva Orden de Compra Registrada')
-            ->greeting('Hola ' . $this->proveedor->nombre . ',')
-            ->line('Hemos registrado una nueva orden de compra para ti.')
-            ->line('**Detalles de la Orden:**')
-            ->line('Monto: $' . number_format($this->ordenCompra->monto, 2))
-            ->line('Estado: ' . ucfirst($this->ordenCompra->estado))
-            ->line('Fecha: ' . $this->ordenCompra->fecha->format('d/m/Y H:i'));
+            ->from(config('mail.from.address'), "Tienda D'Jenny")
+            ->subject('Nueva Orden de Compra #' . $this->ordenCompra->id . ' - Pendiente de Confirmación')
+            ->greeting('Estimado/a ' . $this->proveedor->nombre . ',')
+            ->line(new \Illuminate\Support\HtmlString('<img src="https://img.freepik.com/vector-gratis/carro-tienda-edificio-tienda-dibujos-animados_138676-2085.jpg?t=st=1743616027~exp=1743619627~hmac=ffae08aea9e36ba0c9518e47c19ab0a81f8b7c777a5df13b0745b6b85ee6d6a2&w=740" alt="Logo Tienda D\'Jenny" style="max-width: 200px; margin-bottom: 20px;">'))
+            ->line('Hemos registrado una nueva orden de compra a su nombre. Por favor, al momento de entregar los productos, indique los precios correspondientes y el monto total.')
+            ->line('**Detalles de la Orden #' . $this->ordenCompra->id . ':**')
+            ->line('Fecha: ' . $this->ordenCompra->fecha->format('d/m/Y H:i'))
+            ->line('Estado: ' . ucfirst($this->ordenCompra->estado));
 
-        if ($this->ordenCompra->detalles) {
-            $mail->line('**Pedidos Nuevos Solicitados:**');
+        // Manejo mejorado de los detalles de productos
+        if ($this->ordenCompra->detalles && $this->ordenCompra->detalles->count() > 0) {
+            $mail->line('**Productos Solicitados:**');
             foreach ($this->ordenCompra->detalles as $detalle) {
-                $line = "- {$detalle['producto']}: {$detalle['cantidad']} unidades";
-                if (!empty($detalle['descripcion'])) {
-                    $line .= " - {$detalle['descripcion']}";
+                $productoLine = "- " . ($detalle->producto->nombre ?? $detalle->producto ?? 'Producto no especificado') 
+                    . ": " . ($detalle->cantidad ?? 0) . " unidades";
+                
+                // Agregar más detalles si están disponibles
+                if (!empty($detalle->descripcion)) {
+                    $productoLine .= " - " . $detalle->descripcion;
                 }
-                $mail->line($line);
+                if (!empty($detalle->precio_unitario)) {
+                    $productoLine .= " (Precio unitario: $" . number_format($detalle->precio_unitario, 2) . ")";
+                }
+                if (!empty($detalle->subtotal)) {
+                    $productoLine .= " - Subtotal: $" . number_format($detalle->subtotal, 2);
+                }
+
+                $mail->line($productoLine);
+            }
+            
+            // Agregar total si existe
+            if ($this->ordenCompra->total) {
+                $mail->line('**Total estimado: $' . number_format($this->ordenCompra->total, 2) . '**');
             }
         } else {
-            $mail->line('No se especificaron detalles de pedidos.');
+            $mail->line('No se especificaron detalles de productos en esta orden.');
         }
 
         $mail->line('**Contrato:** ' . $contratoAplica)
-            ->action('Contactar al administrador', 'mailto:' . config('mail.from.address'))
-            ->salutation('Saludos, Equipo ' . config('app.name'));
+            ->line('Por favor, coordine con nosotros para confirmar los precios y el monto total al entregar la orden.')
+            ->action('Contactar al Administrador', 'mailto:' . config('mail.from.address'))
+            ->salutation("Atentamente,\nEquipo AlphaSoft");
 
         return $mail;
     }

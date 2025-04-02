@@ -14,14 +14,16 @@ class OrdenCompra extends Model
     protected $fillable = [
         'proveedor_id',
         'fecha',
-        'monto', // Cambiamos 'total' por 'monto'
+        'monto',
         'estado',
         'detalles',
+        'confirmado_por_vendedor',
     ];
 
     protected $casts = [
         'detalles' => 'array',
         'fecha' => 'datetime',
+        'confirmado_por_vendedor' => 'boolean',
     ];
 
     public function proveedor()

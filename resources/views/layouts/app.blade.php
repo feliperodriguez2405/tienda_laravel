@@ -15,6 +15,8 @@
 
     <!-- Estilos personalizados -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <!-- bootstrap-icons bi-* -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
         body {
             background-color: #f1f3f5;
@@ -138,7 +140,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('informes.index') }}">
+                        <a class="nav-link" href="{{ route('admin.reportes') }}">
                             <i class="bi bi-bar-chart me-1"></i>Reportes
                         </a>
                     </li>

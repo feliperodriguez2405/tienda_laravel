@@ -36,7 +36,7 @@
                             @foreach ($ordenes as $orden)
                                 <tr>
                                     <td>{{ $orden->id }}</td>
-                                    <td>{{ $orden->user->name }}</td>
+                                    <td>{{ $orden->user->name ?? 'Usuario no disponible' }}</td>
                                     <td>{{ $orden->direccion ?? 'No especificada' }}</td>
                                     <td>
                                         <ul class="list-unstyled mb-0">

@@ -16,7 +16,7 @@
                     <div class="col-md-6">
                         <p class="mb-2">
                             <strong class="text-muted">Estado:</strong> 
-                            <span class="badge {{ $orden->estado === 'pendiente' ? 'bg-warning' : ($orden->estado === 'completado' ? 'bg-success' : 'bg-secondary') }}">
+                            <span class="badge {{ $orden->estado === 'pendiente' ? 'bg-warning' : ($orden->estado === 'entregado' ? 'bg-success' : 'bg-secondary') }}">
                                 {{ ucfirst($orden->estado) }}
                             </span>
                         </p>
@@ -26,7 +26,7 @@
                 <!-- Detalles de productos -->
                 <h3 class="h5 border-bottom pb-2 mb-3">Detalles de la Orden</h3>
                 @if (!empty($orden->detalles) && is_array($orden->detalles))
-                    <form method="POST" action="{{ route('admin.ordenes.update', $orden->id) }}">
+                    <form method="POST" action="{{ route('admin.proveedores.ordenes.update', [$proveedor, $orden]) }}">
                         @csrf
                         @method('PUT')
                         <div class="table-responsive">
@@ -35,7 +35,7 @@
                                     <tr>
                                         <th>Producto</th>
                                         <th>Cantidad</th>
-                                        <th>Precio Unitario</th>
+                                        <th>Precio Unitario (COP)</th>
                                         <th>Descripción</th>
                                     </tr>
                                 </thead>
@@ -51,7 +51,7 @@
                                                        class="form-control @error('detalles.' . $index . '.precio') is-invalid @enderror" 
                                                        step="0.01" 
                                                        min="0" 
-                                                       placeholder="Ingrese precio"
+                                                       placeholder="Ingrese precio en COP"
                                                        {{ $orden->estado !== 'pendiente' ? 'disabled' : '' }}>
                                                 @error('detalles.' . $index . '.precio')
                                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -69,6 +69,7 @@
                             <div class="mb-3">
                                 <label for="estado" class="form-label"><strong>Actualizar estado:</strong></label>
                                 <select name="estado" id="estado" class="form-select w-auto d-inline-block">
+                                    <option value="entregado">Entregado</option>
                                     <option value="completado">Completado</option>
                                     <option value="cancelado">Cancelado</option>
                                 </select>
@@ -107,7 +108,7 @@
             vertical-align: middle;
         }
         .form-control {
-            max-width: 120px;
+            max-width: 150px;
         }
     </style>
 @endsection

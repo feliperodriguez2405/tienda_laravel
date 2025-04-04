@@ -6,23 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up()
-{
-    Schema::table('users', function (Blueprint $table) {
-        $table->string('rol')->default('cliente')->after('password');
-    });
-}
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('rol');
+            $table->enum('role', ['usuario', 'cajero', 'admin'])->default('usuario')->after('password');
+        });
+    }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down()
-{
-    Schema::table('users', function (Blueprint $table) {
-        $table->dropColumn('rol');
-    });
-}
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('role');
+            $table->string('rol')->default('cliente')->after('password');
+        });
+    }
 };

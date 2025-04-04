@@ -10,7 +10,7 @@
             <p class="text-muted">Administra los proveedores del supermercado</p>
         </div>
         <div class="col-md-6 text-end">
-            <a href="{{ route('admin.proveedores.create') }}" class="btn btn-primary">
+            <a href="{{ route('proveedores.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus-circle me-1"></i> Nuevo Proveedor
             </a>
             <a href="{{ route('admin.proveedores.configurar-correo') }}" class="btn btn-secondary">

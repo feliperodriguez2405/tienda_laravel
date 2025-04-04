@@ -8,7 +8,7 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <form action="{{ route('admin.proveedores.store') }}" method="POST">
+            <form action="{{ route('proveedores.store') }}" method="POST">
                 @csrf
                 <div class="mb-3">
                     <label for="nombre" class="form-label">Nombre del Proveedor</label>
@@ -36,11 +36,11 @@
                     <textarea class="form-control" id="condiciones_pago" name="condiciones_pago"></textarea>
                 </div>
                 <div class="mb-3">
-    <label for="fecha_vencimiento_contrato" class="form-label">Fecha de Vencimiento del Contrato</label>
-    <input type="datetime-local" class="form-control" id="fecha_vencimiento_contrato" name="fecha_vencimiento_contrato">
-</div>
+                    <label for="fecha_vencimiento_contrato" class="form-label">Fecha de Vencimiento del Contrato</label>
+                    <input type="datetime-local" class="form-control" id="fecha_vencimiento_contrato" name="fecha_vencimiento_contrato">
+                </div>
                 <button type="submit" class="btn btn-primary">Registrar</button>
-                <a href="{{ route('admin.proveedores') }}" class="btn btn-secondary">Cancelar</a>
+                <a href="{{ route('proveedores.index') }}" class="btn btn-secondary">Cancelar</a>
             </form>
         </div>
     </div>

@@ -20,17 +20,18 @@ class AuthController extends Controller
             'email' => 'required|email',
             'password' => 'required',
         ]);
-
+    
         if (Auth::attempt($credentials)) {
             $user = Auth::user();
             if ($user->role === 'admin') {
                 return redirect()->route('admin.dashboard');
+            } elseif ($user->role === 'cajero') {
+                return redirect()->route('cajero.dashboard'); // Nueva ruta para cajero
             } else {
                 return redirect()->route('user.dashboard');
             }
-        
         }
-
+    
         return back()->withErrors(['email' => 'Credenciales incorrectas.']);
     }
 

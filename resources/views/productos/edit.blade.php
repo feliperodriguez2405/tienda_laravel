@@ -183,7 +183,6 @@
         }
     }
 
-    // Confirmación antes de guardar
     document.querySelector('form').addEventListener('submit', function(e) {
         const nombre = document.getElementById('nombre').value;
         if (!confirm(`¿Estás seguro de guardar los cambios para "${nombre}"?`)) {

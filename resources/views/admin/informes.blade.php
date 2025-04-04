@@ -45,7 +45,7 @@
                                     {{ $producto->nombre }}
                                     <div>
                                         <span class="badge bg-success me-2">{{ $producto->cantidad_vendida }} vendidos</span>
-                                        <span class="badge bg-primary">${{ number_format($producto->total, 2) }}</span>
+                                        <span class="badge bg-primary">{{ number_format($producto->total, 0, ',', '.') }} COP</span>
                                     </div>
                                 </li>
                             @endforeach
@@ -87,7 +87,7 @@
                     <h5 class="mb-0">Valor Total del Inventario</h5>
                 </div>
                 <div class="card-body text-center">
-                    <h3 class="text-info fw-bold animate__animated animate__pulse animate__infinite">${{ number_format($valorInventario, 2) }}</h3>
+                    <h3 class="text-info fw-bold animate__animated animate__pulse animate__infinite">{{ number_format($valorInventario, 0, ',', '.') }} COP</h3>
                     <p class="text-muted">Valor estimado basado en stock y precios actuales.</p>
                 </div>
             </div>
@@ -101,8 +101,8 @@
                     <h5 class="mb-0">Ganancia Total</h5>
                 </div>
                 <div class="card-body text-center">
-                    <h3 class="text-dark fw-bold animate__animated animate__pulse animate__infinite">${{ number_format($gananciaTotal, 2) }}</h3>
-                    <p class="text-muted">Ganancia total de órdenes entregadas.</p>
+                    <h3 class="text-dark fw-bold animate__animated animate__pulse animate__infinite">{{ number_format($gananciaTotal, 0, ',', '.') }} COP</h3>
+                    <p class="text-muted">Ganancia total de ventas entregadas (Venta - Costo).</p>
                 </div>
             </div>
         </div>
@@ -121,7 +121,7 @@
         data: {
             labels: [@foreach($ventas as $venta)"{{ $venta->fecha }}",@endforeach],
             datasets: [{
-                label: 'Total Vendido ($)',
+                label: 'Total Vendido (COP)',
                 data: [@foreach($ventas as $venta){{ $venta->total_vendido }},@endforeach],
                 borderColor: '#28a745',
                 backgroundColor: 'rgba(40, 167, 69, 0.2)',
@@ -136,8 +136,13 @@
             scales: {
                 y: { 
                     beginAtZero: true, 
-                    title: { display: true, text: 'Monto ($)' },
-                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                    title: { display: true, text: 'Monto (COP)' },
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+                        }
+                    }
                 },
                 x: { 
                     title: { display: true, text: 'Fecha' },
@@ -148,7 +153,12 @@
                 tooltip: {
                     backgroundColor: 'rgba(0, 0, 0, 0.8)',
                     padding: 10,
-                    cornerRadius: 8
+                    cornerRadius: 8,
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.y.toLocaleString('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
+                        }
+                    }
                 }
             }
         }

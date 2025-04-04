@@ -1,22 +1,18 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Panel de Administración - Supermercado Online')</title>
-
-    <!-- CSRF Token -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Panel de Administración - Supermercado Online')</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-
     <!-- Estilos personalizados -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <!-- bootstrap-icons bi-* -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
     <style>
         body {
             background-color: #f1f3f5;
@@ -70,6 +66,7 @@
             background: linear-gradient(90deg, #343a40 0%, #495057 100%);
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
             padding: 1.5rem 0;
+            color: #ffffff;
         }
 
         footer p {
@@ -125,7 +122,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.usuarios') }}">
+                        <a class="nav-link" href="{{ route('admin.users.index') }}">
                             <i class="bi bi-people me-1"></i>Usuarios
                         </a>
                     </li>
@@ -135,7 +132,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.proveedores') }}">
+                        <a class="nav-link" href="{{ route('proveedores.index') }}">
                             <i class="bi bi-truck me-1"></i>Proveedores
                         </a>
                     </li>
@@ -145,13 +142,13 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link logout-link" 
-                           href="{{ route('logout') }}"
-                           onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                            <i class="bi bi-box-arrow-right me-1"></i>Cerrar Sesión
-                        </a>
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-inline">
                             @csrf
+                            <a class="nav-link logout-link" 
+                               href="{{ route('logout') }}"
+                               onclick="event.preventDefault(); this.closest('form').submit();">
+                                <i class="bi bi-box-arrow-right me-1"></i>Cerrar Sesión
+                            </a>
                         </form>
                     </li>
                 </ul>
@@ -161,14 +158,26 @@
 
     <main class="container mt-4 mb-4">
         @yield('content')
+
+        <!-- Alertas de productos que necesitan actualización -->
+        @if (session('alerta_productos'))
+            @foreach (session('alerta_productos') as $id => $alerta)
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    {{ $alerta['mensaje'] }} 
+                    <a href="{{ $alerta['url'] }}" class="alert-link">Editar ahora</a>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endforeach
+        @endif
     </main>
 
-    <footer class="text-white text-center py-3">
+    <footer class="text-center py-3">
         <div class="container">
             <p>© {{ date('Y') }} Supermercado Online - Panel de Administración</p>
         </div>
     </footer>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/app.js') }}"></script>
 

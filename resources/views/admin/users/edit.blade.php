@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="fw-bold">Editar Usuario: {{ $user->name }}</h1>
-            <p class="text-muted">Modifica el rol del usuario según sea necesario.</p>
+            <p class="text-muted">Modifica el role del usuario según sea necesario.</p>
         </div>
         <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left"></i> Volver
@@ -16,12 +16,23 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <strong>¡Ups!</strong> Hubo algunos problemas con los datos ingresados.<br><br>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('admin.users.update', $user) }}">
                 @csrf
                 @method('PUT')
 
                 <div class="mb-4">
-                    <label for="role" class="form-label fw-semibold">Rol</label>
+                    <label for="role" class="form-label fw-semibold">Role</label>
                     <select name="role" id="role" class="form-select @error('role') is-invalid @enderror" required>
                         @foreach ($roles as $role)
                             <option value="{{ $role }}" {{ $user->role === $role ? 'selected' : '' }}>
@@ -72,7 +83,8 @@
         color: white;
     }
 </style>
-
-<!-- Incluir Font Awesome para íconos (si no está en layouts.app) -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 @endsection
+
+@push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+@endpush

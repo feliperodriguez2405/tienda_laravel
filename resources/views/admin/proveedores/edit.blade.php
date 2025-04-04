@@ -8,7 +8,7 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <form action="{{ route('admin.proveedores.update', $proveedor) }}" method="POST">
+            <form action="{{ route('proveedores.update', $proveedor) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="mb-3">
@@ -37,11 +37,11 @@
                     <textarea class="form-control" id="condiciones_pago" name="condiciones_pago">{{ $proveedor->condiciones_pago }}</textarea>
                 </div>
                 <div class="mb-3">
-    <label for="fecha_vencimiento_contrato" class="form-label">Fecha de Vencimiento del Contrato</label>
-    <input type="datetime-local" class="form-control" id="fecha_vencimiento_contrato" name="fecha_vencimiento_contrato" value="{{ $proveedor->fecha_vencimiento_contrato ? $proveedor->fecha_vencimiento_contrato->format('Y-m-d\TH:i') : '' }}">
-</div>
+                    <label for="fecha_vencimiento_contrato" class="form-label">Fecha de Vencimiento del Contrato</label>
+                    <input type="datetime-local" class="form-control" id="fecha_vencimiento_contrato" name="fecha_vencimiento_contrato" value="{{ $proveedor->fecha_vencimiento_contrato ? $proveedor->fecha_vencimiento_contrato->format('Y-m-d\TH:i') : '' }}">
+                </div>
                 <button type="submit" class="btn btn-primary">Actualizar</button>
-                <a href="{{ route('admin.proveedores') }}" class="btn btn-secondary">Cancelar</a>
+                <a href="{{ route('proveedores.index') }}" class="btn btn-secondary">Cancelar</a>
             </form>
         </div>
     </div>

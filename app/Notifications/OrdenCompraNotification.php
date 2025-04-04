@@ -31,7 +31,7 @@ class OrdenCompraNotification extends Notification
         $contratoAplica = $this->proveedor->fecha_vencimiento_contrato && $this->proveedor->fecha_vencimiento_contrato->greaterThan(now())
             ? 'Sí aplica'
             : 'No aplica (vencido o no definido)';
-
+    
         $mail = (new MailMessage)
             ->from(config('mail.from.address'), "Tienda D'Jenny")
             ->subject('Nueva Orden de Compra #' . $this->ordenCompra->id . ' - Pendiente de Confirmación')
@@ -41,9 +41,9 @@ class OrdenCompraNotification extends Notification
             ->line('**Detalles de la Orden #' . $this->ordenCompra->id . ':**')
             ->line('Fecha: ' . $this->ordenCompra->fecha->format('d/m/Y H:i'))
             ->line('Estado: ' . ucfirst($this->ordenCompra->estado));
-
+    
         // Manejo mejorado de los detalles de productos
-        if ($this->ordenCompra->detalles && $this->ordenCompra->detalles->count() > 0) {
+        if ($this->ordenCompra->detalles && count($this->ordenCompra->detalles) > 0) {
             $mail->line('**Productos Solicitados:**');
             foreach ($this->ordenCompra->detalles as $detalle) {
                 $productoLine = "- " . ($detalle->producto->nombre ?? $detalle->producto ?? 'Producto no especificado') 
@@ -59,28 +59,23 @@ class OrdenCompraNotification extends Notification
                 if (!empty($detalle->subtotal)) {
                     $productoLine .= " - Subtotal: $" . number_format($detalle->subtotal, 2);
                 }
-
+    
                 $mail->line($productoLine);
             }
             
             // Agregar total si existe
-            if ($this->ordenCompra->total) {
-                $mail->line('**Total estimado: $' . number_format($this->ordenCompra->total, 2) . '**');
+            if ($this->ordenCompra->monto) { // Cambié 'total' por 'monto' según tu modelo
+                $mail->line('**Total estimado: $' . number_format($this->ordenCompra->monto, 2) . '**');
             }
         } else {
             $mail->line('No se especificaron detalles de productos en esta orden.');
         }
-
+    
         $mail->line('**Contrato:** ' . $contratoAplica)
             ->line('Por favor, coordine con nosotros para confirmar los precios y el monto total al entregar la orden.')
             ->action('Contactar al Administrador', 'mailto:' . config('mail.from.address'))
             ->salutation("Atentamente,\nEquipo AlphaSoft");
-
+    
         return $mail;
-    }
-
-    public function toArray($notifiable)
-    {
-        return [];
     }
 }

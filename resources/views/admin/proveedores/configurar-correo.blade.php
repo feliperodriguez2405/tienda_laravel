@@ -12,10 +12,18 @@
                 @csrf
                 <div class="mb-3">
                     <label for="correo_notificaciones" class="form-label">Correo para Notificaciones</label>
-                    <input type="email" class="form-control" id="correo_notificaciones" name="correo_notificaciones" value="{{ $correo_notificaciones }}" required>
+                    <input type="email" 
+                           class="form-control @error('correo_notificaciones') is-invalid @enderror" 
+                           id="correo_notificaciones" 
+                           name="correo_notificaciones" 
+                           value="{{ old('correo_notificaciones', $correo_notificaciones) }}" 
+                           required>
+                    @error('correo_notificaciones')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
                 <button type="submit" class="btn btn-primary">Guardar</button>
-                <a href="{{ route('admin.proveedores') }}" class="btn btn-secondary">Cancelar</a>
+                <a href="{{ route('proveedores.index') }}" class="btn btn-secondary">Cancelar</a>
             </form>
         </div>
     </div>

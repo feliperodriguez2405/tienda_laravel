@@ -33,41 +33,47 @@
 
                 <div class="mb-3">
                     <label for="fecha" class="form-label">Fecha</label>
-                    <input type="datetime-local" name="fecha" id="fecha" class="form-control" value="{{ old('fecha', now()->format('Y-m-d\TH:i')) }}" required>
+                    <input type="datetime-local" name="fecha" id="fecha" class="form-control" 
+                           value="{{ old('fecha', now()->format('Y-m-d\TH:i')) }}" required>
                 </div>
 
                 <div class="mb-3">
                     <label for="estado" class="form-label">Estado</label>
                     <select name="estado" id="estado" class="form-select" required>
-                        <option value="pendiente" {{ old('estado') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
-                        <option value="completada" {{ old('estado') == 'completada' ? 'selected' : '' }}>Completada</option>
-                        <option value="cancelada" {{ old('estado') == 'cancelada' ? 'selected' : '' }}>Cancelada</option>
+                        <option value="pendiente" {{ old('estado', 'pendiente') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+                        <option value="procesando" {{ old('estado') == 'procesando' ? 'selected' : '' }}>Procesando</option>
+                        <option value="enviado" {{ old('estado') == 'enviado' ? 'selected' : '' }}>Enviado</option>
+                        <option value="entregado" {{ old('estado') == 'entregado' ? 'selected' : '' }}>Entregado</option>
+                        <option value="cancelado" {{ old('estado') == 'cancelado' ? 'selected' : '' }}>Cancelado</option>
                     </select>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Detalles</label>
+                    <label class="form-label">Producto</label>
                     <div id="detalles-container">
                         <div class="row mb-2 detalle-row" data-index="0">
                             <div class="col-md-4">
-                                <input type="text" name="detalles[0][producto]" class="form-control" placeholder="Producto" value="{{ old('detalles.0.producto') }}" required>
+                                <input type="text" name="detalles[0][producto]" class="form-control" 
+                                       placeholder="Producto" value="{{ old('detalles.0.producto') }}" required>
                             </div>
-                            <div class="col-md-2">
-                                <input type="number" name="detalles[0][cantidad]" class="form-control" placeholder="Cantidad" value="{{ old('detalles.0.cantidad') }}" min="1" required>
+                            <div class="col-md-3">
+                                <input type="number" name="detalles[0][cantidad]" class="form-control" 
+                                       placeholder="Cantidad" value="{{ old('detalles.0.cantidad') }}" min="1" required>
                             </div>
-                            <div class="col-md-4">
-                                <input type="text" name="detalles[0][descripcion]" class="form-control" placeholder="Descripción (opcional)" value="{{ old('detalles.0.descripcion') }}">
+                            <div class="col-md-3">
+                                <input type="text" name="detalles[0][descripcion]" class="form-control" 
+                                       placeholder="Descripción (opcional)" value="{{ old('detalles.0.descripcion') }}">
                             </div>
                             <div class="col-md-2">
                                 <button type="button" class="btn btn-danger btn-sm remove-detalle" disabled>Eliminar</button>
                             </div>
                         </div>
                     </div>
-                    <button type="button" class="btn btn-outline-primary btn-sm" id="add-detalle">Agregar Detalle</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="add-detalle">Agregar Producto</button>
                 </div>
 
                 <div class="text-end">
-                    <button type="submit" class="btn btn-primary">Guardar Orden</button>
+                    <button type="submit" class="btn btn-primary">Enviar Orden</button>
                 </div>
             </form>
         </div>
@@ -77,56 +83,78 @@
 
 @section('scripts')
 <script>
-    let detalleIndex = 1;
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM cargado, iniciando script');
 
-    // Función para actualizar el estado de los botones "Eliminar"
-    function updateRemoveButtons() {
-        const rows = document.querySelectorAll('.detalle-row');
-        rows.forEach((row, index) => {
-            const removeButton = row.querySelector('.remove-detalle');
-            if (rows.length === 1) {
-                removeButton.disabled = true; // Deshabilita el botón si solo hay un detalle
-            } else {
-                removeButton.disabled = false; // Habilita el botón si hay más de un detalle
+        let detalleIndex = 1;
+
+        function updateRemoveButtons() {
+            const rows = document.querySelectorAll('.detalle-row');
+            console.log('Actualizando botones, total de filas:', rows.length);
+            rows.forEach((row) => {
+                const removeButton = row.querySelector('.remove-detalle');
+                removeButton.disabled = rows.length === 1;
+            });
+        }
+
+        const addButton = document.getElementById('add-detalle');
+        if (addButton) {
+            console.log('Botón Agregar Detalle encontrado');
+            addButton.addEventListener('click', function() {
+                console.log('Clic en Agregar Detalle, índice actual:', detalleIndex);
+                const container = document.getElementById('detalles-container');
+                if (!container) {
+                    console.error('Contenedor de detalles no encontrado');
+                    return;
+                }
+
+                const newRow = document.createElement('div');
+                newRow.classList.add('row', 'mb-2', 'detalle-row');
+                newRow.setAttribute('data-index', detalleIndex);
+                newRow.innerHTML = `
+                    <div class="col-md-4">
+                        <input type="text" name="detalles[${detalleIndex}][producto]" class="form-control" 
+                               placeholder="Producto" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" name="detalles[${detalleIndex}][cantidad]" class="form-control" 
+                               placeholder="Cantidad" min="1" required>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" name="detalles[${detalleIndex}][descripcion]" class="form-control" 
+                               placeholder="Descripción (opcional)">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-danger btn-sm remove-detalle">Eliminar</button>
+                    </div>
+                `;
+                container.appendChild(newRow);
+                detalleIndex++;
+                updateRemoveButtons();
+                console.log('Nuevo detalle agregado, índice actualizado a:', detalleIndex);
+            });
+        } else {
+            console.error('Botón Agregar Detalle no encontrado');
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-detalle')) {
+                console.log('Clic en Eliminar Detalle');
+                if (!e.target.disabled) {
+                    const row = e.target.closest('.detalle-row');
+                    if (row) {
+                        row.remove();
+                        console.log('Fila eliminada');
+                        updateRemoveButtons();
+                    } else {
+                        console.error('No se encontró la fila para eliminar');
+                    }
+                } else {
+                    console.log('Botón Eliminar desactivado, no se realiza acción');
+                }
             }
         });
-    }
 
-    // Agregar un nuevo detalle
-    document.getElementById('add-detalle').addEventListener('click', function() {
-        const container = document.getElementById('detalles-container');
-        const newRow = document.createElement('div');
-        newRow.classList.add('row', 'mb-2', 'detalle-row');
-        newRow.setAttribute('data-index', detalleIndex);
-        newRow.innerHTML = `
-            <div class="col-md-4">
-                <input type="text" name="detalles[${detalleIndex}][producto]" class="form-control" placeholder="Producto" required>
-            </div>
-            <div class="col-md-2">
-                <input type="number" name="detalles[${detalleIndex}][cantidad]" class="form-control" placeholder="Cantidad" min="1" required>
-            </div>
-            <div class="col-md-4">
-                <input type="text" name="detalles[${detalleIndex}][descripcion]" class="form-control" placeholder="Descripción (opcional)">
-            </div>
-            <div class="col-md-2">
-                <button type="button" class="btn btn-danger btn-sm remove-detalle">Eliminar</button>
-            </div>
-        `;
-        container.appendChild(newRow);
-        detalleIndex++;
-        updateRemoveButtons(); // Actualiza el estado de los botones después de agregar
-    });
-
-    // Eliminar un detalle
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('remove-detalle') && !e.target.disabled) {
-            e.target.closest('.detalle-row').remove();
-            updateRemoveButtons(); // Actualiza el estado de los botones después de eliminar
-        }
-    });
-
-    // Inicializar el estado de los botones al cargar la página
-    document.addEventListener('DOMContentLoaded', function() {
         updateRemoveButtons();
     });
 </script>

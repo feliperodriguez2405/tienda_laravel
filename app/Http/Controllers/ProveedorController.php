@@ -111,7 +111,11 @@ class ProveedorController extends Controller
             return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
                 ->with('error', 'La orden no pertenece a este proveedor.');
         }
-        return view('admin.proveedores.orden_show', compact('proveedor', 'orden'));
+        
+        // Cargar todos los productos disponibles para el select
+        $productos = Producto::all(); // Puedes filtrarlos si necesitas algo más específico
+        
+        return view('admin.proveedores.orden_show', compact('proveedor', 'orden', 'productos'));
     }
 
     public function historialCompras(Proveedor $proveedor, Request $request)
@@ -128,6 +132,21 @@ class ProveedorController extends Controller
         return view('admin.proveedores.historial', compact('proveedor', 'ordenes'));
     }
 
+    public function ordenCompraDestroy(Proveedor $proveedor, OrdenCompra $orden)
+    {
+        // Verificar que la orden pertenezca al proveedor
+        if ($orden->proveedor_id !== $proveedor->id) {
+            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
+                ->with('error', 'La orden no pertenece a este proveedor.');
+        }
+
+        // Eliminar la orden
+        $orden->delete();
+
+        return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
+            ->with('success', 'Orden de compra eliminada correctamente.');
+    }
+    
     public function ordenCompraUpdate(Request $request, Proveedor $proveedor, OrdenCompra $orden)
     {
         if ($orden->proveedor_id !== $proveedor->id) {
@@ -138,14 +157,18 @@ class ProveedorController extends Controller
         $data = $request->validate([
             'estado' => 'required|in:entregado,completado,cancelado',
             'detalles' => 'required|array',
+            'detalles.*.producto' => 'required|string|max:255', // Validar el nombre del producto del select
             'detalles.*.precio' => 'required|numeric|min:0',
         ]);
 
         $orden->estado = $data['estado'];
         $detalles = $orden->detalles;
         foreach ($data['detalles'] as $index => $detalleInput) {
-            if (isset($detalles[$index]) && isset($detalleInput['precio'])) {
-                $detalles[$index]['precio'] = $detalleInput['precio'];
+            if (isset($detalles[$index])) {
+                $detalles[$index]['producto'] = $detalleInput['producto']; // Actualizar el nombre del producto desde el select
+                if (isset($detalleInput['precio'])) {
+                    $detalles[$index]['precio'] = $detalleInput['precio'];
+                }
             }
         }
         $orden->detalles = $detalles;

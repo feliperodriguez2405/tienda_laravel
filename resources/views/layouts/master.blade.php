@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8">
@@ -28,30 +29,30 @@
         .navbar {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 1rem 0;
-            background: linear-gradient(90deg, #28a745 0%, #5cd17a 100%);
+            background: linear-gradient(90deg, #343a40 0%, #495057 100%);
         }
 
         .navbar-brand {
             font-weight: 700;
             font-size: 1.5rem;
             transition: transform 0.2s ease-in-out;
-            color: #fff;
+            color: #e9ecef;
         }
 
         .navbar-brand:hover {
             transform: scale(1.05);
-            color: #fff;
+            color: #ffffff;
         }
 
         .nav-link {
             font-weight: 500;
             padding: 0.5rem 1rem;
             transition: color 0.2s ease-in-out;
-            color: #fff;
+            color: #e9ecef !important;
         }
 
         .nav-link:hover {
-            color: #e9ecef;
+            color: #ffffff !important;
         }
 
         /* Main Content */
@@ -61,7 +62,7 @@
 
         /* Footer */
         footer {
-            background: linear-gradient(90deg, #28a745 0%, #5cd17a 100%);
+            background: linear-gradient(90deg, #343a40 0%, #495057 100%);
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
             padding: 1.5rem 0;
         }
@@ -70,7 +71,7 @@
             margin: 0;
             font-size: 0.9rem;
             opacity: 0.9;
-            color: #fff;
+            color: #ffffff;
         }
 
         /* Botón Logout */
@@ -167,7 +168,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ asset('js/app.js') }}"></script>
+    <script src="{{ asset('js/app.js') }}" defer></script>
 
     @stack('scripts')
 </body>

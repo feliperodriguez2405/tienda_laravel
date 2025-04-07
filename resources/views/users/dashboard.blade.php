@@ -19,10 +19,11 @@
             </form>
         </div>
         <div class="col-md-6 text-end">
-            <div class="cart-container">
+            <div class="cart-container position-relative">
+                <a href="{{ route('user.cart') }}" class="btn btn-outline-dark cart-btn">
                     <i class="bi bi-cart3"></i> Carrito
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        {{ Auth::user()->cartItems ?? 0 }}
+                        {{ session('cart') ? count(session('cart')) : 0 }}
                         <span class="visually-hidden">items en carrito</span>
                     </span>
                 </a>
@@ -32,7 +33,7 @@
 
     <div class="row">
         <!-- Sidebar -->
-        <div class="col-md-3">
+        <!-- <div class="col-md-3">
             <div class="list-group sidebar">
                 <a href="{{ route('user.dashboard') }}" class="list-group-item list-group-item-action active">
                     <i class="bi bi-house-door me-2"></i> Inicio
@@ -55,7 +56,7 @@
                     @csrf
                 </form>
             </div>
-        </div>
+        </div> -->
 
         <!-- Contenido principal -->
         <div class="col-md-9">
@@ -103,65 +104,39 @@
 </div>
 
 <style>
-    /* Estilos personalizados */
     .search-input {
         border-radius: 20px;
         transition: box-shadow 0.2s ease-in-out;
     }
-
     .search-input:focus {
         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
-
-    .search-btn {
+    .search-btn, .cart-btn {
         border-radius: 20px;
         transition: transform 0.2s ease-in-out;
     }
-
-    .search-btn:hover {
+    .search-btn:hover, .cart-btn:hover {
         transform: scale(1.05);
     }
-
-    .cart-btn {
-        transition: transform 0.2s ease-in-out;
-    }
-
-    .cart-btn:hover {
-        transform: scale(1.05);
-    }
-
     .sidebar {
         border-radius: 8px;
         overflow: hidden;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     }
-
     .list-group-item {
         transition: background-color 0.2s ease-in-out;
     }
-
     .list-group-item:hover {
         background-color: #f8f9fa;
     }
-
-    .main-card {
+    .main-card, .option-card {
         border-radius: 8px;
         box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         transition: transform 0.2s ease-in-out;
     }
-
-    .main-card:hover {
+    .main-card:hover, .option-card:hover {
         transform: translateY(-2px);
     }
-
-    .option-card {
-        transition: transform 0.2s ease-in-out;
-    }
-
-    .option-card:hover {
-        transform: translateY(-2px);
-    }
-
     .btn-sm {
         padding: 0.25rem 1rem;
     }

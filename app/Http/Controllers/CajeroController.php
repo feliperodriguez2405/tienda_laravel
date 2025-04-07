@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\{Orden, DetalleOrden, Producto};
+use App\Models\{Orden, DetalleOrden, Producto, User}; // Añadimos User aquí
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;

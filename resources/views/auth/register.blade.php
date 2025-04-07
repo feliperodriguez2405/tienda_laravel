@@ -1,19 +1,19 @@
-@extends('layouts.master')
+@extends('layouts.welcome')
 
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card register-card">
-                <div class="card-header">{{ __('Register') }}</div>
+                <div class="card-header">{{ __('Registrar') }}</div>
 
                 <div class="card-body">
                     <form method="POST" action="{{ route('register') }}">
                         @csrf
 
-                        <!-- Name -->
+                        <!-- Nombre -->
                         <div class="row mb-3">
-                            <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Name') }}</label>
+                            <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Nombre') }}</label>
                             <div class="col-md-6">
                                 <input id="name" 
                                        type="text" 
@@ -31,9 +31,9 @@
                             </div>
                         </div>
 
-                        <!-- Email -->
+                        <!-- Correo Electrónico -->
                         <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
+                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Dirección de Correo Electrónico') }}</label>
                             <div class="col-md-6">
                                 <input id="email" 
                                        type="email" 
@@ -50,9 +50,9 @@
                             </div>
                         </div>
 
-                        <!-- Password -->
+                        <!-- Contraseña -->
                         <div class="row mb-3">
-                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
+                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Contraseña') }}</label>
                             <div class="col-md-6">
                                 <input id="password" 
                                        type="password" 
@@ -68,9 +68,9 @@
                             </div>
                         </div>
 
-                        <!-- Confirm Password -->
+                        <!-- Confirmar Contraseña -->
                         <div class="row mb-3">
-                            <label for="password-confirm" class="col-md-4 col-form-label text-md-end">{{ __('Confirm Password') }}</label>
+                            <label for="password-confirm" class="col-md-4 col-form-label text-md-end">{{ __('Confirmar Contraseña') }}</label>
                             <div class="col-md-6">
                                 <input id="password-confirm" 
                                        type="password" 
@@ -81,14 +81,14 @@
                             </div>
                         </div>
 
-                        <!-- Buttons -->
+                        <!-- Botones -->
                         <div class="row mb-0 d-flex justify-content-center">
                             <div class="col-md-6 d-flex justify-content-center gap-3">
                                 <button type="submit" class="btn btn-primary register-btn">
-                                    {{ __('Register') }}
+                                    {{ __('Registrar') }}
                                 </button>
                                 <a href="{{ route('login') }}" class="btn btn-link login-link">
-                                    {{ __('Login') }}
+                                    {{ __('Iniciar Sesión') }}
                                 </a>
                             </div>
                         </div>

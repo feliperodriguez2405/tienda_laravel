@@ -13,7 +13,7 @@ class Orden extends Model
     protected $table = 'ordenes';
 
     // Campos que se pueden llenar masivamente
-    protected $fillable = ['user_id', 'total', 'estado'];
+    protected $fillable = ['user_id', 'total', 'estado', 'metodo_pago'];
 
     // Definimos los valores permitidos para 'estado' como un cast (opcional, pero útil)
     protected $casts = [

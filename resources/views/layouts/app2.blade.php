@@ -28,27 +28,30 @@
         .navbar {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 1rem 0;
-            background: linear-gradient(90deg, #0d6efd 0%, #5c9cff 100%);
+            background: linear-gradient(90deg, #343a40 0%, #495057 100%);
         }
 
         .navbar-brand {
             font-weight: 700;
             font-size: 1.5rem;
             transition: transform 0.2s ease-in-out;
+            color: #e9ecef;
         }
 
         .navbar-brand:hover {
             transform: scale(1.05);
+            color: #ffffff;
         }
 
         .nav-link {
             font-weight: 500;
             padding: 0.5rem 1rem;
             transition: color 0.2s ease-in-out;
+            color: #e9ecef !important;
         }
 
         .nav-link:hover {
-            color: #e9ecef;
+            color: #ffffff !important;
         }
 
         /* Main Content */
@@ -58,7 +61,7 @@
 
         /* Footer */
         footer {
-            background: linear-gradient(90deg, #0d6efd 0%, #5c9cff 100%);
+            background: linear-gradient(90deg, #343a40 0%, #495057 100%);
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
             padding: 1.5rem 0;
         }
@@ -67,6 +70,7 @@
             margin: 0;
             font-size: 0.9rem;
             opacity: 0.9;
+            color: #ffffff;
         }
 
         /* Botón Logout */
@@ -127,9 +131,10 @@
                             <i class="bi bi-basket me-1"></i>Mis Pedidos
                         </a>
                     </li>
+                    <!-- Aquí puedes agregar "Perfil" o "Configuración" según prefieras -->
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('user.settings') }}">
-                            <i class="bi bi-gear me-1"></i>Configuración
+                        <a class="nav-link" href="{{ route('user.profile') }}">
+                            <i class="bi bi-person me-1"></i>Perfil
                         </a>
                     </li>
 

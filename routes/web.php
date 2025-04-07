@@ -48,11 +48,18 @@ Route::middleware(['auth'])->group(function () {
 // Rutas para usuarios con rol "usuario"
 Route::middleware(['auth', 'role:usuario'])->group(function () {
     Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
+    Route::get('/user/cart', [UserController::class, 'cart'])->name('user.cart');
+    Route::post('/user/cart/add/{producto}', [UserController::class, 'addToCart'])->name('user.cart.add');
+    Route::post('/user/cart/remove/{producto}', [UserController::class, 'removeFromCart'])->name('user.cart.remove');
+    Route::get('/user/checkout', [UserController::class, 'checkout'])->name('user.checkout');
+    Route::post('/user/checkout/process', [UserController::class, 'processCheckout'])->name('user.process.checkout');
 });
-//Rutas para el cajero
+
+// Rutas para el cajero
 Route::get('/cajero/dashboard', [CajeroController::class, 'dashboard'])
     ->name('cajero.dashboard')
     ->middleware(['auth', 'role:cajero']);
+
 // Rutas para administradores con rol "admin"
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
@@ -62,13 +69,19 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     // Rutas de reportes
     Route::get('/reportes', [ReporteController::class, 'index'])->name('admin.reportes');
 
-    // Rutas para gestión de usuarios
+    // Rutas para gestión de usuarios (existentes)
     Route::get('/users', [AdminController::class, 'usersIndex'])->name('admin.users.index');
     Route::get('/users/create', [AdminController::class, 'create'])->name('admin.users.create');
     Route::post('/users', [AdminController::class, 'store'])->name('admin.users.store');
     Route::get('/users/{user}/edit', [AdminController::class, 'edit'])->name('admin.users.edit');
     Route::put('/users/{user}', [AdminController::class, 'update'])->name('admin.users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('admin.users.destroy');
+
+    // Nuevas rutas para gestión de usuarios desde UserController
+    Route::get('/gestion-usuarios', [UserController::class, 'index'])->name('admin.gestion-usuarios.index');
+    Route::get('/gestion-usuarios/{user}/edit', [UserController::class, 'edit'])->name('admin.gestion-usuarios.edit');
+    Route::put('/gestion-usuarios/{user}', [UserController::class, 'update'])->name('admin.gestion-usuarios.update');
+    Route::delete('/gestion-usuarios/{user}', [UserController::class, 'destroy'])->name('admin.gestion-usuarios.destroy');
 
     // Rutas para gestión de pedidos
     Route::post('/pedidos/{orden}/update-status', [AdminController::class, 'updateStatus'])->name('admin.pedidos.updateStatus');
@@ -93,6 +106,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/proveedores/{proveedor}/ordenes', [ProveedorController::class, 'ordenCompraStore'])->name('admin.proveedores.ordenes.store');
     Route::get('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraShow'])->name('admin.proveedores.ordenes.show');
     Route::put('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraUpdate'])->name('admin.proveedores.ordenes.update');
+    Route::delete('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraDestroy'])->name('admin.proveedores.ordenes.destroy');
 });
 
 // Rutas para administradores con rol "admin" y permiso "administrar categorías"
@@ -117,6 +131,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/products', [UserController::class, 'products'])->name('user.products');
     Route::get('/user/orders', [UserController::class, 'orders'])->name('user.orders');
     Route::get('/user/settings', [UserController::class, 'settings'])->name('user.settings');
+    Route::put('/user/settings', [UserController::class, 'updateSettings'])->name('user.settings.update');
+    Route::get('/user/orders/{orden}', [UserController::class, 'showOrder'])->name('user.orders.show');
+    Route::get('/user/profile', [UserController::class, 'profile'])->name('user.profile');
 });
 
 // Rutas adicionales para cajero

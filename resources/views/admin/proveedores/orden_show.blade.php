@@ -42,7 +42,26 @@
                                 <tbody>
                                     @foreach ($orden->detalles as $index => $detalle)
                                         <tr>
-                                            <td>{{ $detalle['producto'] ?? 'No especificado' }}</td>
+                                            <td>
+                                                <!-- Texto plano del nombre del producto -->
+                                                <div>{{ $detalle['producto'] ?? 'No especificado' }}</div>
+                                                <!-- Select con lista de productos disponibles -->
+                                                <select name="detalles[{{ $index }}][producto]" 
+                                                        class="form-select mt-2 @error('detalles.' . $index . '.producto') is-invalid @enderror"
+                                                        {{ $orden->estado !== 'pendiente' ? 'disabled' : '' }}>
+                                                    <option value="{{ $detalle['producto'] ?? '' }}" selected>
+                                                        {{ $detalle['producto'] ?? 'No especificado' }}
+                                                    </option>
+                                                    @foreach ($productos as $producto)
+                                                        @if ($producto->nombre !== ($detalle['producto'] ?? ''))
+                                                            <option value="{{ $producto->nombre }}">{{ $producto->nombre }}</option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                                @error('detalles.' . $index . '.producto')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </td>
                                             <td>{{ $detalle['cantidad'] ?? 0 }}</td>
                                             <td>
                                                 <input type="number" 
@@ -109,6 +128,9 @@
         }
         .form-control {
             max-width: 150px;
+        }
+        .form-select {
+            max-width: 200px; /* Ajustar el ancho del select si es necesario */
         }
     </style>
 @endsection

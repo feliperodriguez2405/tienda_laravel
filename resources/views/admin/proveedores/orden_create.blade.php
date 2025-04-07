@@ -41,28 +41,40 @@
                     <label for="estado" class="form-label">Estado</label>
                     <select name="estado" id="estado" class="form-select" required>
                         <option value="pendiente" {{ old('estado', 'pendiente') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
-                        <option value="procesando" {{ old('estado') == 'procesando' ? 'selected' : '' }}>Procesando</option>
-                        <option value="enviado" {{ old('estado') == 'enviado' ? 'selected' : '' }}>Enviado</option>
-                        <option value="entregado" {{ old('estado') == 'entregado' ? 'selected' : '' }}>Entregado</option>
                         <option value="cancelado" {{ old('estado') == 'cancelado' ? 'selected' : '' }}>Cancelado</option>
                     </select>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Producto</label>
+                    <label class="form-label">Productos</label>
                     <div id="detalles-container">
+                        @php $productos = \App\Models\Producto::all(); @endphp
                         <div class="row mb-2 detalle-row" data-index="0">
                             <div class="col-md-4">
-                                <input type="text" name="detalles[0][producto]" class="form-control" 
-                                       placeholder="Producto" value="{{ old('detalles.0.producto') }}" required>
+                                <input type="text" name="detalles[0][producto]" 
+                                       class="form-control producto-input" 
+                                       placeholder="Producto" 
+                                       value="{{ old('detalles.0.producto') }}" 
+                                       list="productos-list" 
+                                       required>
+                                <datalist id="productos-list">
+                                    @foreach($productos as $producto)
+                                        <option value="{{ $producto->nombre }}">
+                                    @endforeach
+                                </datalist>
                             </div>
                             <div class="col-md-3">
-                                <input type="number" name="detalles[0][cantidad]" class="form-control" 
-                                       placeholder="Cantidad" value="{{ old('detalles.0.cantidad') }}" min="1" required>
+                                <input type="number" name="detalles[0][cantidad]" 
+                                       class="form-control" 
+                                       placeholder="Cantidad" 
+                                       value="{{ old('detalles.0.cantidad') }}" 
+                                       min="1" required>
                             </div>
                             <div class="col-md-3">
-                                <input type="text" name="detalles[0][descripcion]" class="form-control" 
-                                       placeholder="Descripción (opcional)" value="{{ old('detalles.0.descripcion') }}">
+                                <input type="text" name="detalles[0][descripcion]" 
+                                       class="form-control" 
+                                       placeholder="Descripción (opcional)" 
+                                       value="{{ old('detalles.0.descripcion') }}">
                             </div>
                             <div class="col-md-2">
                                 <button type="button" class="btn btn-danger btn-sm remove-detalle" disabled>Eliminar</button>
@@ -83,78 +95,120 @@
 
 @section('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM cargado, iniciando script');
+    // Ejecutar cuando todo esté cargado (DOM y recursos)
+    window.addEventListener('load', function() {
+        var index = 1;
+        var container = document.getElementById('detalles-container');
+        var addButton = document.getElementById('add-detalle');
+        var productosList = document.getElementById('productos-list').innerHTML;
 
-        let detalleIndex = 1;
+        // Verificar que los elementos existen
+        if (!container) {
+            console.error('Error: #detalles-container no encontrado');
+            return;
+        }
+        if (!addButton) {
+            console.error('Error: #add-detalle no encontrado');
+            return;
+        }
 
+        // Función para actualizar botones "Eliminar"
         function updateRemoveButtons() {
-            const rows = document.querySelectorAll('.detalle-row');
-            console.log('Actualizando botones, total de filas:', rows.length);
-            rows.forEach((row) => {
-                const removeButton = row.querySelector('.remove-detalle');
+            var rows = container.getElementsByClassName('detalle-row');
+            for (var i = 0; i < rows.length; i++) {
+                var removeButton = rows[i].querySelector('.remove-detalle');
                 removeButton.disabled = rows.length === 1;
-            });
+            }
         }
 
-        const addButton = document.getElementById('add-detalle');
-        if (addButton) {
-            console.log('Botón Agregar Detalle encontrado');
-            addButton.addEventListener('click', function() {
-                console.log('Clic en Agregar Detalle, índice actual:', detalleIndex);
-                const container = document.getElementById('detalles-container');
-                if (!container) {
-                    console.error('Contenedor de detalles no encontrado');
-                    return;
-                }
+        // Agregar nueva fila
+        addButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            var newRow = document.createElement('div');
+            newRow.className = 'row mb-2 detalle-row';
+            newRow.setAttribute('data-index', index);
+            newRow.innerHTML = `
+                <div class="col-md-4">
+                    <input type="text" name="detalles[${index}][producto]" 
+                           class="form-control producto-input" 
+                           placeholder="Producto" 
+                           list="productos-list" 
+                           required>
+                    <datalist id="productos-list">${productosList}</datalist>
+                </div>
+                <div class="col-md-3">
+                    <input type="number" name="detalles[${index}][cantidad]" 
+                           class="form-control" 
+                           placeholder="Cantidad" 
+                           min="1" 
+                           required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="detalles[${index}][descripcion]" 
+                           class="form-control" 
+                           placeholder="Descripción (opcional)">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger btn-sm remove-detalle">Eliminar</button>
+                </div>
+            `;
+            container.appendChild(newRow);
+            index++;
+            updateRemoveButtons();
+        });
 
-                const newRow = document.createElement('div');
-                newRow.classList.add('row', 'mb-2', 'detalle-row');
-                newRow.setAttribute('data-index', detalleIndex);
-                newRow.innerHTML = `
-                    <div class="col-md-4">
-                        <input type="text" name="detalles[${detalleIndex}][producto]" class="form-control" 
-                               placeholder="Producto" required>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="number" name="detalles[${detalleIndex}][cantidad]" class="form-control" 
-                               placeholder="Cantidad" min="1" required>
-                    </div>
-                    <div class="col-md-3">
-                        <input type="text" name="detalles[${detalleIndex}][descripcion]" class="form-control" 
-                               placeholder="Descripción (opcional)">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" class="btn btn-danger btn-sm remove-detalle">Eliminar</button>
-                    </div>
-                `;
-                container.appendChild(newRow);
-                detalleIndex++;
+        // Eliminar fila
+        container.addEventListener('click', function(e) {
+            var target = e.target;
+            if (target.classList.contains('remove-detalle') && !target.disabled) {
+                target.closest('.detalle-row').remove();
                 updateRemoveButtons();
-                console.log('Nuevo detalle agregado, índice actualizado a:', detalleIndex);
-            });
-        } else {
-            console.error('Botón Agregar Detalle no encontrado');
-        }
-
-        document.addEventListener('click', function(e) {
-            if (e.target.classList.contains('remove-detalle')) {
-                console.log('Clic en Eliminar Detalle');
-                if (!e.target.disabled) {
-                    const row = e.target.closest('.detalle-row');
-                    if (row) {
-                        row.remove();
-                        console.log('Fila eliminada');
-                        updateRemoveButtons();
-                    } else {
-                        console.error('No se encontró la fila para eliminar');
-                    }
-                } else {
-                    console.log('Botón Eliminar desactivado, no se realiza acción');
-                }
             }
         });
 
+        // Restaurar datos previos si hay errores de validación
+        @if(old('detalles'))
+            @foreach(old('detalles') as $i => $detalle)
+                @if($i > 0)
+                    var newRow{{ $i }} = document.createElement('div');
+                    newRow{{ $i }}.className = 'row mb-2 detalle-row';
+                    newRow{{ $i }}.setAttribute('data-index', {{ $i }});
+                    newRow{{ $i }}.innerHTML = `
+                        <div class="col-md-4">
+                            <input type="text" name="detalles[{{ $i }}][producto]" 
+                                   class="form-control producto-input" 
+                                   placeholder="Producto" 
+                                   value="{{ $detalle['producto'] ?? '' }}"
+                                   list="productos-list" 
+                                   required>
+                            <datalist id="productos-list">${productosList}</datalist>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="number" name="detalles[{{ $i }}][cantidad]" 
+                                   class="form-control" 
+                                   placeholder="Cantidad" 
+                                   value="{{ $detalle['cantidad'] ?? '' }}"
+                                   min="1" 
+                                   required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" name="detalles[{{ $i }}][descripcion]" 
+                                   class="form-control" 
+                                   placeholder="Descripción (opcional)"
+                                   value="{{ $detalle['descripcion'] ?? '' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-danger btn-sm remove-detalle">Eliminar</button>
+                        </div>
+                    `;
+                    container.appendChild(newRow{{ $i }});
+                    index = Math.max(index, {{ $i }} + 1);
+                @endif
+            @endforeach
+            updateRemoveButtons();
+        @endif
+
+        // Inicializar estado de botones
         updateRemoveButtons();
     });
 </script>

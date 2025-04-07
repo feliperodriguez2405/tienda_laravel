@@ -1,19 +1,19 @@
-@extends('layouts.master')
+@extends('layouts.welcome')
 
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card login-card">
-                <div class="card-header">{{ __('Login') }}</div>
+                <div class="card-header">{{ __('Iniciar Sesión') }}</div>
 
                 <div class="card-body">
                     <form method="POST" action="{{ route('login') }}">
                         @csrf
 
-                        <!-- Email -->
+                        <!-- Correo electrónico -->
                         <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
+                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Dirección de Correo Electrónico') }}</label>
                             <div class="col-md-6">
                                 <input id="email" 
                                        type="email" 
@@ -31,9 +31,9 @@
                             </div>
                         </div>
 
-                        <!-- Password -->
+                        <!-- Contraseña -->
                         <div class="row mb-3">
-                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
+                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Contraseña') }}</label>
                             <div class="col-md-6">
                                 <input id="password" 
                                        type="password" 
@@ -49,7 +49,7 @@
                             </div>
                         </div>
 
-                        <!-- Remember Me -->
+                        <!-- Recordarme -->
                         <div class="row mb-3 d-flex justify-content-center">
                             <div class="col-md-6">
                                 <div class="form-check d-flex align-items-center justify-content-center">
@@ -59,32 +59,32 @@
                                            id="remember" 
                                            {{ old('remember') ? 'checked' : '' }}>
                                     <label class="form-check-label" for="remember">
-                                        {{ __('Remember Me') }}
+                                        {{ __('Recuérdame') }}
                                     </label>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Buttons -->
+                        <!-- Botones -->
                         <div class="row mb-0 d-flex justify-content-center">
                             <div class="col-md-6 d-flex justify-content-center gap-3">
                                 <button type="submit" class="btn btn-primary login-btn">
-                                    {{ __('Login') }}
+                                    {{ __('Iniciar Sesión') }}
                                 </button>
                                 @if (Route::has('register'))
                                     <a href="{{ route('register') }}" class="btn btn-secondary register-btn">
-                                        {{ __('Register') }}
+                                        {{ __('Registrarse') }}
                                     </a>
                                 @endif
                             </div>
                         </div>
 
-                        <!-- Forgot Password Link -->
+                        <!-- Enlace de Contraseña Olvidada -->
                         @if (Route::has('password.request'))
                             <div class="row mt-3 d-flex justify-content-center">
                                 <div class="col-md-6 text-center">
                                     <a class="btn btn-link forgot-link" href="{{ route('password.request') }}">
-                                        {{ __('Forgot Your Password?') }}
+                                        {{ __('¿Olvidaste tu Contraseña?') }}
                                     </a>
                                 </div>
                             </div>

@@ -1,49 +1,33 @@
 @extends('layouts.app2')
 
+@section('title', 'Mis Órdenes')
+
 @section('content')
 <div class="container">
-    <h1 class="mb-4 text-center text-primary fw-bold">Lista de Productos</h1>
+    <h1 class="mb-4 text-center text-primary fw-bold">Mis Órdenes</h1>
 
-    <div class="d-flex justify-content-between mb-3">
-        <a href="{{ route('productos.create') }}" class="btn btn-success">
-            <i class="fas fa-plus"></i> Agregar Producto
-        </a>
-    </div>
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
 
-    {{-- Verifica si hay productos --}}
-    @if ($productos->isEmpty())
+    @if (!$pedidos || $pedidos->isEmpty())
         <div class="alert alert-warning text-center">
-            <strong>No hay productos disponibles.</strong>
+            <strong>No tienes órdenes registradas.</strong>
         </div>
     @else
         <div class="row">
-            @foreach($productos as $producto)
+            @foreach($pedidos as $pedido)
                 <div class="col-md-4 mb-4">
-                    <div class="card shadow-lg border-0">
-                        <img src="{{ $producto->imagen ? asset('storage/'.$producto->imagen) : asset('images/placeholder.png') }}" 
-                            class="card-img-top img-fluid" alt="{{ $producto->nombre }}" 
-                            style="height: 200px; object-fit: cover;">
-
-                        <div class="card-body text-center">
-                            <h5 class="card-title text-dark fw-bold">{{ $producto->nombre }}</h5>
-                            <p class="card-text text-success fw-bold">${{ number_format($producto->precio, 2) }}</p>
-                            <p class="card-text text-secondary">Stock: <strong>{{ $producto->stock }}</strong></p>
-
-                            <div class="d-flex justify-content-between">
-                                <a href="{{ route('productos.show', $producto->id) }}" class="btn btn-info">
-                                    <i class="fas fa-eye"></i> Ver
-                                </a>
-                                <a href="{{ route('productos.edit', $producto->id) }}" class="btn btn-warning">
-                                    <i class="fas fa-edit"></i> Editar
-                                </a>
-                                <form action="{{ route('productos.destroy', $producto->id) }}" method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar este producto?')">
-                                        <i class="fas fa-trash"></i> Eliminar
-                                    </button>
-                                </form>
-                            </div>
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title text-dark fw-bold">Orden #{{ $pedido->id }}</h5>
+                            <p class="card-text text-success fw-bold">${{ number_format($pedido->total, 2) }}</p>
+                            <p class="card-text">Estado: <strong>{{ $pedido->estado }}</strong></p>
+                            <p class="card-text">Método de Pago: <strong>{{ $pedido->metodo_pago ?? 'No especificado' }}</strong></p>
+                            <p class="card-text">Fecha: <strong>{{ $pedido->created_at->format('d/m/Y') }}</strong></p>
+                            <a href="{{ route('user.orders.show', $pedido->id) }}" class="btn btn-info">
+                                <i class="bi bi-eye"></i> Ver Detalles
+                            </a>
                         </div>
                     </div>
                 </div>

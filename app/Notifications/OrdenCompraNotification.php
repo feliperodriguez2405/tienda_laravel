@@ -42,29 +42,31 @@ class OrdenCompraNotification extends Notification
             ->line('Fecha: ' . $this->ordenCompra->fecha->format('d/m/Y H:i'))
             ->line('Estado: ' . ucfirst($this->ordenCompra->estado));
     
-        // Manejo mejorado de los detalles de productos
-        if ($this->ordenCompra->detalles && count($this->ordenCompra->detalles) > 0) {
+        // Manejo de los detalles de productos como array
+        if ($this->ordenCompra->detalles && is_array($this->ordenCompra->detalles) && count($this->ordenCompra->detalles) > 0) {
             $mail->line('**Productos Solicitados:**');
             foreach ($this->ordenCompra->detalles as $detalle) {
-                $productoLine = "- " . ($detalle->producto->nombre ?? $detalle->producto ?? 'Producto no especificado') 
-                    . ": " . ($detalle->cantidad ?? 0) . " unidades";
+                $productoLine = "- " . ($detalle['producto'] ?? 'Producto no especificado') 
+                    . ": " . ($detalle['cantidad'] ?? 0) . " unidades";
                 
                 // Agregar más detalles si están disponibles
-                if (!empty($detalle->descripcion)) {
-                    $productoLine .= " - " . $detalle->descripcion;
+                if (!empty($detalle['descripcion'])) {
+                    $productoLine .= " - " . $detalle['descripcion'];
                 }
-                if (!empty($detalle->precio_unitario)) {
-                    $productoLine .= " (Precio unitario: $" . number_format($detalle->precio_unitario, 2) . ")";
+                if (!empty($detalle['precio'])) {
+                    $productoLine .= " (Precio unitario: $" . number_format($detalle['precio'], 2) . ")";
                 }
-                if (!empty($detalle->subtotal)) {
-                    $productoLine .= " - Subtotal: $" . number_format($detalle->subtotal, 2);
+                // Calcular subtotal si precio y cantidad están disponibles
+                if (!empty($detalle['precio']) && !empty($detalle['cantidad'])) {
+                    $subtotal = $detalle['precio'] * $detalle['cantidad'];
+                    $productoLine .= " - Subtotal: $" . number_format($subtotal, 2);
                 }
     
                 $mail->line($productoLine);
             }
             
             // Agregar total si existe
-            if ($this->ordenCompra->monto) { // Cambié 'total' por 'monto' según tu modelo
+            if ($this->ordenCompra->monto > 0) {
                 $mail->line('**Total estimado: $' . number_format($this->ordenCompra->monto, 2) . '**');
             }
         } else {

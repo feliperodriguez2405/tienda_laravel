@@ -7,6 +7,7 @@ use App\Models\Producto;
 use App\Models\Orden;
 use App\Models\DetalleOrden;
 use App\Models\User;
+use App\Models\Reseña; // Added for reviews
 use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
@@ -207,5 +208,41 @@ class UserController extends Controller
         $this->authorize('delete', $user);
         $user->delete();
         return redirect()->route('users.index')->with('success', 'Usuario eliminado correctamente.');
+    }
+
+    // New method to display reviews
+    public function reviews()
+    {
+        $reseñas = Reseña::with(['user', 'producto'])->get();
+        $productos = Producto::all(); // For the review form
+        return view('users.reviews', compact('reseñas', 'productos'));
+    }
+
+    // New method to save a review
+    public function storeReview(Request $request)
+    {
+        $request->validate([
+            'producto_id' => 'required|exists:productos,id',
+            'calificacion' => 'required|integer|min:1|max:5',
+            'comentario' => 'nullable|string|max:1000',
+        ]);
+
+        // Check if the user has already reviewed this product
+        $existingReview = Reseña::where('user_id', Auth::id())
+                               ->where('producto_id', $request->producto_id)
+                               ->exists();
+
+        if ($existingReview) {
+            return redirect()->route('user.reviews')->with('error', 'Ya has dejado una reseña para este producto.');
+        }
+
+        Reseña::create([
+            'user_id' => Auth::id(),
+            'producto_id' => $request->producto_id,
+            'calificacion' => $request->calificacion,
+            'comentario' => $request->comentario,
+        ]);
+
+        return redirect()->route('user.reviews')->with('success', 'Reseña guardada correctamente.');
     }
 }

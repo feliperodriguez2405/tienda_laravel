@@ -4,10 +4,12 @@
 
 @section('content')
 <div class="container">
-    <!-- Barra superior con búsqueda y carrito -->
+    <!-- Barra superior con búsqueda -->
     <div class="row mb-4 align-items-center">
         <div class="col-md-6">
-            <form class="d-flex" action="{{ route('user.products') }}" method="GET">
+            <form class="d-flex" action="{{ route('user.products') }}" method="
+
+GET">
                 <input class="form-control me-2 search-input" 
                        type="search" 
                        name="search" 
@@ -17,17 +19,6 @@
                     <i class="bi bi-search"></i>
                 </button>
             </form>
-        </div>
-        <div class="col-md-6 text-end">
-            <div class="cart-container position-relative">
-                <a href="{{ route('user.cart') }}" class="btn btn-outline-dark cart-btn">
-                    <i class="bi bi-cart3"></i> Carrito
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        {{ session('cart') ? count(session('cart')) : 0 }}
-                        <span class="visually-hidden">items en carrito</span>
-                    </span>
-                </a>
-            </div>
         </div>
     </div>
 
@@ -111,11 +102,11 @@
     .search-input:focus {
         box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
     }
-    .search-btn, .cart-btn {
+    .search-btn {
         border-radius: 20px;
         transition: transform 0.2s ease-in-out;
     }
-    .search-btn:hover, .cart-btn:hover {
+    .search-btn:hover {
         transform: scale(1.05);
     }
     .sidebar {

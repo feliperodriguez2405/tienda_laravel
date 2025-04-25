@@ -34,7 +34,7 @@ Route::middleware(['auth'])->group(function () {
     // CRUD de productos
     Route::resource('productos', ProductoController::class);
 
-    // CRUD de categorías (como estaba originalmente)
+    // CRUD de categorías
     Route::get('categorias', [CategoriaController::class, 'index'])->name('categorias.index');
     Route::get('categorias/create', [CategoriaController::class, 'create'])->name('categorias.create');
     Route::post('categorias', [CategoriaController::class, 'store'])->name('categorias.store');
@@ -43,11 +43,23 @@ Route::middleware(['auth'])->group(function () {
     Route::put('categorias/{categoria}', [CategoriaController::class, 'update'])->name('categorias.update');
     Route::patch('categorias/{categoria}', [CategoriaController::class, 'update']);
     Route::delete('categorias/{categoria}', [CategoriaController::class, 'destroy'])->name('categorias.destroy');
+
+    // Rutas para reseñas
+    Route::get('/user/reviews', [UserController::class, 'reviews'])->name('user.reviews');
+    Route::post('/user/reviews', [UserController::class, 'storeReview'])->name('user.reviews.store');
+
+    // Rutas adicionales para usuarios
+    Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
+    Route::get('/user/products', [UserController::class, 'products'])->name('user.products');
+    Route::get('/user/orders', [UserController::class, 'orders'])->name('user.orders');
+    Route::get('/user/settings', [UserController::class, 'settings'])->name('user.settings');
+    Route::put('/user/settings', [UserController::class, 'updateSettings'])->name('user.settings.update');
+    Route::get('/user/orders/{orden}', [UserController::class, 'showOrder'])->name('user.orders.show');
+    Route::get('/user/profile', [UserController::class, 'profile'])->name('user.profile');
 });
 
 // Rutas para usuarios con rol "usuario"
 Route::middleware(['auth', 'role:usuario'])->group(function () {
-    Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
     Route::get('/user/cart', [UserController::class, 'cart'])->name('user.cart');
     Route::post('/user/cart/add/{producto}', [UserController::class, 'addToCart'])->name('user.cart.add');
     Route::post('/user/cart/remove/{producto}', [UserController::class, 'removeFromCart'])->name('user.cart.remove');
@@ -56,9 +68,14 @@ Route::middleware(['auth', 'role:usuario'])->group(function () {
 });
 
 // Rutas para el cajero
-Route::get('/cajero/dashboard', [CajeroController::class, 'dashboard'])
-    ->name('cajero.dashboard')
-    ->middleware(['auth', 'role:cajero']);
+Route::middleware(['auth', 'role:cajero'])->group(function () {
+    Route::get('/cajero/dashboard', [CajeroController::class, 'dashboard'])->name('cajero.dashboard');
+    Route::get('/cajero/sale', [CajeroController::class, 'sale'])->name('cajero.sale');
+    Route::post('/cajero/sale', [CajeroController::class, 'sale']);
+    Route::get('/cajero/transactions', [CajeroController::class, 'transactions'])->name('cajero.transactions');
+    Route::get('/cajero/close', [CajeroController::class, 'close'])->name('cajero.close');
+    Route::get('/cajero/payment/{orden_id}', [CajeroController::class, 'payment'])->name('cajero.payment');
+});
 
 // Rutas para administradores con rol "admin"
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
@@ -77,7 +94,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::put('/users/{user}', [AdminController::class, 'update'])->name('admin.users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('admin.users.destroy');
 
-    // Nuevas rutas para gestión de usuarios desde UserController
+    // Rutas para gestión de usuarios desde UserController
     Route::get('/gestion-usuarios', [UserController::class, 'index'])->name('admin.gestion-usuarios.index');
     Route::get('/gestion-usuarios/{user}/edit', [UserController::class, 'edit'])->name('admin.gestion-usuarios.edit');
     Route::put('/gestion-usuarios/{user}', [UserController::class, 'update'])->name('admin.gestion-usuarios.update');
@@ -123,26 +140,3 @@ Route::post('/register', [AuthController::class, 'register']);
 
 // Redirecciones según el rol
 Route::middleware(['auth', 'role:admin'])->get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-Route::middleware(['auth', 'role:usuario'])->get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
-
-// Rutas adicionales para usuarios autenticados
-Route::middleware(['auth'])->group(function () {
-    Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
-    Route::get('/user/products', [UserController::class, 'products'])->name('user.products');
-    Route::get('/user/orders', [UserController::class, 'orders'])->name('user.orders');
-    Route::get('/user/settings', [UserController::class, 'settings'])->name('user.settings');
-    Route::put('/user/settings', [UserController::class, 'updateSettings'])->name('user.settings.update');
-    Route::get('/user/orders/{orden}', [UserController::class, 'showOrder'])->name('user.orders.show');
-    Route::get('/user/profile', [UserController::class, 'profile'])->name('user.profile');
-});
-
-// Rutas adicionales para cajero
-Route::middleware(['auth', 'role:cajero'])->group(function () {
-    Route::get('/cajero/dashboard', [CajeroController::class, 'dashboard'])->name('cajero.dashboard');
-    Route::get('/cajero/sale', [CajeroController::class, 'sale'])->name('cajero.sale');
-    Route::post('/cajero/sale', [CajeroController::class, 'sale']); // Agregar POST para procesar la venta
-    Route::get('/cajero/transactions', [CajeroController::class, 'transactions'])->name('cajero.transactions');
-    Route::get('/cajero/close', [CajeroController::class, 'close'])->name('cajero.close');
-    // Rutas nuevas para el manejo de pagos
-    Route::get('/cajero/payment/{orden_id}', [CajeroController::class, 'payment'])->name('cajero.payment');
-});

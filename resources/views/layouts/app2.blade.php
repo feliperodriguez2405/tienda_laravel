@@ -83,6 +83,16 @@
             color: #dc3545 !important;
         }
 
+        /* Cart Button */
+        .cart-btn {
+            border-radius: 20px;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .cart-btn:hover {
+            transform: scale(1.05);
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .navbar-nav {
@@ -131,13 +141,27 @@
                             <i class="bi bi-basket me-1"></i>Mis Pedidos
                         </a>
                     </li>
-                    <!-- Aquí puedes agregar "Perfil" o "Configuración" según prefieras -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ route('user.reviews') }}">
+                            <i class="bi bi-star me-1"></i>Reseñas
+                        </a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('user.profile') }}">
                             <i class="bi bi-person me-1"></i>Perfil
                         </a>
                     </li>
-
+                    <li class="nav-item">
+                        <div class="cart-container position-relative">
+                            <a href="{{ route('user.cart') }}" class="nav-link cart-btn">
+                                <i class="bi bi-cart3 me-1"></i>Carrito
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ session('cart') ? count(session('cart')) : 0 }}
+                                    <span class="visually-hidden">items en carrito</span>
+                                </span>
+                            </a>
+                        </div>
+                    </li>
                     @auth
                         <li class="nav-item">
                             <a class="nav-link text-danger logout-link" 

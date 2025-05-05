@@ -7,9 +7,7 @@
     <!-- Barra superior con búsqueda -->
     <div class="row mb-4 align-items-center">
         <div class="col-md-6">
-            <form class="d-flex" action="{{ route('user.products') }}" method="
-
-GET">
+            <form class="d-flex" action="{{ route('user.products') }}" method="GET">
                 <input class="form-control me-2 search-input" 
                        type="search" 
                        name="search" 
@@ -54,7 +52,7 @@ GET">
             <div class="card main-card">
                 <div class="card-header bg-primary text-white d-flex align-items-center">
                     <i class="bi bi-house-door me-2"></i>
-                    <h5 class="mb-0">Bienvenido a Tu Supermercado</h5>
+                    <h5 class="mb-0">Bienvenido a D'jenny</h5>
                 </div>
                 <div class="card-body">
                     <p class="lead mb-4">Hola, <strong>{{ Auth::user()->name }}</strong>. Gestiona tus compras fácilmente desde aquí.</p>
@@ -86,8 +84,8 @@ GET">
                         </div>
                     </div>
 
-                    <hr>
-                    <p class="text-muted text-center mb-0">© {{ date('Y') }} Supermercado Ipiranga | Panel de Usuario</p>
+                    
+                    
                 </div>
             </div>
         </div>

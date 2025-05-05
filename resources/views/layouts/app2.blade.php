@@ -17,7 +17,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
+            background-color: #e0f7fa;
             font-family: 'Arial', sans-serif;
             min-height: 100vh;
             display: flex;
@@ -28,7 +28,7 @@
         .navbar {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 1rem 0;
-            background: linear-gradient(90deg, #343a40 0%, #495057 100%);
+            background: #006064;
         }
 
         .navbar-brand {
@@ -61,7 +61,7 @@
 
         /* Footer */
         footer {
-            background: linear-gradient(90deg, #343a40 0%, #495057 100%);
+            background: #006064;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
             padding: 1.5rem 0;
         }

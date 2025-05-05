@@ -1,4 +1,4 @@
-@extends('layouts.master')
+@extends('layouts.app3')
 @section('title', 'Transacciones')
 @section('content')
 <div class="container">

@@ -1,152 +1,88 @@
-@extends('layouts.welcome')
+@extends('layouts.form')
 
 @section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card register-card">
-                <div class="card-header">{{ __('Registrar') }}</div>
+<a href="{{ route('login') }}" class="back-arrow"><i class="bi bi-arrow-left"></i></a>
 
-                <div class="card-body">
-                    <form method="POST" action="{{ route('register') }}">
-                        @csrf
-
-                        <!-- Nombre -->
-                        <div class="row mb-3">
-                            <label for="name" class="col-md-4 col-form-label text-md-end">{{ __('Nombre') }}</label>
-                            <div class="col-md-6">
-                                <input id="name" 
-                                       type="text" 
-                                       class="form-control @error('name') is-invalid @enderror" 
-                                       name="name" 
-                                       value="{{ old('name') }}" 
-                                       required 
-                                       autocomplete="name" 
-                                       autofocus>
-                                @error('name')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Correo Electrónico -->
-                        <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Dirección de Correo Electrónico') }}</label>
-                            <div class="col-md-6">
-                                <input id="email" 
-                                       type="email" 
-                                       class="form-control @error('email') is-invalid @enderror" 
-                                       name="email" 
-                                       value="{{ old('email') }}" 
-                                       required 
-                                       autocomplete="email">
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Contraseña -->
-                        <div class="row mb-3">
-                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Contraseña') }}</label>
-                            <div class="col-md-6">
-                                <input id="password" 
-                                       type="password" 
-                                       class="form-control @error('password') is-invalid @enderror" 
-                                       name="password" 
-                                       required 
-                                       autocomplete="new-password">
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
-
-                        <!-- Confirmar Contraseña -->
-                        <div class="row mb-3">
-                            <label for="password-confirm" class="col-md-4 col-form-label text-md-end">{{ __('Confirmar Contraseña') }}</label>
-                            <div class="col-md-6">
-                                <input id="password-confirm" 
-                                       type="password" 
-                                       class="form-control" 
-                                       name="password_confirmation" 
-                                       required 
-                                       autocomplete="new-password">
-                            </div>
-                        </div>
-
-                        <!-- Botones -->
-                        <div class="row mb-0 d-flex justify-content-center">
-                            <div class="col-md-6 d-flex justify-content-center gap-3">
-                                <button type="submit" class="btn btn-primary register-btn">
-                                    {{ __('Registrar') }}
-                                </button>
-                                <a href="{{ route('login') }}" class="btn btn-link login-link">
-                                    {{ __('Iniciar Sesión') }}
-                                </a>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="login-header">
+    <img src="{{ asset('images/djenny.png') }}" alt="Logo de D'Jenny">
+    <h2>Crear Cuenta</h2>
 </div>
 
-<style>
-    /* Estilos mínimos con animaciones discretas */
-    .register-card {
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        transition: transform 0.2s ease-in-out;
-    }
+@if ($errors->any())
+    <div class="alert">
+        <ul class="mb-0" style="list-style: none; padding-left: 0;">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
 
-    .register-card:hover {
-        transform: translateY(-2px);
-    }
+<form method="POST" action="{{ route('register') }}">
+    @csrf
 
-    .card-header {
-        font-weight: 600;
-        text-align: center;
-        padding: 1rem;
-    }
+    <!-- Nombre -->
+    <div class="form-group">
+        <label for="name">Nombre</label>
+        <input id="name" 
+               type="text" 
+               class="form-control @error('name') is-invalid @enderror" 
+               name="name" 
+               value="{{ old('name') }}" 
+               placeholder="Ingresa tu nombre completo"
+               required 
+               autocomplete="name" 
+               autofocus>
+    </div>
 
-    .card-body {
-        padding: 1.5rem;
-    }
+    <!-- Correo Electrónico -->
+    <div class="form-group">
+        <label for="email">Correo Electrónico</label>
+        <input id="email" 
+               type="email" 
+               class="form-control @error('email') is-invalid @enderror" 
+               name="email" 
+               value="{{ old('email') }}" 
+               placeholder="ejemplo@correo.com"
+               required 
+               autocomplete="email">
+    </div>
 
-    .form-control {
-        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
+    <!-- Contraseña -->
+    <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input id="password" 
+               type="password" 
+               class="form-control @error('password') is-invalid @enderror" 
+               name="password" 
+               placeholder="Crea una contraseña segura"
+               required 
+               autocomplete="new-password">
+    </div>
 
-    .form-control:focus {
-        border-color: #80bdff;
-        box-shadow: 0 0 5px rgba(128, 189, 255, 0.5);
-    }
+    <!-- Confirmar Contraseña -->
+    <div class="form-group">
+        <label for="password-confirm">Confirmar Contraseña</label>
+        <input id="password-confirm" 
+               type="password" 
+               class="form-control" 
+               name="password_confirmation" 
+               placeholder="Repite tu contraseña"
+               required 
+               autocomplete="new-password">
+    </div>
 
-    .register-btn {
-        padding: 0.5rem 1.5rem;
-        transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
-    }
+    <!-- Botón -->
+    <div class="form-group">
+        <button type="submit" class="btn-submit">
+            Registrar
+        </button>
+    </div>
+</form>
 
-    .register-btn:hover {
-        transform: scale(1.02);
-    }
-
-    .login-link {
-        padding: 0.5rem;
-        transition: color 0.2s ease-in-out;
-    }
-
-    .login-link:hover {
-        color: #0056b3;
-        text-decoration: underline;
-    }
-</style>
+<!-- Caja con enlace para iniciar sesión -->
+<div class="register-box">
+    <span>¿Ya tienes una cuenta?</span>
+    <a href="{{ route('login') }}">Iniciar Sesión</a>
+</div>
 @endsection

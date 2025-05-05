@@ -18,7 +18,7 @@
 
     <style>
         body {
-            background-color: #f0f2f5;
+            background-color: #e0f7fa;
             font-family: 'Arial', sans-serif;
             min-height: 100vh;
             display: flex;
@@ -27,9 +27,8 @@
 
         /* Navbar */
         .navbar {
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             padding: 1rem 0;
-            background: linear-gradient(90deg, #343a40 0%, #495057 100%);
+            background: #006064;
         }
 
         .navbar-brand {
@@ -62,7 +61,7 @@
 
         /* Footer */
         footer {
-            background: linear-gradient(90deg, #343a40 0%, #495057 100%);
+            background: #006064;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
             padding: 1.5rem 0;
         }
@@ -118,11 +117,6 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('cajero.dashboard') }}">
-                            <i class="bi bi-house-door me-1"></i>Inicio
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="{{ route('cajero.sale') }}">
                             <i class="bi bi-cart-check me-1"></i>Registrar Venta
                         </a>
@@ -162,7 +156,7 @@
     <!-- Footer -->
     <footer class="text-white text-center py-3">
         <div class="container">
-            <p>© {{ date('Y') }} Supermercado Online - Panel de Cajero</p>
+            <p>© {{ date('Y') }} Tienda D'jenny - Panel de Cajero</p>
         </div>
     </footer>
 

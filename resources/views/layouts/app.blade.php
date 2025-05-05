@@ -15,7 +15,7 @@
 
     <style>
         body {
-            background-color: #f1f3f5;
+            background-color: #e0f7fa;
             font-family: 'Arial', sans-serif;
             min-height: 100vh;
             display: flex;
@@ -23,9 +23,8 @@
         }
 
         .navbar {
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
             padding: 1rem 0;
-            background: linear-gradient(90deg, #343a40 0%, #495057 100%);
+            background: #006064;
         }
 
         .navbar-brand {
@@ -63,7 +62,7 @@
         }
 
         footer {
-            background: linear-gradient(90deg, #343a40 0%, #495057 100%);
+            background: #006064;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.15);
             padding: 1.5rem 0;
             color: #ffffff;
@@ -93,7 +92,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ route('admin.dashboard') }}">
-                <i class="bi bi-gear-wide-connected me-2"></i>Admin - Supermercado
+                <i class="bi bi-gear-wide-connected me-2"></i>Panel de Administración
             </a>
             <button class="navbar-toggler" 
                     type="button" 
@@ -106,11 +105,6 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ route('admin.dashboard') }}">
-                            <i class="bi bi-speedometer2 me-1"></i>Dashboard
-                        </a>
-                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('productos.index') }}">
                             <i class="bi bi-box-seam me-1"></i>Productos
@@ -173,7 +167,7 @@
 
     <footer class="text-center py-3">
         <div class="container">
-            <p>© {{ date('Y') }} Supermercado Online - Panel de Administración</p>
+            <p>© {{ date('Y') }} Tienda D'jenny - Panel de Administración</p>
         </div>
     </footer>
 

@@ -5,7 +5,7 @@
 <!-- Barra de navegación -->
 @section('navbar')
     <a class="navbar-brand animate__animated animate__pulse" href="{{ route('admin.dashboard') }}">
-        <i class="bi bi-gear-wide-connected me-2"></i>Panel de Administración
+        <i class="bi bi-gear-wide-connected me-2"></i>Administración
     </a>
     <button class="navbar-toggler" 
             type="button" 

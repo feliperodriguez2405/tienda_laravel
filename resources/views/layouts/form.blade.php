@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>D'Jenny - Autenticación</title>
+
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #e0f7fa;
+            color: #263238;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .login-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 1.5rem 1rem;
+        }
+
+        .login-container {
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            padding: 2rem 1.8rem;
+            width: 100%;
+            max-width: 420px;
+            animation: fadeIn 0.5s ease;
+            position: relative;
+        }
+
+        .back-arrow {
+            position: absolute;
+            top: 0.8rem;
+            left: 1rem;
+            font-size: 1.6rem;
+            color: #0097a7 ;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .back-arrow:hover {
+            font-size: 1.8rem;
+            color: #004d40;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .login-header img {
+            width: 60px;
+            border-radius: 12px;
+            box-shadow: 0 0 0 4px #e0f7fa;
+        }
+
+        .login-header h2 {
+            margin-top: 1rem;
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #0097a7;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid #b0bec5;
+            border-radius: 8px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #00bcd4;
+            box-shadow: 0 0 6px rgba(0, 188, 212, 0.3);
+            outline: none;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 0.7rem;
+            background: linear-gradient(90deg, #00bcd4, #0097a7);
+            color: white;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            transform: scale(1.02);
+        }
+
+        .extra-links {
+            text-align: center;
+            margin-top: 0.8rem;
+        }
+
+        .extra-links a {
+            color: #0097a7;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s;
+        }
+
+        .extra-links a:hover {
+            color: #006064;
+        }
+
+        .register-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 1rem;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            font-size: 0.9rem;
+        }
+
+        .register-box a {
+            padding: 0.5rem 1.25rem;
+            background-color: #0077b6;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .register-box a:hover {
+            background-color: #005f8a;
+        }
+
+        .alert {
+            padding: 0.8rem;
+            border-radius: 8px;
+            background-color: #ffe0e0;
+            color: #b71c1c;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        footer.footer {
+            color: #004d40;
+            text-align: center;
+            padding: 0.8rem 0;
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 2rem 1.5rem;
+            }
+
+            .login-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .register-box {
+                flex-direction: column;
+            }
+
+            .register-box a {
+                width: 100%;
+                text-align: center;
+            }
+
+            .back-arrow {
+                top: 0.8rem;
+                left: 0.8rem;
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="login-wrapper" role="main" aria-label="Autenticación">
+        <section class="login-container">
+            @yield('content')
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>© 2025 Tienda D'Jenny. Todos los derechos reservados.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

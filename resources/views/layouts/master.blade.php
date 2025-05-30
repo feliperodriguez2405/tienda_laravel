@@ -179,43 +179,45 @@ footer a img:hover {
     </main>
     
         <!-- Footer -->
-<footer class="bg-dark text-white pt-4">
+<footer class="footer text-white pt-5 pb-4" style="background: linear-gradient(90deg, #006064, #263238); border-radius: 10px 10px 0 0;">
     <div class="container">
-        <div class="row align-items-center">
+        <div class="row">
             <!-- Redes Sociales -->
-            <div class="col-md-6 mb-4 mb-md-0 text-center text-md-start">
-                <h5 class="mb-3">Síguenos</h5>
-                <div class="d-flex justify-content-center justify-content-md-start gap-3">
-                    <a href="https://facebook.com" target="_blank" class="text-white" title="Facebook">
-                        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook" width="28" height="28" style="filter: invert(1);">
+            <div class="col-md-6 mb-4 mb-md-0">
+                <h5 class="mb-3 text-uppercase fw-bold">Síguenos</h5>
+                <div class="d-flex gap-3">
+                    <a href="https://wa.me/1234567890" target="_blank" class="d-inline-block" title="WhatsApp">
+                        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg" alt="WhatsApp" width="28" height="28" style="filter: invert(1); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
                     </a>
-                    <a href="https://instagram.com" target="_blank" class="text-white" title="Instagram">
-                        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram" width="28" height="28" style="filter: invert(1);">
+                    <a href="https://www.facebook.com/profile.php?id=61560973980821" target="_blank" class="d-inline-block" title="Facebook">
+                        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook" width="28" height="28" style="filter: invert(1); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
                     </a>
-                    <a href="https://twitter.com" target="_blank" class="text-white" title="Twitter">
-                        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/x.svg" alt="Twitter" width="28" height="28" style="filter: invert(1);">
-                    </a>
-                    <a href="https://wa.me/1234567890" target="_blank" class="text-white" title="WhatsApp">
-                        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg" alt="WhatsApp" width="28" height="28" style="filter: invert(1);">
+                    <a href="https://www.instagram.com/alphasoft.5/" target="_blank" class="d-inline-block" title="Instagram">
+                        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram" width="28" height="28" style="filter: invert(1); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
                     </a>
                 </div>
             </div>
 
-            <!-- Mapa -->
-            <div class="col-md-6 text-center text-md-end">
-                <h5 class="mb-3">encuentranos</h5>
-                <p>Direccion: Carrera 36A #2e-57 Neiva-Huila</p>
-                <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3984.617385749955!2d-75.26511422502979!3d2.925829097050505!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMsKwNTUnMzMuMCJOIDc1wrAxNSc0NS4xIlc!5e0!3m2!1ses!2sco!4v1748389528042!5m2!1ses!2sco" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            <!-- Información y Mapa -->
+            <div class="col-md-6 text-md-end mt-4 mt-md-0">
+                <h5 class="mb-2 text-uppercase fw-bold">Encuéntranos</h5>
+                <a href="https://www.google.com/maps?q=Carrera+36A+%232e-57+Neiva-Huila" 
+           target="_blank" 
+           class="text-white text-decoration-underline"
+           style="font-weight: 500;">
+            Carrera 36A #2e-57 Neiva-Huila
+        </a>
             </div>
         </div>
 
         <!-- Línea inferior -->
         <hr class="my-4 border-light opacity-25">
-        <div class="text-center pb-2">
+        <div class="text-center small">
             @yield('footer')
         </div>
     </div>
 </footer>
+
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

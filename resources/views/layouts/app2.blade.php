@@ -74,7 +74,7 @@
 <!-- Footer -->
 @section('footer')
     <div class="container">
-        <p class="mb-4">© {{ date('Y') }} D'jenny</p>
+        <p class="mb-4">&copy; {{ date('Y') }} D'jenny - Todos los derechos reservados.</p>
     </div>
 @endsection
 

@@ -43,6 +43,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('categorias/{categoria}', [CategoriaController::class, 'update'])->name('categorias.update');
     Route::patch('categorias/{categoria}', [CategoriaController::class, 'update']);
     Route::delete('categorias/{categoria}', [CategoriaController::class, 'destroy'])->name('categorias.destroy');
+    Route::post('categorias/check-name', [App\Http\Controllers\CategoriaController::class, 'checkName'])->name('categorias.checkName');
 });
 
 // Rutas para usuarios con rol "usuario"
@@ -115,9 +116,12 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
 });
 
 // Rutas para administradores con rol "admin" y permiso "administrar categorías"
-Route::middleware(['auth', 'role:admin', 'permission:administrar categorías'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/categories', [AdminController::class, 'categories'])->name('admin.categories');
 });
+
+// Rutas para administradores con rol "admin" con rutas de informes
+
 
 // Rutas de autenticación personalizadas
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');

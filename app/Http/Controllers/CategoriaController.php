@@ -7,9 +7,23 @@ use App\Models\Categoria;
 
 class CategoriaController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $categorias = Categoria::all();
+        $query = Categoria::query();
+
+        // Filtro por nombre
+        if ($request->filled('nombre')) {
+            $query->where('nombre', 'like', '%' . $request->nombre . '%');
+        }
+
+        // Filtro por estado
+        if ($request->filled('estado')) {
+            $query->where('estado', $request->estado);
+        }
+
+        // Paginación: 10 categorías por página
+        $categorias = $query->paginate(10);
+
         return view('categorias.index', compact('categorias'));
     }
 
@@ -39,16 +53,36 @@ class CategoriaController extends Controller
 
     public function destroy(Categoria $categoria)
     {
+        // Check if the category has associated products
+        if ($categoria->productos()->count() > 0) {
+            return redirect()->route('categorias.index')->with('error', 'No se puede eliminar, tiene productos asociados.');
+        }
+
         $categoria->delete();
         return redirect()->route('categorias.index')->with('success', 'Categoría eliminada');
     }
 
     public function store(Request $request)
     {
-        $request->validate(['nombre' => 'required|string|max:255']);
+        $request->validate([
+            'nombre' => 'required|string|max:50|unique:categorias,nombre',
+            'descripcion' => 'nullable|string',
+            'estado' => 'required|in:activo,inactivo'
+        ]);
 
         Categoria::create($request->all());
 
-        return redirect()->route('categorias.index')->with('success', 'Categoría creada');
+        return redirect()->route('categorias.index')->with('success', '¡Categoría creada!');
+    }
+
+    public function checkName(Request $request)
+    {
+        $nombre = $request->input('nombre');
+        $exists = Categoria::where('nombre', $nombre)->exists();
+
+        return response()->json([
+            'exists' => $exists,
+            'message' => $exists ? 'Error: El nombre ya está en uso' : ''
+        ]);
     }
 }

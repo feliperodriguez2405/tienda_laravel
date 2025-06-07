@@ -11,6 +11,38 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    <!-- Added search form for filtering by client name, order ID, and status -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.pedidos') }}" class="row g-3">
+                <div class="col-md-3">
+                    <label for="client_name" class="form-label">Nombre del Cliente</label>
+                    <input type="text" name="client_name" id="client_name" class="form-control" value="{{ request('client_name') }}" placeholder="Buscar por nombre">
+                </div>
+                <div class="col-md-3">
+                    <label for="order_id" class="form-label">ID del Pedido</label>
+                    <input type="number" name="order_id" id="order_id" class="form-control" value="{{ request('order_id') }}" placeholder="Buscar por ID">
+                </div>
+                <div class="col-md-3">
+                    <label for="status" class="form-label">Estado</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">Todos los estados</option>
+                        <option value="pendiente" {{ request('status') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
+                        <option value="procesando" {{ request('status') == 'procesando' ? 'selected' : '' }}>Procesando</option>
+                        <option value="enviado" {{ request('status') == 'enviado' ? 'selected' : '' }}>Enviado</option>
+                        <option value="entregado" {{ request('status') == 'entregado' ? 'selected' : '' }}>Entregado</option>
+                        <option value="cancelado" {{ request('status') == 'cancelado' ? 'selected' : '' }}>Cancelado</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                    <a href="{{ route('admin.pedidos') }}" class="btn btn-secondary">Limpiar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- End of search form -->
+
     <div class="card shadow-sm">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">Lista de Pedidos</h5>
@@ -99,6 +131,12 @@
             @endif
         </div>
     </div>
+
+    <!-- Added pagination links -->
+    <div class="mt-3">
+        {{ $ordenes->appends(request()->query())->links('pagination::bootstrap-5') }}
+    </div>
+    <!-- End of pagination links -->
 </div>
 
 <style>

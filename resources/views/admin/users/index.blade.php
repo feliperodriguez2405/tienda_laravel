@@ -27,6 +27,36 @@
         </div>
     @endif
 
+    <!-- Added search form for filtering by name, email, and role -->
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+            <form method="GET" action="{{ route('admin.users.index') }}" class="row g-3">
+                <div class="col-md-3">
+                    <label for="name" class="form-label">Nombre</label>
+                    <input type="text" name="name" id="name" class="form-control" value="{{ request('name') }}" placeholder="Buscar por nombre">
+                </div>
+                <div class="col-md-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" name="email" id="email" class="form-control" value="{{ request('email') }}" placeholder="Buscar por email">
+                </div>
+                <div class="col-md-3">
+                    <label for="role" class="form-label">Rol</label>
+                    <select name="role" id="role" class="form-select">
+                        <option value="">Todos los roles</option>
+                        <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                        <option value="cajero" {{ request('role') == 'cajero' ? 'selected' : '' }}>Cajero</option>
+                        <option value="usuario" {{ request('role') == 'usuario' ? 'selected' : '' }}>Usuario</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                    <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Limpiar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- End of search form -->
+
     <div class="card shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -74,6 +104,12 @@
             </div>
         </div>
     </div>
+
+    <!-- Added pagination links -->
+    <div class="mt-3">
+        {{ $users->appends(request()->query())->links('pagination::bootstrap-5') }}
+    </div>
+    <!-- End of pagination links -->
 </div>
 
 <style>

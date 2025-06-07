@@ -19,9 +19,31 @@ class AdminController extends Controller
     /**
      * Display a listing of users.
      */
-    public function usersIndex()
+    public function usersIndex(Request $request)
     {
-        $users = User::all();
+        // Initialize query builder for users
+        $query = User::query();
+
+        // Apply search filters if provided
+        if ($request->filled('name')) {
+            // Filter by name (case-insensitive, partial match)
+            $query->where('name', 'like', '%' . $request->input('name') . '%');
+        }
+
+        if ($request->filled('email')) {
+            // Filter by email (case-insensitive, partial match)
+            $query->where('email', 'like', '%' . $request->input('email') . '%');
+        }
+
+        if ($request->filled('role')) {
+            // Filter by role (exact match)
+            $query->where('role', $request->input('role'));
+        }
+
+        // Paginate results, 10 per page
+        $users = $query->paginate(10);
+
+        // Pass the filtered and paginated users to the view
         return view('admin.users.index', compact('users'));
     }
 
@@ -116,9 +138,33 @@ class AdminController extends Controller
     /**
      * Display a listing of orders.
      */
-    public function pedidos()
+    public function pedidos(Request $request)
     {
-        $ordenes = Orden::with(['detalles.producto', 'user'])->latest()->get();
+        // Initialize query builder for orders with related user and details
+        $query = Orden::with(['detalles.producto', 'user']);
+
+        // Apply search filters if provided
+        if ($request->filled('client_name')) {
+            // Filter by client name (case-insensitive, partial match)
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->input('client_name') . '%');
+            });
+        }
+
+        if ($request->filled('order_id')) {
+            // Filter by order ID (exact match)
+            $query->where('id', $request->input('order_id'));
+        }
+
+        if ($request->filled('status')) {
+            // Filter by status (exact match)
+            $query->where('estado', $request->input('status'));
+        }
+
+        // Paginate results, 10 per page, and order by latest
+        $ordenes = $query->latest()->paginate(10);
+
+        // Pass the filtered and paginated orders to the view
         return view('admin.pedidos', compact('ordenes'));
     }
 

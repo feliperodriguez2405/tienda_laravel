@@ -110,11 +110,12 @@
                 <!-- Imagen -->
                 <div class="col-md-6 mb-2">
                     <label for="imagen" class="form-label fw-medium small">Imagen</label>
-                    <input type="file" 
-                           name="imagen" 
-                           id="imagen" 
-                           class="form-control form-control-sm @error('imagen') is-invalid @enderror" 
-                           accept="image/*">
+                <input type="file" 
+                    name="imagen" 
+                    id="imagen" 
+                    class="form-control form-control-sm @error('imagen') is-invalid @enderror" 
+                    accept="image/jpeg,image/png,image/jpg,image/gif">
+
                     <small class="text-muted" style="font-size: 0.75rem;">JPEG, PNG, JPG, GIF (Máx 2MB)</small>
                     @error('imagen')
                         <div class="invalid-feedback small">{{ $message }}</div>

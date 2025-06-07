@@ -15,6 +15,22 @@
         </div>
     </div>
 
+    <!-- Mensaje de éxito -->
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    <!-- Mensaje de error -->
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <!-- Filtros y búsqueda -->
     <div class="card mb-4 shadow-sm">
         <div class="card-body">
@@ -53,8 +69,15 @@
         </div>
     </div>
 
+    <!-- Depuración: Mostrar número de productos -->
+    @if (isset($productos))
+        <div class="text-muted mb-2">
+            Mostrando {{ $productos->count() }} de {{ $productos->total() }} productos ({{ $productos->perPage() }} por página)
+        </div>
+    @endif
+
     <!-- Lista de productos -->
-    @if ($productos->isEmpty())
+    @if (!isset($productos) || $productos->isEmpty())
         <div class="alert alert-warning text-center shadow-sm">
             <i class="bi bi-exclamation-triangle me-2"></i>
             <strong>No hay productos disponibles con los filtros aplicados.</strong>
@@ -65,7 +88,7 @@
                 <div class="col-md-4 mb-4">
                     <div class="card product-card shadow-lg border-0 h-100">
                         <div class="position-relative">
-                            <img src="{{ $producto->imagen ? asset('storage/'.$producto->imagen) : asset('images/placeholder.png') }}" 
+                            <img src="{{ $producto->imagen ? asset('storage/' . $producto->imagen) : asset('images/placeholder.png') }}" 
                                  class="card-img-top" 
                                  alt="{{ $producto->nombre }}" 
                                  style="height: 200px; object-fit: cover;">
@@ -77,7 +100,7 @@
                         </div>
                         <div class="card-body text-center d-flex flex-column justify-content-between">
                             <div>
-                                <h5 class="card-title text-dark fw-bold mb-2">{{ Str::limit($producto->nombre, 20) }}</h5>
+                                <h5 class="card-title text-dark fw-bold mb-2">{{ \Illuminate\Support\Str::limit($producto->nombre, 20) }}</h5>
                                 <p class="card-text text-success fw-bold mb-1">${{ number_format($producto->precio, 2) }}</p>
                                 <p class="card-text text-secondary mb-3">
                                     Stock: <span class="{{ $producto->stock <= 10 ? 'text-danger' : 'text-dark' }}">{{ $producto->stock }}</span>
@@ -101,7 +124,7 @@
                                     <button type="submit" 
                                             class="btn btn-danger btn-sm" 
                                             title="Eliminar" 
-                                            onclick="return confirm('¿Estás seguro de eliminar {{ $producto->nombre }}?')">
+                                            onclick="return confirm('¿Estás seguro de eliminar {{ addslashes($producto->nombre) }}?')">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
@@ -114,7 +137,7 @@
 
         <!-- Paginación -->
         <div class="d-flex justify-content-center mt-4">
-            {{ $productos->links() }}
+            {{ $productos->appends(request()->query())->links('pagination::bootstrap-5') }}
         </div>
     @endif
 </div>

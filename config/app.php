@@ -98,6 +98,7 @@ return [
 
     'fallback_locale' => 'en',
 
+    'pagination' => 'bootstrap-5', // 'bootstrap-4', 'tailwind', 'tailwind-2', 'tailwind-3'
     /*
     |--------------------------------------------------------------------------
     | Faker Locale

@@ -23,6 +23,42 @@
         </div>
     @endif
 
+    <!-- Mensaje de error -->
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    <!-- Formulario de búsqueda y filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form action="{{ route('categorias.index') }}" method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label for="nombre" class="form-label">Nombre</label>
+                    <input type="text" name="nombre" id="nombre" class="form-control" placeholder="Buscar por nombre" value="{{ request('nombre') }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select name="estado" id="estado" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="activo" {{ request('estado') === 'activo' ? 'selected' : '' }}>Activo</option>
+                        <option value="inactivo" {{ request('estado') === 'inactivo' ? 'selected' : '' }}>Inactivo</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                    <a href="{{ route('categorias.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-undo"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Tabla de categorías -->
     <div class="card shadow-sm">
         <div class="card-body p-0">
@@ -77,7 +113,10 @@
         </div>
     </div>
 
-
+    <!-- Paginación -->
+    <div class="mt-4">
+        {{ $categorias->appends(request()->query())->links('pagination::bootstrap-5') }}
+    </div>
 
 <style>
     .card {
@@ -120,6 +159,15 @@
     }
     .btn-success:hover {
         background-color: #218838;
+    }
+    .form-control, .form-select {
+        border-radius: 0.375rem;
+    }
+    .btn-primary {
+        transition: all 0.2s ease-in-out;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
     }
 </style>
 

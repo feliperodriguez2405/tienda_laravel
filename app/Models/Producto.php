@@ -22,4 +22,5 @@ class Producto extends Model
     {
         return $this->hasMany(DetalleOrden::class, 'producto_id');
     }
+    
 }

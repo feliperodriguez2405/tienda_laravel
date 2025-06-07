@@ -16,7 +16,8 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth')->except(['index', 'edit', 'update', 'destroy']);
+        // Removed middleware exceptions for index, edit, update, destroy as they are now handled by AdminController
+        $this->middleware('auth');
     }
 
     public function dashboard(Request $request)
@@ -237,40 +238,5 @@ class UserController extends Controller
     {
         $user = auth()->user();
         return view('users.user', compact('user'));
-    }
-
-    public function index()
-    {
-        $this->authorize('viewAny', User::class);
-        $users = User::all();
-        return view('users.index', compact('users'));
-    }
-
-    public function edit(User $user)
-    {
-        $this->authorize('update', $user);
-        $roles = ['usuario', 'cajero', 'admin'];
-        return view('users.edit', compact('user', 'roles'));
-    }
-
-    public function update(Request $request, User $user)
-    {
-        $this->authorize('update', $user);
-        $request->validate([
-            'role' => 'required|in:usuario,cajero,admin',
-        ]);
-
-        $user->update([
-            'role' => $request->role,
-        ]);
-
-        return redirect()->route('users.index')->with('success', 'Rol actualizado correctamente.');
-    }
-
-    public function destroy(User $user)
-    {
-        $this->authorize('delete', $user);
-        $user->delete();
-        return redirect()->route('users.index')->with('success', 'Usuario eliminado correctamente.');
     }
 }

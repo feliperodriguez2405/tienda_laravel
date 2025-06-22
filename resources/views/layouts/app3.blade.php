@@ -50,7 +50,6 @@
 @endsection
 
 <!-- Footer -->
- 
 @section('footer')
 <div class="text-center">
     <p class="mb-4">© {{ date('Y') }} Supermercado Online - Panel de Cajero</p>

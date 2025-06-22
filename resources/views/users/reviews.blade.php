@@ -1,10 +1,10 @@
 @extends('layouts.app2')
 
-@section('title', 'Reseñas de Productos')
+@section('title', 'Reseñas')
 
 @section('content')
 <div class="container">
-    <h2 class="mb-4">Reseñas de Productos</h2>
+    <h2 class="mb-4">Reseñas</h2>
 
     <!-- Form to submit a new review -->
     <div class="card mb-4">

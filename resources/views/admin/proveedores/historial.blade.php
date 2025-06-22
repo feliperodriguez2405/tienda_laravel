@@ -6,8 +6,8 @@
 <div class="container py-5">
     <div class="row mb-5 align-items-center">
         <div class="col-md-6">
-            <h2 class="mb-1">Historial de Compras - {{ $proveedor->nombre }}</h2>
-            <p class="text-muted mb-0">Registro completo de tus órdenes (Estado: {{ ucfirst($proveedor->estado) }})</p>
+            <h2 class="mb-1 title-mode">Historial de Compras - {{ $proveedor->nombre }}</h2>
+            <p class="text-mode mb-0">Registro completo de tus órdenes (Estado: {{ ucfirst($proveedor->estado) }})</p>
         </div>
         <div class="col-md-6 text-end">
             <a href="{{ route('admin.proveedores.ordenes.create', $proveedor) }}" class="btn btn-primary me-2 shadow-sm">
@@ -42,11 +42,11 @@
                 <table class="table table-hover align-middle">
                     <thead class="bg-light">
                         <tr>
-                            <th class="py-3">Fecha</th>
-                            <th class="py-3">Estado</th>
-                            <th class="py-3">Detalles</th>
-                            <th class="py-3">Notificación</th>
-                            <th class="py-3">Acciones</th>
+                            <th class="py-3 text-dark">Fecha</th>
+                            <th class="py-3 text-dark">Estado</th>
+                            <th class="py-3 text-dark">Detalles</th>
+                            <th class="py-3 text-dark">Notificación</th>
+                            <th class="py-3 text-dark">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -151,6 +151,34 @@
         color: #212529 !important; /* Negro por defecto para buen contraste */
     }
 
+    /* Estilos por defecto (modo claro) */
+    .title-mode, .text-mode {
+        color: #212529; /* Negro en modo claro */
+    }
+
+    /* Estilos para modo oscuro */
+    body.dark-mode .title-mode, body.dark-mode .text-mode {
+        color: #ffffff; /* Blanco en modo oscuro */
+    }
+
+    /* Fondo para modo oscuro */
+    body.dark-mode {
+        background-color: #1a1a1a;
+    }
+    body.dark-mode .card {
+        background-color: #2c2c2c;
+        color: #ffffff;
+    }
+    body.dark-mode .table {
+        color: #ffffff;
+    }
+    body.dark-mode .text-muted {
+        color: #b0b0b0 !important;
+    }
+    body.dark-mode .bg-light {
+        background-color: #3a3a3a !important;
+    }
+
     /* Mejoras generales */
     .btn {
         transition: all 0.3s ease;
@@ -161,7 +189,9 @@
     }
     .table-hover tbody tr:hover {
         background-color: #f8f9fa;
-        transition: background-color 0.2s ease;
+    }
+    body.dark-mode .table-hover tbody tr:hover {
+        background-color: #3a3a3a;
     }
     .card {
         background-color: #ffffff;
@@ -176,4 +206,31 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 </style>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggleButton = document.getElementById('toggle-dark-mode');
+        const body = document.body;
+
+        // Cargar preferencia guardada
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            body.classList.add('dark-mode');
+            toggleButton.innerHTML = '<i class="bi bi-sun-fill"></i> Modo Claro';
+        }
+
+        // Alternar modo oscuro
+        toggleButton.addEventListener('click', function () {
+            body.classList.toggle('dark-mode');
+            if (body.classList.contains('dark-mode')) {
+                toggleButton.innerHTML = '<i class="bi bi-sun-fill"></i> Modo Claro';
+                localStorage.setItem('darkMode', 'enabled');
+            } else {
+                toggleButton.innerHTML = '<i class="bi bi-moon-stars-fill"></i> Modo Oscuro';
+                localStorage.setItem('darkMode', 'disabled');
+            }
+        });
+    });
+</script>
 @endsection

@@ -102,7 +102,7 @@
                 </div>
                 <div class="card-body text-center">
                     <h3 class="text-dark fw-bold animate__animated animate__pulse animate__infinite">{{ number_format($gananciaTotal, 0, ',', '.') }} COP</h3>
-                    <p class="text-muted">Ganancia total de ventas entregadas (Venta - Costo).</p>
+                    <p class="text-muted">Ganancia total de ventas entregadas (Precio de Venta - Precio de Compra).</p>
                 </div>
             </div>
         </div>

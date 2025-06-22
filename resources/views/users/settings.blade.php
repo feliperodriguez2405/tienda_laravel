@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container">
-    <h1 class="mb-4 text-center text-primary fw-bold">Configuración</h1>
+    <h1 class="mb-4 text-center fw-bold">Configuración</h1>
 
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -12,8 +12,8 @@
 
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
+            <div class="product-card shadow-sm">
+                <div class="card-header text-white">
                     <h5 class="mb-0">Actualizar Perfil</h5>
                 </div>
                 <div class="card-body">
@@ -58,7 +58,7 @@
                         </div>
 
                         <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit">
                                 <i class="bi bi-save me-1"></i> Guardar Cambios
                             </button>
                         </div>

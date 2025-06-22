@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container">
-    <h1 class="mb-4 text-center text-primary fw-bold">Carrito de Compras</h1>
+    <h1 class="mb-4 text-center fw-bold">Carrito de Compras</h1>
 
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>

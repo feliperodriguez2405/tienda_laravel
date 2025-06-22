@@ -10,7 +10,6 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 
-
 class ProductoController extends Controller
 {
     public function index(Request $request)
@@ -38,7 +37,7 @@ class ProductoController extends Controller
                 }
             }
 
-            $productos = $query->paginate(9); // Changed to 9 products per page
+            $productos = $query->paginate(9);
             Log::info('Productos paginated', ['count' => $productos->count(), 'total' => $productos->total(), 'per_page' => $productos->perPage()]);
 
             $categorias = Categoria::all();
@@ -57,48 +56,50 @@ class ProductoController extends Controller
         return view('productos.create', compact('categorias'));
     }
 
-   public function store(Request $request)
-{
-    $request->validate([
-        'nombre' => [
-            'required',
-            'string',
-            'max:255',
-            Rule::unique('productos', 'nombre'),
-        ],
-        'descripcion' => 'required|string',
-        'precio' => 'required|numeric|min:0',
-        'precio_compra' => 'nullable|numeric|min:0',
-        'stock' => 'required|integer|min:0',
-        'categoria_id' => 'required|exists:categorias,id',
-        'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-    ], [
-        'nombre.unique' => 'El nombre ya está en uso.',
-        'nombre.required' => 'El nombre es obligatorio.',
-        'precio.required' => 'El precio es obligatorio.',
-        'stock.required' => 'El stock es obligatorio.',
-        'categoria_id.required' => 'La categoría es obligatoria.',
-        'descripcion.required' => 'La descripción es obligatoria.',
-        'imagen.image' => 'La imagen debe ser un archivo de imagen válido.',
-        'imagen.max' => 'La imagen no debe superar los 2MB.',
-    ]);
-    $rutaImagen = null;
-    if ($request->hasFile('imagen')) {
-        $rutaImagen = $request->file('imagen')->store('productos', 'public');
-    }
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nombre' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('productos', 'nombre'),
+            ],
+            'descripcion' => 'required|string',
+            'precio' => 'required|numeric|min:0',
+            'precio_compra' => 'nullable|numeric|min:0',
+            'stock' => 'required|integer|min:0',
+            'categoria_id' => 'required|exists:categorias,id',
+            'imagen' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'nombre.unique' => 'El nombre ya está en uso.',
+            'nombre.required' => 'El nombre es obligatorio.',
+            'precio.required' => 'El precio es obligatorio.',
+            'precio_compra.numeric' => 'El precio de compra debe ser un número.',
+            'stock.required' => 'El stock es obligatorio.',
+            'categoria_id.required' => 'La categoría es obligatoria.',
+            'descripcion.required' => 'La descripción es obligatoria.',
+            'imagen.image' => 'La imagen debe ser un archivo de imagen válido.',
+            'imagen.max' => 'La imagen no debe superar los 2MB.',
+        ]);
 
-    Producto::create([
-        'nombre' => $request->nombre,
-        'descripcion' => $request->descripcion,
-        'precio' => $request->precio,
-        'precio_compra' => $request->precio_compra,
-        'stock' => $request->stock,
-        'categoria_id' => $request->categoria_id,
-        'imagen' => $rutaImagen,
-    ]);
+        $rutaImagen = null;
+        if ($request->hasFile('imagen')) {
+            $rutaImagen = $request->file('imagen')->store('productos', 'public');
+        }
+
+        Producto::create([
+            'nombre' => $request->nombre,
+            'descripcion' => $request->descripcion,
+            'precio' => $request->precio,
+            'precio_compra' => $request->precio_compra,
+            'stock' => $request->stock,
+            'categoria_id' => $request->categoria_id,
+            'imagen' => $rutaImagen,
+        ]);
 
         return redirect()->route('productos.index')->with('success', 'Producto agregado correctamente.');
-}
+    }
 
     public function show(Producto $producto)
     {
@@ -139,10 +140,17 @@ class ProductoController extends Controller
 
     public function destroy(Producto $producto)
     {
+        // Verificar si el producto tiene pedidos asociados
+        if ($producto->detallesOrdenes()->exists()) {
+            return redirect()->route('productos.index')->with('error', 'No se puede eliminar, tiene pedidos asociados.');
+        }
+
+        // Eliminar la imagen si existe
         if ($producto->imagen) {
             Storage::delete('public/' . $producto->imagen);
         }
 
+        // Eliminar el producto
         $producto->delete();
         return redirect()->route('productos.index')->with('success', 'Producto eliminado correctamente.');
     }

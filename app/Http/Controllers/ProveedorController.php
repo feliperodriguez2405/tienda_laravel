@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\{OrdenCompra, Proveedor, Producto};
+use App\Models\{OrdenCompra, Proveedor, Producto, Categoria};
 use App\Notifications\OrdenCompraNotification;
-use Illuminate\Support\Facades\{Log, DB};
+use Illuminate\Support\Facades\{Log, DB, Storage};
 
 class ProveedorController extends Controller
 {
@@ -23,7 +23,8 @@ class ProveedorController extends Controller
      */
     public function create()
     {
-        return view('admin.proveedores.create');
+        $categorias = Categoria::all(); // Cargar todas las categorías
+        return view('admin.proveedores.create', compact('categorias'));
     }
 
     /**
@@ -32,6 +33,13 @@ class ProveedorController extends Controller
     public function store(Request $request)
     {
         $data = $this->validateProveedor($request);
+
+        // Manejar nueva categoría
+        if ($request->categoria_id === 'new' && $request->new_category_name) {
+            $categoria = Categoria::create(['nombre' => $request->new_category_name]);
+            $data['categoria_id'] = $categoria->id;
+        }
+
         Proveedor::create($data);
         return redirect()->route('proveedores.index')->with('success', 'Proveedor registrado correctamente.');
     }
@@ -41,7 +49,8 @@ class ProveedorController extends Controller
      */
     public function edit(Proveedor $proveedor)
     {
-        return view('admin.proveedores.edit', compact('proveedor'));
+        $categorias = Categoria::all(); // Cargar categorías para el formulario de edición
+        return view('admin.proveedores.edit', compact('proveedor', 'categorias'));
     }
 
     /**
@@ -50,6 +59,13 @@ class ProveedorController extends Controller
     public function update(Request $request, Proveedor $proveedor)
     {
         $data = $this->validateProveedor($request, $proveedor->id);
+
+        // Manejar nueva categoría
+        if ($request->categoria_id === 'new' && $request->new_category_name) {
+            $categoria = Categoria::create(['nombre' => $request->new_category_name]);
+            $data['categoria_id'] = $categoria->id;
+        }
+
         $proveedor->update($data);
         return redirect()->route('proveedores.index')->with('success', 'Proveedor actualizado correctamente.');
     }
@@ -140,7 +156,8 @@ class ProveedorController extends Controller
         }
 
         $productos = Producto::all();
-        return view('admin.proveedores.orden_show', compact('proveedor', 'orden', 'productos'));
+        $categorias = Categoria::all(); // Cargar categorías para el modal
+        return view('admin.proveedores.orden_show', compact('proveedor', 'orden', 'productos', 'categorias'));
     }
 
     /**
@@ -265,7 +282,7 @@ class ProveedorController extends Controller
      */
     private function validateProveedor(Request $request, $id = null): array
     {
-        $data = $request->validate([
+        $rules = [
             'nombre' => 'required|string|max:255',
             'telefono' => 'nullable|string|max:20',
             'email' => "nullable|email|unique:proveedores,email,{$id}",
@@ -275,7 +292,11 @@ class ProveedorController extends Controller
             'fecha_vencimiento_contrato' => 'nullable|date',
             'recibir_notificaciones' => 'nullable|boolean',
             'estado' => 'nullable|in:activo,inactivo',
-        ]);
+            'categoria_id' => 'nullable|exists:categorias,id',
+            'new_category_name' => 'nullable|string|max:255|required_if:categoria_id,new',
+        ];
+
+        $data = $request->validate($rules);
 
         // Convert productos_suministrados string to array
         if ($data['productos_suministrados']) {
@@ -335,7 +356,7 @@ class ProveedorController extends Controller
         } catch (\Exception $e) {
             Log::error('Error enviando notificación de orden de compra: ' . $e->getMessage());
             return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-                ->with('warning', 'Orden registrada, pero hubo un problema al enviar el correo: ' . $e->getMessage());
+                ->with('warning', 'Orden registrada, pero un problema al enviar el correo: ' . $e->getMessage());
         }
     }
 }

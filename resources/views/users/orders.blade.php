@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container">
-    <h1 class="mb-4 text-center text-primary fw-bold">Mis Ordenes</h1>
+    <h1 class="mb-4 text-center fw-bold">Mis Ordenes</h1>
 
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -51,8 +51,8 @@
     @endif
 
     <div class="mt-4">
-        <a href="{{ route('user.dashboard') }}" class="btn btn-secondary">
-            <i class="bi bi-arrow-left"></i> Volver al Dashboard
+        <a href="{{ route('user.dashboard') }}" class="btn btn-success">
+            <i class="bi bi-arrow-left"></i> Volver al Inicio
         </a>
     </div>
 
@@ -86,7 +86,7 @@
                         </table>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>

@@ -1,24 +1,38 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Models\Producto;
+   use Illuminate\Support\Facades\Route;
+   use App\Http\Controllers\Api\AuthController;
+   use App\Http\Controllers\Api\ProductoController;
+   use App\Http\Controllers\Api\ReporteController;
+   use App\Http\Controllers\Api\CajeroController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+   Route::post('/register', [AuthController::class, 'register']);
+   Route::post('/login', [AuthController::class, 'login']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-Route::get('/productos/{id}/stock', function ($id) {
-    $producto = Producto::findOrFail($id);
-    return response()->json(['stock' => $producto->stock]);
-})->middleware('auth');
+   Route::middleware('auth:sanctum')->group(function () {
+       Route::get('/user', [AuthController::class, 'user']);
+       Route::post('/logout', [AuthController::class, 'logout']);
+
+       // User routes (view products)
+       Route::middleware('role:usuario')->group(function () {
+           Route::get('/productos', [ProductoController::class, 'index']);
+           Route::get('/productos/{id}', [ProductoController::class, 'show']);
+       });
+
+       // Cashier routes (transactions and cash register closure)
+       Route::middleware('role:cajero')->prefix('cajero')->group(function () {
+           Route::post('/sale', [CajeroController::class, 'sale']);
+           Route::get('/transactions', [CajeroController::class, 'transactions']);
+           Route::post('/close', [CajeroController::class, 'close']);
+       });
+
+       // Admin routes (reports)
+       Route::middleware('role:admin')->prefix('admin')->group(function () {
+           Route::get('/reportes', [ReporteController::class, 'index']);
+       });
+   });
+
+   // Role middleware
+   Route::middleware('auth:sanctum')->get('/check-role', function () {
+       return response()->json(['role' => auth()->user()->role]);
+   });

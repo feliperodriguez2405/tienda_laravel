@@ -63,8 +63,23 @@
                            step="0.01" 
                            value="{{ old('precio') }}" 
                            required 
-                           placeholder="Ej: 12.50">
+                           placeholder="Ej: 12.34">
                     @error('precio')
+                        <div class="invalid-feedback small">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Precio Compra -->
+                <div class="col-md-3 mb-2">
+                    <label for="precio_compra" class="form-label fw-medium small">Precio Compra ($)</label>
+                    <input type="number" 
+                           name="precio_compra" 
+                           id="precio_compra" 
+                           class="form-control form-control-sm @error('precio_compra') is-invalid @enderror" 
+                           step="0.01" 
+                           value="{{ old('precio_compra') }}" 
+                           placeholder="Ej: 10.00">
+                    @error('precio_compra')
                         <div class="invalid-feedback small">{{ $message }}</div>
                     @enderror
                 </div>
@@ -80,6 +95,21 @@
                            required 
                            placeholder="Ej: 100">
                     @error('stock')
+                        <div class="invalid-feedback small">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Estado -->
+                <div class="col-md-3 mb-2">
+                    <label for="estado" class="form-label fw-medium small">Estado</label>
+                    <select name="estado" 
+                            id="estado" 
+                            class="form-select form-select-sm @error('estado') is-invalid @enderror" 
+                            required>
+                        <option value="activo" {{ old('estado', 'activo') == 'activo' ? 'selected' : '' }}>Activo</option>
+                        <option value="inactivo" {{ old('estado', 'activo') == 'inactivo' ? 'selected' : '' }}>Inactivo</option>
+                    </select>
+                    @error('estado')
                         <div class="invalid-feedback small">{{ $message }}</div>
                     @enderror
                 </div>
@@ -110,12 +140,11 @@
                 <!-- Imagen -->
                 <div class="col-md-6 mb-2">
                     <label for="imagen" class="form-label fw-medium small">Imagen</label>
-                <input type="file" 
-                    name="imagen" 
-                    id="imagen" 
-                    class="form-control form-control-sm @error('imagen') is-invalid @enderror" 
-                    accept="image/jpeg,image/png,image/jpg,image/gif">
-
+                    <input type="file" 
+                           name="imagen" 
+                           id="imagen" 
+                           class="form-control form-control-sm @error('imagen') is-invalid @enderror" 
+                           accept="image/jpeg,image/png,image/jpg,image/gif">
                     <small class="text-muted" style="font-size: 0.75rem;">JPEG, PNG, JPG, GIF (Máx 2MB)</small>
                     @error('imagen')
                         <div class="invalid-feedback small">{{ $message }}</div>
@@ -182,9 +211,7 @@
     }
 
     .alert-sm {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-        border-radius: 6px;
+        padding: 0.5rem 0.0rem;
     }
 
     .alert-sm ul {

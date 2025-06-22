@@ -7,10 +7,12 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\CategoriaController;
+use App\Http\Controllers\ReseñaController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\CajeroController;
+use App\Http\Controllers;
 
 /*
 |---------------------------------------------------------------------------
@@ -43,7 +45,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('categorias/{categoria}', [CategoriaController::class, 'update'])->name('categorias.update');
     Route::patch('categorias/{categoria}', [CategoriaController::class, 'update']);
     Route::delete('categorias/{categoria}', [CategoriaController::class, 'destroy'])->name('categorias.destroy');
-    Route::post('categorias/check-name', [App\Http\Controllers\CategoriaController::class, 'checkName'])->name('categorias.checkName');
+    Route::post('categorias/check-name', [CategoriaController::class, 'checkName'])->name('categorias.checkName');
 });
 
 // Rutas para usuarios con rol "usuario"
@@ -57,7 +59,6 @@ Route::middleware(['auth', 'role:usuario'])->group(function () {
     Route::post('/user/cart/update/{producto}', [UserController::class, 'updateCart'])->name('user.cart.update');
     Route::get('/user/orders', [UserController::class, 'orders'])->name('user.orders');
     Route::get('/user/orders/{orden}', [UserController::class, 'showOrder'])->name('user.orders.show');
-    
 });
 
 // Rutas para el cajero
@@ -70,27 +71,19 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/usuarios', [AdminController::class, 'usuarios'])->name('admin.usuarios');
     Route::get('/pedidos', [AdminController::class, 'pedidos'])->name('admin.pedidos');
+    Route::post('productos', [ProductoController::class, 'store'])->name('productos.store');
 
     // Rutas de reportes
     Route::get('/reportes', [ReporteController::class, 'index'])->name('admin.reportes');
 
-    // Rutas para gestión de usuarios (existentes)
-Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
+    // Rutas para gestión de usuarios
     Route::get('/users', [AdminController::class, 'usersIndex'])->name('admin.users.index');
     Route::get('/users/create', [AdminController::class, 'create'])->name('admin.users.create');
     Route::post('/users', [AdminController::class, 'store'])->name('admin.users.store');
     Route::get('/users/{user}/edit', [AdminController::class, 'edit'])->name('admin.users.edit');
     Route::put('/users/{user}', [AdminController::class, 'update'])->name('admin.users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('admin.users.destroy');
-    Route::get('/pedidos', [AdminController::class, 'pedidos'])->name('admin.pedidos');
     Route::put('/pedidos/{orden}/status', [AdminController::class, 'updateStatus'])->name('admin.pedidos.updateStatus');
-    Route::post('/pedidos/{orden}/refund', [AdminController::class, 'refund'])->name('admin.pedidos.refund');
-    Route::get('/pedidos/{orden}/invoice', [AdminController::class, 'generateInvoice'])->name('admin.pedidos.invoice');
-});
-
-    // Rutas para gestión de pedidos
-    Route::post('/pedidos/{orden}/update-status', [AdminController::class, 'updateStatus'])->name('admin.pedidos.updateStatus');
     Route::post('/pedidos/{orden}/refund', [AdminController::class, 'refund'])->name('admin.pedidos.refund');
     Route::get('/pedidos/{orden}/invoice', [AdminController::class, 'generateInvoice'])->name('admin.pedidos.invoice');
 
@@ -113,15 +106,13 @@ Route::prefix('admin')->middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraShow'])->name('admin.proveedores.ordenes.show');
     Route::put('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraUpdate'])->name('admin.proveedores.ordenes.update');
     Route::delete('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraDestroy'])->name('admin.proveedores.ordenes.destroy');
+    Route::post('/proveedores/{proveedor}/ordenes/{orden}/update-producto', [ProveedorController::class, 'updateProducto'])->name('admin.proveedores.ordenes.updateProducto');
 });
 
 // Rutas para administradores con rol "admin" y permiso "administrar categorías"
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/categories', [AdminController::class, 'categories'])->name('admin.categories');
 });
-
-// Rutas para administradores con rol "admin" con rutas de informes
-
 
 // Rutas de autenticación personalizadas
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -142,7 +133,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/settings', [UserController::class, 'settings'])->name('user.settings');
     Route::put('/user/settings', [UserController::class, 'updateSettings'])->name('user.settings.update');
     Route::get('/user/orders/{orden}', [UserController::class, 'showOrder'])->name('user.orders.show');
-    Route::get('/user/profile', [UserController::class, 'profile'])->name('user.profile');   
+    Route::get('/user/profile', [UserController::class, 'profile'])->name('user.profile');
+    Route::get('/reseñas', [ReseñaController::class, 'index'])->name('user.reviews');  
+    Route::post('/reseñas', [ReseñaController::class, 'store'])->middleware('auth')->name('user.reviews.store'); 
 });
 
 // Rutas adicionales para cajero

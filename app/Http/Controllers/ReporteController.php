@@ -31,11 +31,11 @@ class ReporteController extends Controller
         // Valor total del inventario
         $valorInventario = Producto::sum(DB::raw('stock * COALESCE(precio, 0)'));
 
-        // Ingreso total (suma de subtotales de órdenes entregadas)
+        // Ganancia total (precio de venta - precio de compra por cantidad para órdenes entregadas)
         $gananciaTotal = DetalleOrden::join('productos', 'detalle_ordenes.producto_id', '=', 'productos.id')
             ->join('ordenes', 'detalle_ordenes.orden_id', '=', 'ordenes.id')
             ->where('ordenes.estado', 'entregado')
-            ->selectRaw('SUM(detalle_ordenes.subtotal) as ganancia')
+            ->selectRaw('SUM(detalle_ordenes.cantidad * (productos.precio - COALESCE(productos.precio_compra, 0))) as ganancia')
             ->value('ganancia') ?? 0;
 
         // Cierre de caja (hoy)

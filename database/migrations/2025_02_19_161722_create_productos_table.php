@@ -16,8 +16,10 @@ return new class extends Migration
             $table->string('nombre');
             $table->text('descripcion')->nullable();
             $table->decimal('precio', 10, 2);
+            $table->decimal('precio_compra', 10, 2)->nullable();
             $table->integer('stock');
-            $table->binary('imagen')->nullable(); // Changed to binary for BLOB
+            $table->enum('estado', ['activo', 'inactivo'])->nullable()->default(null);
+            $table->binary('imagen')->nullable();
             $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
             $table->timestamps();
         });

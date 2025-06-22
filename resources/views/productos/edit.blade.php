@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <!-- Encabezado -->
-    <div class="row mb-4 align-items-center">
+    <div class="row mb-3 align-items-center">
         <div class="col-md-6">
             <h2 class="text-primary fw-bold mb-0">Editar Producto</h2>
             <p class="text-muted">Modifica los detalles del producto</p>
@@ -95,8 +95,23 @@
                                step="0.01" 
                                value="{{ old('precio', $producto->precio) }}" 
                                required 
-                               placeholder="Ej: 12.50">
+                               placeholder="Ej: 12.34">
                         @error('precio')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Precio Compra -->
+                    <div class="mb-3">
+                        <label for="precio_compra" class="form-label fw-bold">Precio Compra ($)</label>
+                        <input type="number" 
+                               name="precio_compra" 
+                               id="precio_compra" 
+                               class="form-control form-input @error('precio_compra') is-invalid @enderror" 
+                               step="0.01" 
+                               value="{{ old('precio_compra', $producto->precio_compra) }}" 
+                               placeholder="Ej: 10.00">
+                        @error('precio_compra')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -112,6 +127,21 @@
                                required 
                                placeholder="Ej: 100">
                         @error('stock')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Estado -->
+                    <div class="mb-3">
+                        <label for="estado" class="form-label fw-bold">Estado</label>
+                        <select name="estado" 
+                                id="estado" 
+                                class="form-select @error('estado') is-invalid @enderror" 
+                                required>
+                            <option value="activo" {{ old('estado', $producto->estado) == 'activo' ? 'selected' : '' }}>Activo</option>
+                            <option value="inactivo" {{ old('estado', $producto->estado) == 'inactivo' ? 'selected' : '' }}>Inactivo</option>
+                        </select>
+                        @error('estado')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>

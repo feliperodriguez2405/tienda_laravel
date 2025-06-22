@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container">
-    <h1 class="mb-4 text-center text-primary fw-bold">Detalles de la Orden #{{ $orden->id }}</h1>
+    <h1 class="mb-4 text-center fw-bold">Detalles de la Orden #{{ $orden->id }}</h1>
 
     <div class="row justify-content-center">
         <div class="col-md-8">

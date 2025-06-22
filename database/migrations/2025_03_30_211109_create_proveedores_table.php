@@ -22,6 +22,7 @@ return new class extends Migration
             $table->dateTime('fecha_vencimiento_contrato')->nullable();
             $table->boolean('recibir_notificaciones')->default(false);
             $table->string('estado')->default('activo');
+            $table->foreignId('categoria_id')->nullable()->constrained('categorias')->onDelete('set null');
             $table->timestamps();
         });
     }

@@ -3,13 +3,45 @@
 @section('title', 'Gestión de Proveedores')
 
 @section('content')
+<style>
+    /* Custom styles for better responsiveness */
+    @media (max-width: 768px) {
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: start;
+        }
+        .action-buttons .btn {
+            width: 100%;
+            text-align: left;
+        }
+        .header-buttons {
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: stretch;
+        }
+        .header-buttons .btn {
+            width: 100%;
+        }
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        .table th, .table td {
+            white-space: nowrap;
+        }
+    }
+</style>
+
 <div class="container py-4">
     <div class="row mb-4 align-items-center">
-        <div class="col-md-6">
+        <div class="col-12 col-md-6">
             <h2 class="mb-0 text-primary fw-bold">Gestión de Proveedores</h2>
             <p class="text-muted">Administra los proveedores del supermercado</p>
         </div>
-        <div class="col-md-6 text-end">
+        <div class="col-12 col-md-6 text-md-end header-buttons">
             <a href="{{ route('proveedores.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus-circle me-1"></i> Nuevo Proveedor
             </a>
@@ -28,55 +60,61 @@
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Teléfono</th>
-                        <th>Email</th>
-                        <th>Dirección</th>
-                        <th>Contrato Vence</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($proveedores as $proveedor)
-                        <tr {{ $proveedor->fecha_vencimiento_contrato && $proveedor->fecha_vencimiento_contrato->lessThanOrEqualTo(now()->addDays(7)) && $proveedor->recibir_notificaciones ? 'class=bg-warning' : '' }}>
-                            <td>{{ $proveedor->nombre ?? 'Sin nombre' }}</td>
-                            <td>{{ $proveedor->telefono ?? 'N/A' }}</td>
-                            <td>{{ $proveedor->email ?? 'N/A' }}</td>
-                            <td>{{ $proveedor->direccion ?? 'N/A' }}</td>
-                            <td>
-                                {{ $proveedor->fecha_vencimiento_contrato ? $proveedor->fecha_vencimiento_contrato->format('d/m/Y') : 'No definido' }}
-                                @if ($proveedor->fecha_vencimiento_contrato && $proveedor->fecha_vencimiento_contrato->lessThanOrEqualTo(now()->addDays(7)) && $proveedor->recibir_notificaciones)
-                                    <span class="badge bg-danger">Próximo a vencer</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="badge {{ $proveedor->estado == 'activo' ? 'bg-success' : 'bg-secondary' }}">
-                                    {{ ucfirst($proveedor->estado) }}
-                                </span>
-                            </td>
-                            <td>
-                                <a href="{{ route('admin.proveedores.ordenes.historial', $proveedor) }}" class="btn btn-sm btn-info">
-                                    <i class="bi bi-clock-history"></i> Historial/Ordenes
-                                </a>
-                                <a href="{{ route('admin.proveedores.edit', $proveedor) }}" class="btn btn-sm btn-warning">
-                                    <i class="bi bi-pencil"></i>
-                                </a>
-                                <form action="{{ route('admin.proveedores.destroy', $proveedor) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar este proveedor?')">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
-                            </td>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Teléfono</th>
+                            <th>Email</th>
+                            <th>Dirección</th>
+                            <th>Categoría</th>
+                            <th>Contrato Vence</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach ($proveedores as $proveedor)
+                            <tr {{ $proveedor->fecha_vencimiento_contrato && $proveedor->fecha_vencimiento_contrato->lessThanOrEqualTo(now()->addDays(7)) && $proveedor->recibir_notificaciones ? 'class=bg-warning' : '' }}>
+                                <td>{{ $proveedor->nombre ?? 'Sin nombre' }}</td>
+                                <td>{{ $proveedor->telefono ?? 'N/A' }}</td>
+                                <td>{{ $proveedor->email ?? 'N/A' }}</td>
+                                <td>{{ $proveedor->direccion ?? 'N/A' }}</td>
+                                <td>{{ $proveedor->categoria ? $proveedor->categoria->nombre : 'N/A' }}</td>
+                                <td>
+                                    {{ $proveedor->fecha_vencimiento_contrato ? $proveedor->fecha_vencimiento_contrato->format('d/m/Y') : 'No definido' }}
+                                    @if ($proveedor->fecha_vencimiento_contrato && $proveedor->fecha_vencimiento_contrato->lessThanOrEqualTo(now()->addDays(7)) && $proveedor->recibir_notificaciones)
+                                        <span class="badge bg-danger">Próximo a vencer</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span class="badge {{ $proveedor->estado == 'activo' ? 'bg-success' : 'bg-secondary' }}">
+                                        {{ ucfirst($proveedor->estado) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a href="{{ route('admin.proveedores.ordenes.historial', $proveedor) }}" class="btn btn-sm btn-info">
+                                            <i class="bi bi-clock-history"></i> Historial/Ordenes
+                                        </a>
+                                        <a href="{{ route('admin.proveedores.edit', $proveedor) }}" class="btn btn-sm btn-warning">
+                                            <i class="bi bi-pencil"></i> Editar
+                                        </a>
+                                        <form action="{{ route('admin.proveedores.destroy', $proveedor) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar este proveedor?')">
+                                                <i class="bi bi-trash"></i> Eliminar
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

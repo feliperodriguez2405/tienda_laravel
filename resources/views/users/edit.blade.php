@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white text-center">
+                <div class="card-header text-white text-center">
                     <h3><i class="fas fa-edit"></i> Editar Producto</h3>
                 </div>
                 <div class="card-body">
@@ -79,7 +79,7 @@
                             <a href="{{ route('productos.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Volver
                             </a>
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit">
                                 <i class="fas fa-save"></i> Guardar Cambios
                             </button>
                         </div>

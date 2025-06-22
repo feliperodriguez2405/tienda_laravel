@@ -48,6 +48,26 @@
                     @enderror
                 </div>
                 <div class="mb-3">
+                    <label for="categoria_id" class="form-label">Categoría (Opcional)</label>
+                    <select class="form-select @error('categoria_id') is-invalid @enderror" id="categoria_id" name="categoria_id">
+                        <option value="">Selecciona una categoría</option>
+                        @foreach($categorias as $categoria)
+                            <option value="{{ $categoria->id }}" {{ old('categoria_id', $proveedor->categoria_id) == $categoria->id ? 'selected' : '' }}>{{ $categoria->nombre }}</option>
+                        @endforeach
+                        <option value="new">Crear nueva categoría</option>
+                    </select>
+                    @error('categoria_id')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="mb-3" id="new_category_container" style="display: none;">
+                    <label for="new_category_name" class="form-label">Nombre de la Nueva Categoría</label>
+                    <input type="text" class="form-control @error('new_category_name') is-invalid @enderror" id="new_category_name" name="new_category_name" value="{{ old('new_category_name') }}">
+                    @error('new_category_name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="mb-3">
                     <label for="condiciones_pago" class="form-label">Condiciones de Pago</label>
                     <textarea class="form-control @error('condiciones_pago') is-invalid @enderror" id="condiciones_pago" name="condiciones_pago">{{ old('condiciones_pago', $proveedor->condiciones_pago) }}</textarea>
                     @error('condiciones_pago')
@@ -81,4 +101,18 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('categoria_id').addEventListener('change', function() {
+        const newCategoryContainer = document.getElementById('new_category_container');
+        newCategoryContainer.style.display = this.value === 'new' ? 'block' : 'none';
+    });
+
+    // Initialize visibility based on current selection
+    window.addEventListener('DOMContentLoaded', function() {
+        const categoriaSelect = document.getElementById('categoria_id');
+        const newCategoryContainer = document.getElementById('new_category_container');
+        newCategoryContainer.style.display = categoriaSelect.value === 'new' ? 'block' : 'none';
+    });
+</script>
 @endsection

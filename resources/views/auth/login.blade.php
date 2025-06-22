@@ -22,7 +22,7 @@
         <label for="email">Correo Electrónico</label>
         <input id="email" 
                type="email" 
-                placeholder="ingresa tu correo electrónico"
+               placeholder="ingresa tu correo electrónico"
                class="form-control @error('email') is-invalid @enderror" 
                name="email" 
                value="{{ old('email') }}" 
@@ -51,14 +51,6 @@
                 <strong>{{ $message }}</strong>
             </span>
         @enderror
-    </div>
-
-    <!-- Recordarme -->
-    <div class="form-group" style="text-align: center;">
-        <label class="form-check-label">
-            <input class="form-check-input" type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>
-            Recordarme
-        </label>
     </div>
 
     <!-- Botón de Iniciar Sesión -->

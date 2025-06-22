@@ -88,10 +88,6 @@
                 <div class="col-md-4 mb-4">
                     <div class="card product-card shadow-lg border-0 h-100">
                         <div class="position-relative">
-                            <img src="{{ $producto->imagen ? asset('storage/' . $producto->imagen) : asset('images/placeholder.png') }}" 
-                                 class="card-img-top" 
-                                 alt="{{ $producto->nombre }}" 
-                                 style="height: 200px; object-fit: cover;">
                             @if($producto->stock <= 10)
                                 <span class="badge bg-danger position-absolute top-0 end-0 m-2">
                                     Stock Bajo

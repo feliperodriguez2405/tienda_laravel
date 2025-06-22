@@ -9,7 +9,7 @@ class Proveedor extends Model
 {
     use Notifiable;
 
-    protected $table = 'proveedores'; // Explicitly set the table name
+    protected $table = 'proveedores';
 
     protected $fillable = [
         'nombre',
@@ -21,6 +21,7 @@ class Proveedor extends Model
         'fecha_vencimiento_contrato',
         'recibir_notificaciones',
         'estado',
+        'categoria_id',
     ];
 
     protected $casts = [
@@ -32,5 +33,10 @@ class Proveedor extends Model
     public function ordenesCompra()
     {
         return $this->hasMany(OrdenCompra::class);
+    }
+
+    public function categoria()
+    {
+        return $this->belongsTo(Categoria::class, 'categoria_id');
     }
 }

@@ -1,10 +1,9 @@
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
     <title>Tienda D'Jenny</title>
 
     <style>
@@ -99,25 +98,6 @@
             color: #e0f7fa;
         }
 
-        /* Carousel */
-        .carousel {
-            max-width: 1280px;
-            margin: 2rem auto;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        }
-
-        .carousel-item img {
-            max-height: 400px;
-            object-fit: cover;
-            transition: transform 0.6s ease;
-        }
-
-        .carousel-item img:hover {
-            transform: scale(1.03);
-        }
-
         /* Productos Grid */
         .products-grid {
             display: grid;
@@ -129,12 +109,15 @@
         }
 
         .product-card {
-            background: #09222F;
-            border-radius: 16px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             transition: all 0.3s ease;
             position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
         .product-card:hover {
@@ -142,10 +125,21 @@
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
         }
 
+        .product-card .image-container {
+            width: 100%;
+            aspect-ratio: 4 / 3; /* Maintains proportional height */
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa; /* Fallback background for empty space */
+        }
+
         .product-card img {
             width: 100%;
-            height: 200px;
-            object-fit: cover;
+            height: 100%;
+            object-fit: contain; /* Ensures full image is visible without cropping */
+            object-position: center; /* Centers image */
             transition: transform 0.3s ease;
         }
 
@@ -153,37 +147,49 @@
             transform: scale(1.05);
         }
 
-        .product-card .content {
+        .product-card .card-body {
             padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
 
-        .product-card h1 {
-            font-size: 1.3rem;
-            color: #FF6608;
-            margin-bottom: 0.6rem;
+        .product-card .card-title {
+            font-size: 1.2rem;
+            color: #263238;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .product-card .price {
+            font-size: 1.1rem;
+            color: #398129;
             font-weight: 700;
         }
 
-        .product-card p {
-            font-size: 0.95rem;
-            color: #e0f7fa;
-            margin-bottom: 1.2rem;
+        .product-card .small {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
         }
 
-        .product-card a {
-            display: inline-block;
-            padding: 0.6rem 1.5rem;
-            background: #398129;
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
+        .product-card .btn {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 6px;
             transition: all 0.3s ease;
         }
 
-        .product-card a:hover {
-            background: #398129;
-            transform: translateY(-2px);
+        .product-card .btn:hover {
+            background-color: #2e6b21;
+            border-color: #2e6b21;
+        }
+
+        .empty-message {
+            color: #263238;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 2rem;
         }
 
         /* Hero Section */
@@ -273,34 +279,98 @@
         .footer {
             background: #09222F;
             color: #ffffff;
-            padding: 3rem 2rem;
-            margin-top: 5rem;
+            padding: 3rem 1.5rem;
+            margin-top: 4rem;
             position: relative;
+            font-family: 'Inter', sans-serif;
         }
 
-        footer p {
-            margin: 0;
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .footer-section h5 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 1.2rem;
+            color: #e0f7fa;
+        }
+
+        .social-links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .social-icon {
+            width: 32px;
+            height: 32px;
+            filter: invert(1);
+            transition: transform 0.3s ease;
+        }
+
+        .social-icon:hover {
+            transform: scale(1.2);
+        }
+
+        .contact-info p {
+            font-size: 0.95rem;
+            color: #e0f7fa;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .map-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .map-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .footer-divider {
+            border: none;
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            margin: 2rem 0;
+        }
+
+        .footer-bottom {
+            text-align: center;
+        }
+
+        .footer-bottom p {
             font-size: 0.9rem;
-            color: #ffffff;
+            color: #e0f7fa;
             opacity: 0.9;
+            margin: 0;
         }
 
-        footer h5 {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 1rem;
-}
-
-footer a img:hover {
-    transform: scale(1.2);
-    transition: transform 0.3s ease;
-}
-
-        @keyframes slideDown {
-            from { transform: translateY(-30px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
+        /* Responsive Adjustments */
         @media (max-width: 768px) {
             .navbar-container {
                 flex-direction: column;
@@ -327,8 +397,29 @@ footer a img:hover {
                 font-size: 2.2rem;
             }
 
-            .carousel-item img {
-                max-height: 300px;
+            .footer {
+                padding: 2rem 1rem;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .social-links {
+                align-items: center;
+            }
+
+            .contact-info {
+                text-align: center;
+            }
+
+            .map-container {
+                padding-bottom: 75%; /* Slightly taller for smaller screens */
+            }
+
+            .product-card .image-container {
+                aspect-ratio: 4 / 3; /* Maintain aspect ratio on smaller screens */
             }
         }
 
@@ -340,11 +431,42 @@ footer a img:hover {
             .content-grid {
                 grid-template-columns: 1fr;
             }
+
+            .footer-section h5 {
+                font-size: 1.1rem;
+            }
+
+            .social-icon {
+                width: 28px;
+                height: 28px;
+            }
+
+            .contact-info p {
+                font-size: 0.9rem;
+            }
+
+            .footer-bottom p {
+                font-size: 0.85rem;
+            }
+
+            .product-card .image-container {
+                aspect-ratio: 4 / 3; /* Consistent aspect ratio */
+                max-height: 180px; /* Slightly smaller for mobile */
+            }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
     </style>
 
-    <!-- Fonts -->
+    <!-- Fonts and Animate.css -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="icon" href="{{ asset('images/djenny.png') }}" type="image/x-icon">
 </head>
 <body>
     <!-- Navbar -->
@@ -355,6 +477,7 @@ footer a img:hover {
                 <span>D'Jenny</span>
             </div>
             <div class="nav-links">
+                <a href="{{ route('manual') }}">Manual de Usuario</a>
                 @if (Route::has('login'))
                     @auth
                         <a href="{{ url('/home') }}">Inicio</a>
@@ -373,41 +496,77 @@ footer a img:hover {
         </div>
     </nav>
 
-    <!-- Carrusel Principal -->
-    <div id="carouselExample" class="carousel slide">
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="{{ asset('images/djenny.png') }}" class="d-block w-100" alt="...">
-            </div>
-            <div class="carousel-item">
-                <img src="{{ asset('images/tienda.jpg') }}" class="d-block w-100" alt="...">
-            </div>
-            <div class="carousel-item">
-                <img src="{{ asset('images/djenny.png') }}" class="d-block w-100" alt="...">
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Anterior</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Siguiente</span>
-        </button>
-    </div>
-
     <!-- Productos Destacados -->
-    <section class="products-grid">
-        @for ($i = 1; $i <= 9; $i++)
-            <div class="product-card">
-                <img src="{{ asset('images/djenny.png') }}" alt="Producto {{ $i }}">
-                <div class="content">
-                    <h1>Producto {{ $i }}</h1>
-                    <p>Descripción breve del producto número {{ $i }}. Calidad garantizada y precios accesibles para todos.</p>
-                    <a href="{{ route('login') }}">Ver más</a>
+    <section>
+        <h2 class="text-center mb-3" style="color: #FF6608; font-weight: 800; font-size: 2rem;">Productos Destacados</h2>
+        <div class="products-grid">
+            <div class="product-card animate__animated animate__fadeInUp" data-delay="0">
+                <div class="image-container">
+                    <img src="{{ asset('images/arroz-supremo.png') }}" class="card-img-top" alt="Arroz Premium" loading="lazy">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Arroz Premium</h5>
+                    <p class="mb-2">Granos y Cereales</p>
+                    <p class="price mb-2"><strong>12.000 COP</strong></p>
+                    <p class="small">Stock: 100</p>
                 </div>
             </div>
-        @endfor
+            <div class="product-card animate__animated animate__fadeInUp" data-delay="100">
+                <div class="image-container">
+                    <img src="{{ asset('images/product2.jpg') }}" class="card-img-top" alt="Aceite de Cocina" loading="lazy">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Aceite de Cocina</h5>
+                    <p class="mb-2">Aceites y Grasas</p>
+                    <p class="price mb-2"><strong>8.500 COP</strong></p>
+                    <p class="small">Stock: 50</p>
+                </div>
+            </div>
+            <div class="product-card animate__animated animate__fadeInUp" data-delay="200">
+                <div class="image-container">
+                    <img src="{{ asset('images/product3.jpg') }}" class="card-img-top" alt="Leche Entera" loading="lazy">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Leche Entera</h5>
+                    <p class="mb-2">Lácteos</p>
+                    <p class="price mb-2"><strong>3.200 COP</strong></p>
+                    <p class="small">Stock: 200</p>
+                </div>
+            </div>
+            <div class="product-card animate__animated animate__fadeInUp" data-delay="300">
+                <div class="image-container">
+                    <img src="{{ asset('images/product4.jpg') }}" class="card-img-top" alt="Café Molido" loading="lazy">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Café Molido</h5>
+                    <p class="mb-2">Bebidas</p>
+                    <p class="price mb-2"><strong>15.000 COP</strong></p>
+                    <p class="small">Stock: 75</p>
+                </div>
+            </div>
+            <div class="product-card animate__animated animate__fadeInUp" data-delay="400">
+                <div class="image-container">
+                    <img src="{{ asset('images/product5.jpg') }}" class="card-img-top" alt="Pan Integral" loading="lazy">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Pan Integral</h5>
+                    <p class="mb-2">Panadería</p>
+                    <p class="price mb-2"><strong>4.500 COP</strong></p>
+                    <p class="small">Stock: 60</p>
+                </div>
+            </div>
+            <div class="product-card animate__animated animate__fadeInUp" data-delay="500">
+                <div class="image-container">
+                    <img src="{{ asset('images/product6.jpg') }}" class="card-img-top" alt="Huevos AA" loading="lazy">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Huevos AA</h5>
+                    <p class="mb-2">Huevos y Derivados</p>
+                    <p class="price mb-2"><strong>10.000 COP</strong></p>
+                    <p class="small">Stock: 90</p>
+                </div>
+            </div>
+        </div>
     </section>
 
     <!-- Hero -->
@@ -433,42 +592,73 @@ footer a img:hover {
     </section>
 
     <!-- Footer -->
-    <footer class="footer text-white pt-5 pb-4">
-    <div class="container">
-        <div class="row">
-            <!-- Redes Sociales -->
-            <div class="col-md-6 mb-4 mb-md-0">
-                <h5 class="mb-3 text-uppercase fw-bold">Síguenos</h5>
-                <div class="d-flex gap-3">
-                    <a href="https://wa.me/1234567890" target="_blank" class="d-inline-block" title="WhatsApp">
-                        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg" alt="WhatsApp" width="28" height="28" style="filter: invert(1); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
-                    </a>
-                    <a href="https://facebook.com" target="_blank" class="d-inline-block" title="Facebook">
-                        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook" width="28" height="28" style="filter: invert(1); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
-                    </a>
-                    <a href="https://instagram.com" target="_blank" class="d-inline-block" title="Instagram">
-                        <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram" width="28" height="28" style="filter: invert(1); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
-                    </a>
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-grid">
+                <!-- Redes Sociales -->
+                <div class="footer-section social-links">
+                    <h5>Síguenos</h5>
+                    <div class="social-icons">
+                        <a href="https://wa.me/1234567890" target="_blank" aria-label="WhatsApp">
+                            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg" alt="WhatsApp" class="social-icon">
+                        </a>
+                        <a href="https://facebook.com" target="_blank" aria-label="Facebook">
+                            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook" class="social-icon">
+                        </a>
+                        <a href="https://instagram.com" target="_blank" aria-label="Instagram">
+                            <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram" class="social-icon">
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Información y Mapa -->
+                <div class="footer-section contact-info">
+                    <h5>Encuéntranos</h5>
+                    <p>Dirección: Carrera 36A #2e-57, Neiva - Huila</p>
+                    <div class="map-container">
+                        <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3984.617385749955!2d-75.26511422502979!3d2.925829097050505!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMsKwNTUnMzMuMCJOIDc1wrAxNSc0NS4xIlc!5e0!3m2!1ses!2sco!4v1748389528042!5m2!1ses!2sco" allowfullscreen loading="lazy" title="Ubicación de D'Jenny"></iframe>
+                    </div>
                 </div>
             </div>
 
-            <!-- Información y Mapa -->
-            <div class="col-md-6 text-md-end mt-4 mt-md-0">
-                <h5 class="mb-2 text-uppercase fw-bold">Encuéntranos</h5>
-                <p class="mb-2">Dirección: Carrera 36A #2e-57, Neiva - Huila</p>
-                <div class="ratio ratio-16x9 rounded overflow-hidden">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3984.617385749955!2d-75.26511422502979!3d2.925829097050505!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMsKwNTUnMzMuMCJOIDc1wrAxNSc0NS4xIlc!5e0!3m2!1ses!2sco!4v1748389528042!5m2!1ses!2sco" allowfullscreen loading="lazy" style="border:0;"></iframe>
-                </div>
+            <!-- Línea inferior -->
+            <hr class="footer-divider">
+            <div class="footer-bottom">
+                <p>© {{ date('Y') }} D'Jenny - Todos los derechos reservados.</p>
             </div>
         </div>
+    </footer>
 
-        <!-- Línea inferior -->
-        <hr class="my-4 border-light opacity-25">
-        <div class="text-center small">
-            <p>&copy; {{ date('Y') }} D'Jenny - Todos los derechos reservados.</p>
-        </div>
-    </div>
-</footer>
+    <!-- JavaScript for Animations -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const delay = entry.target.getAttribute('data-delay') || 0;
+                        setTimeout(() => {
+                            entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+                        }, delay);
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
 
+            document.querySelectorAll('.product-card, .content-card').forEach(card => {
+                observer.observe(card);
+            });
+
+            document.querySelectorAll('.product-card, .content-card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    card.style.transform = 'translateY(-10px)';
+                    card.style.boxShadow = '0 12px 24px rgba(0, 0, 0, 0.15)';
+                });
+                card.addEventListener('mouseleave', () => {
+                    card.style.transform = 'translateY(0)';
+                    card.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.1)';
+                });
+            });
+        });
+    </script>
 </body>
 </html>

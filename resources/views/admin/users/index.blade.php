@@ -6,8 +6,8 @@
 <div class="container py-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h2 class="text-primary fw-semibold mb-0" style="font-size: 1.5rem;">Gestión de Usuarios</h2>
-            <p class="text-muted small mb-0">Administra los usuarios registrados.</p>
+            <h1 class="fw-bold mb-0">Gestión de Usuarios</h1>
+            <p>Administra los usuarios registrados.</p>
         </div>
         <a href="{{ route('admin.users.create') }}" class="btn btn-primary btn-sm">
             <i class="fas fa-plus me-1"></i> Agregar Usuario

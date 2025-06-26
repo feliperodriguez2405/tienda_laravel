@@ -32,13 +32,11 @@ class CajeroController extends Controller
                 'metodo_pago' => 'required|in:efectivo,nequi',
             ]);
 
-            // Ensure productos and cantidades have the same length
             if (count($request->productos) !== count($request->cantidades)) {
                 Log::error('Mismatch between productos and cantidades arrays', ['request' => $request->all()]);
                 return back()->with('error', 'Error en los datos de la venta. Por favor, intenta de nuevo.');
             }
 
-            // Validate products and stock
             $subtotal = 0;
             $items = [];
             foreach ($request->productos as $index => $producto_id) {
@@ -56,11 +54,9 @@ class CajeroController extends Controller
                 $items[] = ['producto' => $producto, 'cantidad' => $cantidad];
             }
 
-            // Apply 19% IVA
             $iva = $subtotal * 0.19;
-            $total = $subtotal * 1.19;
+            $total = $subtotal + $iva;
 
-            // Create order and payment in a transaction
             try {
                 DB::beginTransaction();
 
@@ -72,7 +68,7 @@ class CajeroController extends Controller
                 $orden = Orden::create([
                     'user_id' => Auth::id(),
                     'total' => $total,
-                    'iva' => $iva, // Store IVA separately (requires migration)
+                    'iva' => $iva,
                     'estado' => $request->metodo_pago === 'efectivo' ? 'entregado' : 'procesando',
                     'metodo_pago' => $request->metodo_pago,
                 ]);
@@ -83,7 +79,7 @@ class CajeroController extends Controller
                         'producto_id' => $item['producto']->id,
                         'cantidad' => $item['cantidad'],
                         'precio_unitario' => $item['producto']->precio,
-                        'subtotal' => $item['producto']->precio * $item['cantidad'] * 1.19, // Store with IVA
+                        'subtotal' => $item['producto']->precio * $item['cantidad'] * (1 + 0.19),
                     ]);
                     $item['producto']->decrement('stock', $item['cantidad']);
                 }
@@ -111,7 +107,6 @@ class CajeroController extends Controller
             }
         }
 
-        // Always use paginate for products
         $query = Producto::query();
         $search = $request->query('search');
         if ($search) {
@@ -209,7 +204,7 @@ class CajeroController extends Controller
     public function updateOrder(Request $request, $id)
     {
         $request->validate([
-            'estado' => 'required|in:pendiente,procesando,enviado,entregado,cancelado',
+            'estado' => 'required|in:pendiente,procesando,entregado,cancelado',
         ]);
 
         try {
@@ -294,7 +289,7 @@ class CajeroController extends Controller
 
     public function exportTransactions(Request $request)
     {
-        $query = Orden::with(['detalles.producto', 'user']);
+        $query = Orden::with(['detalles.producto', 'user', 'pagos']);
 
         if ($search = $request->query('search')) {
             $query->whereHas('user', function ($q) use ($search) {
@@ -302,9 +297,11 @@ class CajeroController extends Controller
                   ->orWhere('email', 'like', '%' . $search . '%');
             });
         }
+
         if ($estado = $request->query('estado')) {
             $query->where('estado', $estado);
         }
+
         if ($fecha_inicio = $request->query('fecha_inicio')) {
             $query->whereDate('created_at', '>=', $fecha_inicio);
         }
@@ -314,19 +311,22 @@ class CajeroController extends Controller
 
         $ordenes = $query->latest()->get();
 
-        $csv = Writer::createFromString();
-        $csv->insertOne(['ID', 'Cliente', 'Total', 'Metodo de Pago', 'Estado', 'Fecha', 'Detalles']);
+        $csv = Writer::createFromString('');
+        $csv->insertOne(['ID', 'Cliente', 'Fecha', 'Total', 'Método de Pago', 'Estado', 'Detalles']);
 
         foreach ($ordenes as $orden) {
-            $detalles = $orden->detalles->map(fn($detalle) => "{$detalle->producto->nombre} (x{$detalle->cantidad})")->implode('; ');
+            $detalles = $orden->detalles->map(function ($detalle) {
+                return $detalle->producto->nombre . " (x" . $detalle->cantidad . ")";
+            })->implode('; ');
+            $metodo_pago = isset($orden->metodo_pago) ? ucfirst($orden->metodo_pago) : 'N/A';
             $csv->insertOne([
                 $orden->id,
-                $orden->user->name,
-                number_format($orden->total, 2),
-                ucfirst($orden->metodo_pago ?? 'N/A'),
-                ucfirst($orden->estado),
+                isset($orden->user->name) ? $orden->user->name : 'N/A',
                 $orden->created_at->format('d/m/Y H:i'),
-                $detalles
+                number_format($orden->total, 2, ',', '.'),
+                $metodo_pago,
+                ucfirst($orden->estado),
+                $detalles ? $detalles : 'N/A',
             ]);
         }
 
@@ -403,7 +403,6 @@ class CajeroController extends Controller
             ->orderByDesc('cantidad_vendida')
             ->take(5)
             ->get();
-
-        return view('cajero.close', compact('ordenes', 'totalVentas', 'metodosPago', 'ventasPorHora', 'productosMasVendidos'));
-    }
+            return view('cajero.close', compact('ordenes', 'totalVentas', 'metodosPago', 'ventasPorHora', 'productosMasVendidos'));
+}
 }

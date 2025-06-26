@@ -4,8 +4,8 @@
 
 @section('content')
 <div class="container py-4">
-    <h1 class="text-primary fw-bold">Gestión de Pedidos</h1>
-    <p class="text-muted">Visualiza y administra los pedidos en tiempo real.</p>
+    <h1 class="fw-bold mb-0">Gestión de Pedidos</h1>
+    <p>Visualiza y administra los pedidos en tiempo real.</p>
 
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>

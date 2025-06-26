@@ -50,15 +50,17 @@ Route::middleware(['auth'])->group(function () {
 
 // Rutas para usuarios con rol "usuario"
 Route::middleware(['auth', 'role:usuario'])->group(function () {
-    Route::get('/user/dashboard', [UserController::class, 'index'])->name('user.dashboard');
+    Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
     Route::get('/user/cart', [UserController::class, 'cart'])->name('user.cart');
     Route::post('/user/cart/add/{producto}', [UserController::class, 'addToCart'])->name('user.cart.add');
     Route::post('/user/cart/remove/{producto}', [UserController::class, 'removeFromCart'])->name('user.cart.remove');
-    Route::get('/user/checkout', [UserController::class, 'checkout'])->name('user.checkout');
-    Route::post('/user/checkout/process', [UserController::class, 'processCheckout'])->name('user.process.checkout');
     Route::post('/user/cart/update/{producto}', [UserController::class, 'updateCart'])->name('user.cart.update');
+    Route::post('/user/cart/checkout', [UserController::class, 'cartCheckout'])->name('user.cart.checkout');
     Route::get('/user/orders', [UserController::class, 'orders'])->name('user.orders');
     Route::get('/user/orders/{orden}', [UserController::class, 'showOrder'])->name('user.orders.show');
+    Route::post('/user/orders/cancel/{orden}', [UserController::class, 'cancelOrder'])->name('order.cancel');
+    Route::patch('/user/orders/cancel/{orden}', [UserController::class, 'cancelOrder'])->name('order.cancel');
+    Route::delete('/user/orders/delete', [UserController::class, 'deleteSelectedOrders'])->name('orders.delete.selected');
 });
 
 // Rutas para el cajero
@@ -151,5 +153,11 @@ Route::prefix('cajero')->middleware(['auth', 'role:cajero'])->group(function () 
     Route::delete('/order/{id}', [CajeroController::class, 'deleteOrder'])->name('cajero.order.delete');
     Route::post('/order/{id}/pay', [CajeroController::class, 'payOrder'])->name('cajero.order.pay');
     Route::get('/close', [CajeroController::class, 'close'])->name('cajero.close');
+    Route::post('/cajero/order/{order}/refund', [CajeroController::class, 'refundOrder'])->name('cajero.order.refunded');
     Route::post('/close', [CajeroController::class, 'close']);
 });
+
+//Ruta para manual de usuario
+Route::get('/manual', function () {
+    return view('manual');
+})->name('manual');

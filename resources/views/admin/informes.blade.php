@@ -6,8 +6,8 @@
 <div class="container py-4">
     <div class="row mb-4 align-items-center animate__animated animate__fadeIn">
         <div class="col-md-12">
-            <h2 class="text-primary fw-bold">Reportes de Ventas e Inventario</h2>
-            <p class="text-muted">Información detallada sobre las ventas e inventario de la tienda.</p>
+            <h1 class="fw-bold mb-0">Reportes de Ventas e Inventario</h1>
+            <p>Información detallada sobre las ventas e inventario de la tienda.</p>
         </div>
     </div>
 
@@ -22,7 +22,7 @@
                 <div class="card-body">
                     <canvas id="ventasChart" height="150"></canvas>
                     @if($ventas->isEmpty())
-                        <p class="text-muted text-center mt-3">No hay ventas registradas en los últimos 7 días.</p>
+                        <p class=" text-center mt-3">No hay ventas registradas en los últimos 7 días.</p>
                     @endif
                 </div>
             </div>
@@ -37,7 +37,7 @@
                 </div>
                 <div class="card-body">
                     @if($productosMasVendidos->isEmpty())
-                        <p class="text-muted">No hay ventas registradas.</p>
+                        <p>No hay ventas registradas.</p>
                     @else
                         <ul class="list-group">
                             @foreach($productosMasVendidos as $producto)
@@ -64,7 +64,7 @@
                 </div>
                 <div class="card-body">
                     @if($bajoStock->isEmpty())
-                        <p class="text-muted">Todos los productos tienen stock suficiente.</p>
+                        <p>Todos los productos tienen stock suficiente.</p>
                     @else
                         <ul class="list-group">
                             @foreach($bajoStock as $producto)
@@ -88,7 +88,7 @@
                 </div>
                 <div class="card-body text-center">
                     <h3 class="text-info fw-bold animate__animated animate__pulse animate__infinite">{{ number_format($valorInventario, 0, ',', '.') }} COP</h3>
-                    <p class="text-muted">Valor estimado basado en stock y precios actuales.</p>
+                    <p>Valor estimado basado en stock y precios actuales.</p>
                 </div>
             </div>
         </div>
@@ -101,8 +101,8 @@
                     <h5 class="mb-0">Ganancia Total</h5>
                 </div>
                 <div class="card-body text-center">
-                    <h3 class="text-dark fw-bold animate__animated animate__pulse animate__infinite">{{ number_format($gananciaTotal, 0, ',', '.') }} COP</h3>
-                    <p class="text-muted">Ganancia total de ventas entregadas (Precio de Venta - Precio de Compra).</p>
+                    <h3 class="fw-bold animate__animated animate__pulse animate__infinite">{{ number_format($gananciaTotal, 0, ',', '.') }} COP</h3>
+                    <p>Ganancia total de ventas entregadas (Precio de Venta - Precio de Compra).</p>
                 </div>
             </div>
         </div>
@@ -116,7 +116,7 @@
                 </div>
                 <div class="card-body">
                     @if($cierreCaja['transacciones'] == 0)
-                        <p class="text-muted">No hay transacciones registradas para hoy.</p>
+                        <p>No hay transacciones registradas para hoy.</p>
                     @else
                         <div class="mb-4">
                             <h6 class="fw-bold">Resumen</h6>
@@ -142,7 +142,7 @@
                         <!-- Productos Más Vendidos Hoy -->
                         <h6 class="fw-bold mt-4 mb-3">Productos Más Vendidos (Hoy)</h6>
                         @if($cierreCaja['productos_top']->isEmpty())
-                            <p class="text-muted">No hay ventas registradas hoy.</p>
+                            <p>No hay ventas registradas hoy.</p>
                         @else
                             <ul class="list-group">
                                 @foreach($cierreCaja['productos_top'] as $producto)
@@ -290,52 +290,4 @@
         });
     });
 </script>
-
-<style>
-    .card {
-        border-radius: 15px;
-        transition: all 0.3s ease;
-        border: none;
-        overflow: hidden;
-    }
-    .card-header {
-        padding: 1rem 1.25rem;
-        border-bottom: none;
-    }
-    .card-body {
-        padding: 1.5rem;
-    }
-    .list-group-item {
-        border: none;
-        padding: 0.75rem 0;
-        transition: background-color 0.2s;
-    }
-    .list-group-item:hover {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-    }
-    .badge {
-        font-size: 0.9rem;
-        padding: 0.5rem 0.9rem;
-        border-radius: 20px;
-        transition: transform 0.2s;
-    }
-    .badge:hover {
-        transform: scale(1.1);
-    }
-    h5 {
-        font-size: 1.25rem;
-        font-weight: 600;
-    }
-    .text-muted {
-        font-size: 0.9rem;
-        line-height: 1.4;
-    }
-    #ventasChart, #metodosPagoChart {
-        transition: opacity 0.5s ease;
-    }
-    .bg-purple {
-        background-color: #6f42c1;
-    }
-</style>
 @endsection

@@ -3,10 +3,10 @@
 @section('content')
 <div class="container">
     <!-- Encabezado con título y búsqueda -->
-    <div class="row mb-4 align-items-center">
+    <div class="row mb-4 my-3 align-items-center">
         <div class="col-md-6">
-            <h1 class="text-primary fw-bold mb-0">Gestión de Productos</h1>
-            <p class="text-muted">Administra el inventario de tu supermercado</p>
+            <h1 class="fw-bold mb-0">Gestión de Productos</h1>
+            <p>Administra el inventario de tu supermercado</p>
         </div>
         <div class="col-md-6 text-end">
             <a href="{{ route('productos.create') }}" class="btn btn-success btn-sm me-2">
@@ -71,7 +71,7 @@
 
     <!-- Depuración: Mostrar número de productos -->
     @if (isset($productos))
-        <div class="text-muted mb-2">
+        <div class="mb-2">
             Mostrando {{ $productos->count() }} de {{ $productos->total() }} productos ({{ $productos->perPage() }} por página)
         </div>
     @endif
@@ -96,12 +96,12 @@
                         </div>
                         <div class="card-body text-center d-flex flex-column justify-content-between">
                             <div>
-                                <h5 class="card-title text-dark fw-bold mb-2">{{ \Illuminate\Support\Str::limit($producto->nombre, 20) }}</h5>
+                                <h5 class="card-title fw-bold mb-2">{{ \Illuminate\Support\Str::limit($producto->nombre, 20) }}</h5>
                                 <p class="card-text text-success fw-bold mb-1">${{ number_format($producto->precio, 2) }}</p>
                                 <p class="card-text text-secondary mb-3">
-                                    Stock: <span class="{{ $producto->stock <= 10 ? 'text-danger' : 'text-dark' }}">{{ $producto->stock }}</span>
+                                    Stock: <span class=" {{ $producto->stock <= 10 ? 'text-danger' : 'text-succes fw-bold' }}">{{ $producto->stock }}</span>
                                 </p>
-                                <p class="card-text text-muted small">{{ $producto->categoria->nombre ?? 'Sin categoría' }}</p>
+                                <p class="card-text small">{{ $producto->categoria->nombre ?? 'Sin categoría' }}</p>
                             </div>
                             <div class="d-flex justify-content-center gap-2">
                                 <a href="{{ route('productos.show', $producto->id) }}" 
@@ -138,51 +138,4 @@
     @endif
 </div>
 
-<style>
-    /* Estilos personalizados */
-    .search-input {
-        border-radius: 20px;
-        transition: box-shadow 0.2s ease-in-out;
-    }
-
-    .search-input:focus {
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-    }
-
-    .search-btn {
-        border-radius: 20px;
-        transition: transform 0.2s ease-in-out;
-    }
-
-    .search-btn:hover {
-        transform: scale(1.05);
-    }
-
-    .product-card {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-
-    .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .card-img-top {
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
-    }
-
-    .btn-sm {
-        padding: 0.25rem 0.75rem;
-        font-size: 0.875rem;
-    }
-
-    .form-select {
-        border-radius: 20px;
-    }
-
-    .alert {
-        border-radius: 8px;
-    }
-</style>
 @endsection

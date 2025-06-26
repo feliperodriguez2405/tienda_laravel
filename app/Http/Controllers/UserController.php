@@ -5,9 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Producto;
 use App\Models\Orden;
 use App\Models\DetalleOrden;
-use App\Models\User;
-use App\Models\Pago;
 use App\Models\MetodoPago;
+use App\Models\Pago;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,55 +16,31 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        // Removed middleware exceptions for index, edit, update, destroy as they are now handled by AdminController
         $this->middleware('auth');
     }
 
     public function dashboard(Request $request)
     {
-        $query = Producto::where('stock', '>', 0);
-
-        if ($search = $request->query('search')) {
-            $query->where('nombre', 'like', '%' . $search . '%');
-        }
-
-        if ($category = $request->query('category')) {
-            $query->where('categoria_id', $category);
-        }
-
-        $productos = $query->with('categoria')->paginate(12);
-
+        $productos = $this->getFilteredProducts($request);
         return view('users.dashboard', compact('productos'));
     }
 
     public function products(Request $request)
     {
-        $query = Producto::where('stock', '>', 0);
-
-        if ($search = $request->query('search')) {
-            $query->where('nombre', 'like', '%' . $search . '%');
-        }
-
-        if ($category = $request->query('category')) {
-            $query->where('categoria_id', $category);
-        }
-
-        $productos = $query->with('categoria')->paginate(12);
-
-        return view('users.products', compact('productos'));
+        $productos = $this->getFilteredProducts($request);
+        return view('users.dashboard', compact('productos'));
     }
 
-    public function orders()
+    public function orders(Request $request)
     {
-        $ordenes = Orden::where('user_id', auth()->id())->latest()->get();
+        $ordenes = Orden::where('user_id', Auth::id())->latest()->paginate(10);
         return view('users.orders', compact('ordenes'));
     }
 
     public function cart()
     {
-        $cart = session('cart', []);
-        $productoIds = array_keys($cart);
-        $productos = Producto::whereIn('id', $productoIds)->get();
+        $cart = session()->get('cart', []);
+        $productos = Producto::whereIn('id', array_keys($cart))->get();
         return view('users.cart', compact('cart', 'productos'));
     }
 
@@ -75,10 +50,9 @@ class UserController extends Controller
             'cantidad' => 'required|integer|min:1|max:' . $producto->stock,
         ]);
 
-        $cart = session('cart', []);
-        $quantity = $request->input('cantidad');
-        $cart[$producto->id] = isset($cart[$producto->id]) ? $cart[$producto->id] + $quantity : $quantity;
-        session(['cart' => $cart]);
+        $cart = session()->get('cart', []);
+        $cart[$producto->id] = ($cart[$producto->id] ?? 0) + $request->input('cantidad');
+        session()->put('cart', $cart);
 
         return redirect()->route('user.dashboard')->with('success', 'Producto añadido al carrito.');
     }
@@ -89,10 +63,10 @@ class UserController extends Controller
             'cantidad' => 'required|integer|min:1|max:' . $producto->stock,
         ]);
 
-        $cart = session('cart', []);
+        $cart = session()->get('cart', []);
         if (isset($cart[$producto->id])) {
             $cart[$producto->id] = $request->input('cantidad');
-            session(['cart' => $cart]);
+            session()->put('cart', $cart);
             return redirect()->route('user.cart')->with('success', 'Cantidad actualizada.');
         }
 
@@ -101,42 +75,28 @@ class UserController extends Controller
 
     public function removeFromCart(Producto $producto)
     {
-        $cart = session('cart', []);
+        $cart = session()->get('cart', []);
         if (isset($cart[$producto->id])) {
             unset($cart[$producto->id]);
-            session(['cart' => $cart]);
+            session()->put('cart', $cart);
             return redirect()->route('user.cart')->with('success', 'Producto eliminado del carrito.');
         }
 
         return redirect()->route('user.cart')->with('error', 'Producto no encontrado en el carrito.');
     }
 
-    public function checkout()
-    {
-        $cart = session('cart', []);
-        if (empty($cart)) {
-            return redirect()->route('user.cart')->with('error', 'El carrito está vacío.');
-        }
-
-        $productoIds = array_keys($cart);
-        $productos = Producto::whereIn('id', $productoIds)->get();
-
-        return view('users.checkout', compact('cart', 'productos'));
-    }
-
-    public function processCheckout(Request $request)
+    public function cartCheckout(Request $request)
     {
         $request->validate([
             'metodo_pago' => 'required|in:efectivo,nequi',
         ]);
 
-        $cart = session('cart', []);
+        $cart = session()->get('cart', []);
         if (empty($cart)) {
             return redirect()->route('user.cart')->with('error', 'El carrito está vacío.');
         }
 
-        $productoIds = array_keys($cart);
-        $productos = Producto::whereIn('id', $productoIds)->get();
+        $productos = Producto::whereIn('id', array_keys($cart))->get();
 
         // Validate stock
         foreach ($productos as $producto) {
@@ -148,15 +108,15 @@ class UserController extends Controller
         try {
             DB::beginTransaction();
 
-            // Calculate total with quantities and 19% IVA
+            // Calculate total with 19% IVA
             $subtotal = $productos->sum(fn($p) => $p->precio * $cart[$p->id]);
             $total = $subtotal * 1.19;
 
             // Create order
             $orden = Orden::create([
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
                 'total' => $total,
-                'estado' => $request->metodo_pago === 'efectivo' ? 'entregado' : 'procesando',
+                'estado' => $request->metodo_pago === 'efectivo' ? 'pendiente' : 'procesando',
                 'metodo_pago' => $request->metodo_pago,
             ]);
 
@@ -172,15 +132,12 @@ class UserController extends Controller
             }
 
             // Create payment
-            $metodoPago = MetodoPago::where('nombre', $request->metodo_pago)->first();
-            if (!$metodoPago) {
-                throw new \Exception("Método de pago {$request->metodo_pago} no encontrado.");
-            }
+            $metodoPago = MetodoPago::where('nombre', $request->metodo_pago)->firstOrFail();
             Pago::create([
                 'orden_id' => $orden->id,
                 'metodo_pago_id' => $metodoPago->id,
                 'monto' => $total,
-                'estado' => $request->metodo_pago === 'efectivo' ? 'completado' : 'pendiente',
+                'estado' => $request->metodo_pago === 'efectivo' ? 'pendiente' : 'pendiente',
             ]);
 
             // Clear cart
@@ -188,23 +145,76 @@ class UserController extends Controller
 
             DB::commit();
 
-            return redirect()->route('user.orders')->with('success', 'Orden procesada con éxito.');
+            // Notificación según método de pago
+            $sessionKey = $request->metodo_pago === 'efectivo' ? 'efectivo_notification' : 'success';
+            $message = $request->metodo_pago === 'efectivo' 
+                ? 'Orden procesada. Por favor, diríjase al local para pagar en efectivo y recibir su pedido.'
+                : 'Orden procesada con éxito.';
+
+            return redirect()->route('user.orders')->with($sessionKey, $message);
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error("Error processing checkout: {$e->getMessage()}", ['trace' => $e->getTraceAsString()]);
-            return redirect()->route('user.cart')->with('error', 'Error al procesar la orden: ' . $e->getMessage());
+            Log::error("Error processing checkout: {$e->getMessage()}", ['trace' => $e->getTraceAsString()]);
+            return redirect()->route('user.cart')->with('error', 'Error al procesar la orden. Por favor, intenta de nuevo.');
+        }
+    }
+
+    public function cancelOrder(Request $request, Orden $orden)
+    {
+        if ($orden->user_id !== Auth::id()) {
+            return redirect()->route('user.orders')->with('error', 'No tienes permiso para cancelar esta orden.');
+        }
+
+        if ($orden->metodo_pago === 'nequi' && $orden->estado !== 'procesando') {
+            return redirect()->route('user.orders')->with('error', 'No se puede cancelar esta orden.');
+        }
+
+        if ($orden->metodo_pago === 'efectivo' && $orden->estado !== 'pendiente') {
+            return redirect()->route('user.orders')->with('error', 'No se puede cancelar esta orden.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Restaurar stock
+            foreach ($orden->detalles as $detalle) {
+                $producto = Producto::findOrFail($detalle->producto_id);
+                $producto->increment('stock', $detalle->cantidad);
+            }
+
+            // Actualizar estado de la orden
+            $orden->estado = 'cancelado';
+            $orden->save();
+
+            // Actualizar estado del pago
+            $pago = Pago::where('orden_id', $orden->id)->firstOrFail();
+            $pago->estado = 'pendiente'; // Usar 'pendiente' para ambos métodos de pago
+            $pago->save();
+
+            DB::commit();
+
+            $sessionKey = $orden->metodo_pago === 'nequi' ? 'nequi_cancel' : 'efectivo_cancel';
+            $message = $orden->metodo_pago === 'nequi' 
+                ? 'Orden cancelada. El reembolso está en proceso.' 
+                : 'Orden cancelada. No se realizará el pedido.';
+
+            return redirect()->route('user.orders')->with($sessionKey, $message);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Error cancelling order: {$e->getMessage()}", ['trace' => $e->getTraceAsString()]);
+            return redirect()->route('user.orders')->with('error', 'Error al cancelar la orden: ' . $e->getMessage());
         }
     }
 
     public function settings()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         return view('users.settings', compact('user'));
     }
 
     public function updateSettings(Request $request)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
         $request->validate([
             'name' => 'required|string|max:255',
@@ -222,13 +232,12 @@ class UserController extends Controller
         }
 
         $user->update($data);
-
         return redirect()->route('user.settings')->with('success', 'Configuración actualizada correctamente.');
     }
 
     public function showOrder(Orden $orden)
     {
-        if ($orden->user_id !== auth()->id()) {
+        if ($orden->user_id !== Auth::id()) {
             abort(403, 'No tienes permiso para ver esta orden.');
         }
 
@@ -237,7 +246,22 @@ class UserController extends Controller
 
     public function profile()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         return view('users.user', compact('user'));
+    }
+
+    private function getFilteredProducts(Request $request)
+    {
+        $query = Producto::where('stock', '>', 0);
+
+        if ($search = $request->query('search')) {
+            $query->where('nombre', 'like', '%' . $search . '%');
+        }
+
+        if ($category = $request->query('category')) {
+            $query->where('categoria_id', $category);
+        }
+
+        return $query->with('categoria')->paginate(12);
     }
 }

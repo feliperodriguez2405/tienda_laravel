@@ -14,12 +14,12 @@
 }
 
 [data-theme="dark"] {
-    --primary-color: #263238;
-    --secondary-color: #006064;
-    --text-color: #e9ecef;
-    --bg-color: #1B1F23;
-    --heading-color-strong: #e9ecef;
-    --div-bg: #0061642f;
+    --primary-color: #263238; 
+    --secondary-color: #006064; 
+    --text-color: #cfd8dc; 
+    --bg-color: #12191d; 
+    --heading-color-strong: #e0f7fa;
+    --div-bg: #1e2b30; 
 }
 
 body {
@@ -75,7 +75,7 @@ h2,
 h3,
 h4,
 h5 {
-    color: var(--heading-color);
+    color: var(--heading-color-strong);
 }
 
 p {
@@ -154,6 +154,18 @@ p {
     padding: 1.5rem;
 }
 
+.card-title {
+    font-size: 1.5rem;
+    color: var(--heading-color-strong);
+    margin-bottom: 0.5rem;
+}
+
+.card-text {
+    font-size: 1rem;
+    color: var(--text-color);
+    margin-bottom: 1.2rem;
+}
+
 /* tarjetas de productos */
 
 .product-card {
@@ -186,7 +198,6 @@ p {
 
 .product-card h5 {
     font-size: 1.3rem;
-    color: var(--heading-color);
     margin-bottom: 0.6rem;
     font-weight: 700;
 }
@@ -309,25 +320,116 @@ main {
     }
 }
 
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea::placeholder {
+    color: #90a4ae; /* Gris azulado suave */
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+    background-color: #1e2b30; /* Fondo del input */
+    color: #cfd8dc; /* Texto principal */
+    border: 1px solid #37474f; /* Borde oscuro tenue */
+}
+
+[data-theme="dark"] option {
+    background-color: #1e2b30;
+    color: #cfd8dc;
+}
+
 /* Footer */
-footer {
+.footer {
     background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
-    padding: 1.5rem 0;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+    padding: 2rem 0;
     border-radius: 10px 10px 0 0;
-}
-
-footer p,
-footer h5 {
     color: #fff;
-    opacity: 0.9;
 }
 
-footer a img:hover {
-    transform: scale(1.2);
+/* Estilos para el texto */
+.footer h5 {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin-bottom: 1rem;
+    color: var(--secundary-color);
+}
+
+.footer p,
+.footer a {
+    color: #fff;
+    opacity: 0.85;
+    font-size: 0.875rem;
+    transition: opacity 0.3s ease;
+}
+
+.footer a:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+/* Botones de manuales */
+.footer .btn-sm {
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+    width: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.footer .btn-outline-light:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: #fff;
+}
+
+/* Iconos de redes sociales */
+.footer img {
     transition: transform 0.3s ease;
 }
 
+.footer img:hover {
+    transform: scale(1.2);
+}
+
+/* Línea separadora */
+.footer hr {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsividad */
+@media (max-width: 767.98px) {
+    .footer .row > div {
+        text-align: center !important;
+    }
+
+    .footer h5 {
+        font-size: 1.1rem;
+    }
+
+    .footer p,
+    .footer a {
+        font-size: 0.85rem;
+    }
+
+    .footer .btn-sm {
+        max-width: 180px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .footer .d-flex {
+        justify-content: center;
+    }
+}
+
+@media (min-width: 768px) {
+    .footer .row > div:first-child {
+        text-align: left;
+    }
+    .footer .row > div:last-child {
+        text-align: right;
+    }
+}
 
 /* Botón Logout */
 .logout-link {
@@ -407,3 +509,46 @@ footer a img:hover {
     color: white; /* Color base para fondos oscuros */
     mix-blend-mode: difference; /* Invierte el color según el fondo */
 }
+
+.whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .whatsapp-float a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            background-color: #25D366;
+            color: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            animation: pulse 2s infinite;
+        }
+        .whatsapp-float a:hover {
+            transform: scale(1.1);
+            background-color: #20b354;
+            animation: none;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @media (max-width: 576px) {
+            .whatsapp-float {
+                bottom: 15px;
+                right: 15px;
+            }
+            .whatsapp-float a {
+                width: 60px;
+                height: 60px;
+            }
+            .whatsapp-float a i {
+                font-size: 1.8rem;
+            }
+        }

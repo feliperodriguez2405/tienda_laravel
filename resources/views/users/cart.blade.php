@@ -12,6 +12,15 @@
     @if (session('error'))
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     @if (empty($cart))
         <p class="text-center text-muted">Tu carrito está vacío.</p>
@@ -68,7 +77,6 @@
                         <td class="fw-bold">${{ number_format($productos->sum(fn($p) => $p->precio * $cart[$p->id]), 2) }}</td>
                         <td></td>
                     </tr>
-                    <!-- Optional: Add tax or discount -->
                     <tr>
                         <td colspan="3" class="text-end fw-bold">Impuesto (19% IVA):</td>
                         <td class="fw-bold">${{ number_format($productos->sum(fn($p) => $p->precio * $cart[$p->id]) * 0.19, 2) }}</td>
@@ -82,9 +90,30 @@
                 </tfoot>
             </table>
         </div>
-        <div class="text-end">
-            <a href="{{ route('user.checkout') }}" class="btn btn-success">Proceder al Pago</a>
-        </div>
+
+        <!-- Formulario de Checkout -->
+        <form action="{{ route('user.cart.checkout') }}" method="POST" class="mt-4">
+            @csrf
+            <div class="mb-3">
+                <label for="metodo_pago" class="form-label fw-bold">Método de Pago</label>
+                <select name="metodo_pago" id="metodo_pago" class="form-select @error('metodo_pago') is-invalid @enderror" required>
+                    <option value="" disabled selected>Selecciona un método</option>
+                    <option value="efectivo" {{ old('metodo_pago') == 'efectivo' ? 'selected' : '' }}>Efectivo</option>
+                    <option value="nequi" {{ old('metodo_pago') == 'nequi' ? 'selected' : '' }}>Nequi</option>
+                </select>
+                @error('metodo_pago')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+                <div id="nequi-message" class="alert alert-info mt-2 d-none">
+                    Por favor, realiza el pago con Nequi al número 3152971513.
+                </div>
+            </div>
+            <div class="text-end">
+                <button type="submit" class="btn btn-success" data-bs-toggle="tooltip" data-bs-placement="top" title="Confirmar la orden y proceder al pago">
+                    Confirmar Orden
+                </button>
+            </div>
+        </form>
     @endif
 
     <div class="mt-4">
@@ -94,6 +123,7 @@
     </div>
 </div>
 
+@push('scripts')
 <script>
     // Initialize Bootstrap tooltips
     document.addEventListener('DOMContentLoaded', function () {
@@ -101,6 +131,24 @@
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+
+        // Mostrar/Ocultar mensaje de Nequi según selección
+        const metodoPagoSelect = document.getElementById('metodo_pago');
+        const nequiMessage = document.getElementById('nequi-message');
+
+        metodoPagoSelect.addEventListener('change', function () {
+            if (this.value === 'nequi') {
+                nequiMessage.classList.remove('d-none');
+            } else {
+                nequiMessage.classList.add('d-none');
+            }
+        });
+
+        // Mostrar mensaje si Nequi está seleccionado al cargar la página
+        if (metodoPagoSelect.value === 'nequi') {
+            nequiMessage.classList.remove('d-none');
+        }
     });
 </script>
+@endpush
 @endsection

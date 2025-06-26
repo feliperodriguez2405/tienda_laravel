@@ -3,12 +3,12 @@
 @section('title', 'Gestión de Categorías')
 
 @section('content')
-<div class="container my-5">
+<div class="container my-3">
     <!-- Encabezado -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="fw-bold">Lista de Categorías</h1>
-            <p class="text-muted">Administra las categorías del sistema.</p>
+            <h1 class="fw-bold  mb-0">Lista de Categorías</h1>
+            <p>Administra las categorías del sistema.</p>
         </div>
         <a href="{{ route('categorias.create') }}" class="btn btn-success">
             <i class="fas fa-plus"></i> Agregar Categoría

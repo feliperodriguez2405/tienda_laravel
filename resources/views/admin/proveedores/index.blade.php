@@ -3,43 +3,12 @@
 @section('title', 'Gestión de Proveedores')
 
 @section('content')
-<style>
-    /* Custom styles for better responsiveness */
-    @media (max-width: 768px) {
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            align-items: start;
-        }
-        .action-buttons .btn {
-            width: 100%;
-            text-align: left;
-        }
-        .header-buttons {
-            margin-top: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            align-items: stretch;
-        }
-        .header-buttons .btn {
-            width: 100%;
-        }
-        .table-responsive {
-            font-size: 0.9rem;
-        }
-        .table th, .table td {
-            white-space: nowrap;
-        }
-    }
-</style>
 
 <div class="container py-4">
     <div class="row mb-4 align-items-center">
         <div class="col-12 col-md-6">
-            <h2 class="mb-0 text-primary fw-bold">Gestión de Proveedores</h2>
-            <p class="text-muted">Administra los proveedores del supermercado</p>
+            <h1 class="mb-0 fw-bold">Gestión de Proveedores</h1>
+            <p>Administra los proveedores del supermercado</p>
         </div>
         <div class="col-12 col-md-6 text-md-end header-buttons">
             <a href="{{ route('proveedores.create') }}" class="btn btn-primary">

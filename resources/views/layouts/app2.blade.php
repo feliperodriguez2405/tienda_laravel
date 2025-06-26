@@ -19,7 +19,7 @@
 <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav ms-auto align-items-center">
         <li class="nav-item">
-            <a class="nav-link" href="{{ route('user.products') }}">
+            <a class="nav-link" href="{{ route('user.dashboard') }}">
                 <i class="bi bi-cart me-1"></i>Productos
             </a>
         </li>

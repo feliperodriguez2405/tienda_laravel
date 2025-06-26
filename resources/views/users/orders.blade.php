@@ -10,6 +10,10 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    @if (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
     @if ($ordenes->isEmpty())
         <p class="text-center text-muted">No tienes órdenes registradas.</p>
     @else
@@ -23,6 +27,7 @@
                         <th>Estado</th>
                         <th>Método de Pago</th>
                         <th>Detalles</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,10 +48,31 @@
                                     Ver Detalles
                                 </button>
                             </td>
+                            <td>
+                                @if ($orden->estado === 'procesando' && $orden->metodo_pago === 'nequi')
+                                    <form action="{{ route('order.cancel', $orden->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de cancelar este pedido? Se iniciará el proceso de devolución.');">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-danger btn-sm">Cancelar</button>
+                                    </form>
+                                @elseif ($orden->estado === 'pendiente' && $orden->metodo_pago === 'efectivo')
+                                    <form action="{{ route('order.cancel', $orden->id) }}" method="POST" onsubmit="return confirm('¿Estás seguro de cancelar este pedido? No se realizará el pedido.');">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="btn btn-danger btn-sm">Cancelar</button>
+                                    </form>
+                                @elseif ($orden->estado === 'cancelado')
+                                    <button class="btn btn-danger btn-sm" disabled>Cancelado</button>
+                                @endif
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
             </table>
+        </div>
+        <!-- Paginación -->
+        <div class="mt-4">
+            {{ $ordenes->links() }}
         </div>
     @endif
 
@@ -101,6 +127,16 @@
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl);
         });
+
+        // Mostrar alerta para pagos con Nequi al cancelar
+        @if (session('nequi_cancel'))
+            alert('En estos momentos el cajero o administrador está devolviendo el dinero. Si no ha recibido nada en unos minutos, por favor póngase en contacto con el local.');
+        @endif
+
+        // Mostrar alerta para cancelación de pago en efectivo
+        @if (session('efectivo_cancel'))
+            alert('El pedido ha sido cancelado. No se realizará el pedido.');
+        @endif
     });
 </script>
 @endsection

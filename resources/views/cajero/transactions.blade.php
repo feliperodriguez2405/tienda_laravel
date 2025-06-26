@@ -21,7 +21,6 @@
                     <option value="">Todos los estados</option>
                     <option value="pendiente" {{ request('estado') == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
                     <option value="procesando" {{ request('estado') == 'procesando' ? 'selected' : '' }}>Procesando</option>
-                    <option value="enviado" {{ request('estado') == 'enviado' ? 'selected' : '' }}>Enviado</option>
                     <option value="entregado" {{ request('estado') == 'entregado' ? 'selected' : '' }}>Entregado</option>
                     <option value="cancelado" {{ request('estado') == 'cancelado' ? 'selected' : '' }}>Cancelado</option>
                 </select>
@@ -86,7 +85,7 @@
                     <td>{{ $orden->id }}</td>
                     <td>{{ $orden->user->name }}</td>
                     <td>${{ number_format($orden->total, 2) }}</td>
-                    <td>{{ ucfirst($orden->metodo_pago ?? 'N/A') }}</td>
+                    <td>{{ isset($orden->metodo_pago) ? ucfirst($orden->metodo_pago) : 'N/A' }}</td>
                     <td>
                         <span class="badge bg-{{ $orden->estado == 'pendiente' ? 'warning' : ($orden->estado == 'procesando' ? 'info' : ($orden->estado == 'entregado' ? 'success' : ($orden->estado == 'cancelado' ? 'danger' : 'primary'))) }}">
                             {{ ucfirst($orden->estado) }}
@@ -96,11 +95,14 @@
                     <td>
                         <button class="btn btn-sm btn-outline-info view-details" 
                                 data-id="{{ $orden->id }}" 
-                                data-details="{{ json_encode($orden->detalles->map(fn($detalle) => [
-                                    'producto' => $detalle->producto->nombre,
-                                    'cantidad' => $detalle->cantidad,
-                                    'subtotal' => $detalle->subtotal
-                                ])) }}"
+                                data-estado="{{ $orden->estado }}"
+                                data-details="{{ json_encode($orden->detalles->map(function($detalle) {
+                                    return [
+                                        'producto' => $detalle->producto->nombre,
+                                        'cantidad' => $detalle->cantidad,
+                                        'subtotal' => $detalle->subtotal
+                                    ];
+                                })) }}"
                                 data-bs-toggle="modal" 
                                 data-bs-target="#detailsModal">
                             Ver Detalles
@@ -113,7 +115,6 @@
                             <select name="estado" class="form-select form-select-sm d-inline w-auto" onchange="this.form.submit()">
                                 <option value="pendiente" {{ $orden->estado == 'pendiente' ? 'selected' : '' }}>Pendiente</option>
                                 <option value="procesando" {{ $orden->estado == 'procesando' ? 'selected' : '' }}>Procesando</option>
-                                <option value="enviado" {{ $orden->estado == 'enviado' ? 'selected' : '' }}>Enviado</option>
                                 <option value="entregado" {{ $orden->estado == 'entregado' ? 'selected' : '' }}>Entregado</option>
                                 <option value="cancelado" {{ $orden->estado == 'cancelado' ? 'selected' : '' }}>Cancelado</option>
                             </select>
@@ -143,6 +144,11 @@
         </tbody>
     </table>
 
+    <!-- Paginación -->
+    <div class="mt-4">
+        {{ $ordenes->links() }}
+    </div>
+
     <!-- Modal para detalles -->
     <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -153,6 +159,10 @@
                 </div>
                 <div class="modal-body">
                     <p><strong>ID Orden:</strong> <span id="modal-order-id"></span></p>
+                    <p><strong>Estado:</strong> <span id="modal-order-estado"></span></p>
+                    <div id="cancelled-alert" class="alert alert-danger d-none" role="alert">
+                        Esta orden ha sido cancelada.
+                    </div>
                     <table class="table">
                         <thead>
                             <tr>
@@ -191,7 +201,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('Transactions page loaded'); // Debug: Confirm script runs
+        console.log('Transactions page loaded');
 
         // Manejar eliminación con confirmación
         document.querySelectorAll('.delete-form').forEach(form => {
@@ -218,7 +228,7 @@
         document.querySelectorAll('.pay-form').forEach(form => {
             form.addEventListener('submit', (e) => {
                 e.preventDefault();
-                console.log('Pay form submitted'); // Debug: Confirm form click
+                console.log('Pay form submitted');
                 Swal.fire({
                     title: 'Confirmar pago',
                     text: '¿Confirmas que el pago en efectivo ha sido recibido?',
@@ -230,10 +240,10 @@
                     cancelButtonText: 'Cancelar'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        console.log('Payment confirmed, submitting form'); // Debug: Confirm submission
+                        console.log('Payment confirmed, submitting form');
                         form.submit();
                     } else {
-                        console.log('Payment cancelled'); // Debug: Confirm cancellation
+                        console.log('Payment cancelled');
                     }
                 });
             });
@@ -242,10 +252,18 @@
         // Mostrar detalles en el modal
         document.querySelectorAll('.view-details').forEach(button => {
             button.addEventListener('click', () => {
-                console.log('View details clicked'); // Debug: Confirm details click
+                console.log('View details clicked');
                 const orderId = button.dataset.id;
+                const estado = button.dataset.estado;
                 const details = JSON.parse(button.dataset.details);
                 document.getElementById('modal-order-id').textContent = orderId;
+                document.getElementById('modal-order-estado').textContent = estado.charAt(0).toUpperCase() + estado.slice(1);
+                const cancelledAlert = document.getElementById('cancelled-alert');
+                if (estado === 'cancelado') {
+                    cancelledAlert.classList.remove('d-none');
+                } else {
+                    cancelledAlert.classList.add('d-none');
+                }
                 const tbody = document.getElementById('modal-details');
                 tbody.innerHTML = '';
                 details.forEach(detail => {

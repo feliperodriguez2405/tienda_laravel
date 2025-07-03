@@ -55,7 +55,7 @@
 
                 <!-- Precio -->
                 <div class="col-md-3 mb-2">
-                    <label for="precio" class="form-label fw-medium small">Precio ($)</label>
+                    <label for="precio" class="form-label fw-medium small">Precio-venta ($)</label>
                     <input type="number" 
                            name="precio" 
                            id="precio" 

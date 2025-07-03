@@ -85,6 +85,12 @@
     <div class="container">
         <p>© {{ date('Y') }} Tienda D'jenny - Panel de Administración</p>
     </div>
+    <div class="faq-float">
+        <a href="{{ route('manuala') }}" class="faq-btn">
+            <span class="faq-icon"><i class="bi bi-question-circle"></i></span>
+            <span class="faq-text">Preguntas Frecuentes</span>
+        </a>
+    </div>
 @endsection
 
 <!-- Scripts -->

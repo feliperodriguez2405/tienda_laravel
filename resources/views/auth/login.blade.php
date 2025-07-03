@@ -60,14 +60,14 @@
         </button>
     </div>
 
-    <!-- Enlace a contraseña olvidada -->
-    @if (Route::has('password.request'))
+    <!-- Enlace a contraseña olvidada   @if (Route::has('password.request'))
         <div class="extra-links">
             <a href="{{ route('password.request') }}">
                 ¿Olvidaste tu contraseña?
             </a>
         </div>
-    @endif
+    @endif -->
+  
 </form>
 
 <!-- Registro -->

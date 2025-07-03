@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\{Orden, DetalleOrden, User};
 use Illuminate\Support\Facades\{Log, Auth};
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class AdminController extends Controller
 {
@@ -21,29 +22,21 @@ class AdminController extends Controller
      */
     public function usersIndex(Request $request)
     {
-        // Initialize query builder for users
         $query = User::query();
 
-        // Apply search filters if provided
         if ($request->filled('name')) {
-            // Filter by name (case-insensitive, partial match)
             $query->where('name', 'like', '%' . $request->input('name') . '%');
         }
 
         if ($request->filled('email')) {
-            // Filter by email (case-insensitive, partial match)
             $query->where('email', 'like', '%' . $request->input('email') . '%');
         }
 
         if ($request->filled('role')) {
-            // Filter by role (exact match)
             $query->where('role', $request->input('role'));
         }
 
-        // Paginate results, 10 per page
         $users = $query->paginate(10);
-
-        // Pass the filtered and paginated users to the view
         return view('admin.users.index', compact('users'));
     }
 
@@ -73,7 +66,7 @@ class AdminController extends Controller
             return redirect()->route('admin.users.index')->with('success', 'Usuario creado correctamente.');
         } catch (\Exception $e) {
             Log::error('Error creando usuario: ' . $e->getMessage());
-            return redirect()->route('admin.users.create')->with('error', 'Error al crear el usuario. Intenta de nuevo.');
+            return redirect()->route('admin.users.create')->with('error', 'Error al crear el usuario: ' . $e->getMessage());
         }
     }
 
@@ -109,29 +102,25 @@ class AdminController extends Controller
             return redirect()->route('admin.users.index')->with('success', 'Usuario actualizado correctamente.');
         } catch (\Exception $e) {
             Log::error('Error actualizando usuario ID ' . $user->id . ': ' . $e->getMessage());
-            return redirect()->route('admin.users.edit', $user)->with('error', 'Error al actualizar el usuario. Intenta de nuevo.');
+            return redirect()->route('admin.users.edit', $user)->with('error', 'Error al actualizar el usuario: ' . $e->getMessage());
         }
     }
 
     /**
      * Remove the specified user from storage.
      */
-    public function destroy(User $user)
+    public function destroy(Request $request, User $user)
     {
         if ($user->id === Auth::id()) {
-            return redirect()->route('admin.users.index')->with('error', 'No puedes eliminar tu propio usuario.');
-        }
-
-        if ($user->ordenes()->exists()) {
-            return redirect()->route('admin.users.index')->with('error', 'No se puede eliminar un usuario con órdenes asociadas.');
+            return response()->json(['error' => 'No puedes eliminar tu propio usuario.'], 403);
         }
 
         try {
             $user->delete();
-            return redirect()->route('admin.users.index')->with('success', 'Usuario eliminado correctamente.');
+            return response()->json(['success' => 'Usuario eliminado correctamente.']);
         } catch (\Exception $e) {
             Log::error('Error eliminando usuario ID ' . $user->id . ': ' . $e->getMessage());
-            return redirect()->route('admin.users.index')->with('error', 'Error al eliminar el usuario. Intenta de nuevo.');
+            return response()->json(['error' => 'No se puede eliminar el usuario: ' . $e->getMessage()], 500);
         }
     }
 
@@ -140,31 +129,23 @@ class AdminController extends Controller
      */
     public function pedidos(Request $request)
     {
-        // Initialize query builder for orders with related user and details
         $query = Orden::with(['detalles.producto', 'user']);
 
-        // Apply search filters if provided
         if ($request->filled('client_name')) {
-            // Filter by client name (case-insensitive, partial match)
             $query->whereHas('user', function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->input('client_name') . '%');
             });
         }
 
         if ($request->filled('order_id')) {
-            // Filter by order ID (exact match)
             $query->where('id', $request->input('order_id'));
         }
 
         if ($request->filled('status')) {
-            // Filter by status (exact match)
             $query->where('estado', $request->input('status'));
         }
 
-        // Paginate results, 10 per page, and order by latest
         $ordenes = $query->latest()->paginate(10);
-
-        // Pass the filtered and paginated orders to the view
         return view('admin.pedidos', compact('ordenes'));
     }
 
@@ -180,7 +161,7 @@ class AdminController extends Controller
             return redirect()->route('admin.pedidos')->with('success', 'Estado actualizado correctamente.');
         } catch (\Exception $e) {
             Log::error('Error actualizando estado de orden ID ' . $orden->id . ': ' . $e->getMessage());
-            return redirect()->route('admin.pedidos')->with('error', 'Error al actualizar el estado. Intenta de nuevo.');
+            return redirect()->route('admin.pedidos')->with('error', 'Error al actualizar el estado: ' . $e->getMessage());
         }
     }
 
@@ -198,7 +179,7 @@ class AdminController extends Controller
             return redirect()->route('admin.pedidos')->with('success', 'Reembolso procesado correctamente.');
         } catch (\Exception $e) {
             Log::error('Error procesando reembolso para orden ID ' . $orden->id . ': ' . $e->getMessage());
-            return redirect()->route('admin.pedidos')->with('error', 'Error al procesar el reembolso. Intenta de nuevo.');
+            return redirect()->route('admin.pedidos')->with('error', 'Error al procesar el reembolso: ' . $e->getMessage());
         }
     }
 
@@ -208,11 +189,19 @@ class AdminController extends Controller
     public function generateInvoice(Orden $orden)
     {
         try {
-            // Placeholder for invoice generation logic
-            return response()->json(['message' => "Factura generada para orden {$orden->id}"]);
+            $pdf = Pdf::loadView('admin.facture_pdf', compact('orden'));
+            return $pdf->download('factura_pedido_' . $orden->id . '.pdf');
         } catch (\Exception $e) {
             Log::error('Error generando factura para orden ID ' . $orden->id . ': ' . $e->getMessage());
-            return response()->json(['error' => 'Error al generar la factura.'], 500);
+            return redirect()->route('admin.pedidos')->with('error', 'Error al generar la factura: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Generate an HTML invoice for the specified order.
+     */
+    public function invoice(Orden $orden)
+    {
+        return view('admin.invoice', compact('orden'));
     }
 }

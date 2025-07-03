@@ -23,7 +23,7 @@
     @endif
 
     @if (empty($cart))
-        <p class="text-center text-muted">Tu carrito está vacío.</p>
+        <p class="text-center">Tu carrito está vacío.</p>
     @else
         <div class="table-responsive">
             <table class="table table-hover">

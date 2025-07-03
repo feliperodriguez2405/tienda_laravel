@@ -40,7 +40,7 @@
             <div class="col-12 col-md-4 text-center text-md-start mb-4 mb-md-0">
                 <h5 class="mb-3 text-uppercase fw-bold">Síguenos</h5>
                 <div class="d-flex justify-content-center justify-content-md-start gap-3">
-                    <a href="https://wa.me/1234567890" target="_blank" class="d-inline-block" title="WhatsApp">
+                    <a href="https://wa.me/573172343575?text=¡Hola! Estoy interesado en obtener más información sobre el software D'Jenny para tiendas de abarrotes." target="_blank" title="Contactar por WhatsApp">
                         <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg" alt="WhatsApp" width="28" height="28" style="filter: invert(1);">
                     </a>
                     <a href="https://www.facebook.com/profile.php?id=61560973980821" target="_blank" class="d-inline-block" title="Facebook">
@@ -88,7 +88,7 @@
 
     <!-- Botón flotante de WhatsApp -->
     <div class="whatsapp-float">
-        <a href="https://wa.me/573152971513?text=¡Hola! Estoy interesado en obtener más información sobre el software D'Jenny para tiendas de abarrotes." target="_blank" title="Contactar por WhatsApp">
+        <a href="https://wa.me/573172343575?text=¡Hola! Estoy interesado en obtener más información sobre el software D'Jenny para tiendas de abarrotes." target="_blank" title="Contactar por WhatsApp">
             <i class="bi bi-whatsapp" style="font-size: 2rem;"></i>
         </a>
     </div>

@@ -6,8 +6,8 @@
 <div class="container py-4">
     <div class="row mb-4 align-items-center">
         <div class="col-md-6">
-            <h2 class="mb-0 text-primary fw-bold">Nueva Orden de Compra - {{ $proveedor->nombre }}</h2>
-            <p class="text-muted">Complete los detalles de la orden</p>
+            <h2 class="mb-0 fw-bold">Nueva Orden de Compra - {{ $proveedor->nombre }}</h2>
+            <p>Complete los detalles de la orden</p>
         </div>
         <div class="col-md-6 text-end">
             <a href="{{ route('admin.proveedores.ordenes.historial', $proveedor) }}" class="btn btn-secondary">
@@ -50,7 +50,7 @@
                     <div id="detalles-container">
                         @php $productos = \App\Models\Producto::all(); @endphp
                         <div class="row mb-2 detalle-row" data-index="0">
-                            <div class="col-md-4">
+                            <div class="col-md-2">
                                 <input type="text" name="detalles[0][producto]" 
                                        class="form-control producto-input" 
                                        placeholder="Producto" 
@@ -63,14 +63,28 @@
                                     @endforeach
                                 </datalist>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <input type="number" name="detalles[0][cantidad]" 
                                        class="form-control" 
                                        placeholder="Cantidad" 
                                        value="{{ old('detalles.0.cantidad') }}" 
                                        min="1" required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
+                                <input type="number" name="detalles[0][precio_compra]" 
+                                       class="form-control" 
+                                       placeholder="Precio Compra (COP)" 
+                                       value="{{ old('detalles.0.precio_compra') }}" 
+                                       step="0.01" min="0" required>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="number" name="detalles[0][precio_venta]" 
+                                       class="form-control" 
+                                       placeholder="Precio Venta (COP)" 
+                                       value="{{ old('detalles.0.precio_venta') }}" 
+                                       step="0.01" min="0" required>
+                            </div>
+                            <div class="col-md-2">
                                 <input type="text" name="detalles[0][descripcion]" 
                                        class="form-control" 
                                        placeholder="Descripción (opcional)" 
@@ -128,7 +142,7 @@
             newRow.className = 'row mb-2 detalle-row';
             newRow.setAttribute('data-index', index);
             newRow.innerHTML = `
-                <div class="col-md-4">
+                <div class="col-md-2">
                     <input type="text" name="detalles[${index}][producto]" 
                            class="form-control producto-input" 
                            placeholder="Producto" 
@@ -136,14 +150,30 @@
                            required>
                     <datalist id="productos-list">${productosList}</datalist>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <input type="number" name="detalles[${index}][cantidad]" 
                            class="form-control" 
                            placeholder="Cantidad" 
                            min="1" 
                            required>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
+                    <input type="number" name="detalles[${index}][precio_compra]" 
+                           class="form-control" 
+                           placeholder="Precio Compra (COP)" 
+                           step="0.01" 
+                           min="0" 
+                           required>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="detalles[${index}][precio_venta]" 
+                           class="form-control" 
+                           placeholder="Precio Venta (COP)" 
+                           step="0.01" 
+                           min="0" 
+                           required>
+                </div>
+                <div class="col-md-2">
                     <input type="text" name="detalles[${index}][descripcion]" 
                            class="form-control" 
                            placeholder="Descripción (opcional)">
@@ -174,7 +204,7 @@
                     newRow{{ $i }}.className = 'row mb-2 detalle-row';
                     newRow{{ $i }}.setAttribute('data-index', {{ $i }});
                     newRow{{ $i }}.innerHTML = `
-                        <div class="col-md-4">
+                        <div class="col-md-2">
                             <input type="text" name="detalles[{{ $i }}][producto]" 
                                    class="form-control producto-input" 
                                    placeholder="Producto" 
@@ -183,7 +213,7 @@
                                    required>
                             <datalist id="productos-list">${productosList}</datalist>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <input type="number" name="detalles[{{ $i }}][cantidad]" 
                                    class="form-control" 
                                    placeholder="Cantidad" 
@@ -191,7 +221,25 @@
                                    min="1" 
                                    required>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
+                            <input type="number" name="detalles[{{ $i }}][precio_compra]" 
+                                   class="form-control" 
+                                   placeholder="Precio Compra (COP)" 
+                                   value="{{ $detalle['precio_compra'] ?? '' }}"
+                                   step="0.01" 
+                                   min="0" 
+                                   required>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" name="detalles[{{ $i }}][precio_venta]" 
+                                   class="form-control" 
+                                   placeholder="Precio Venta (COP)" 
+                                   value="{{ $detalle['precio_venta'] ?? '' }}"
+                                   step="0.01" 
+                                   min="0" 
+                                   required>
+                        </div>
+                        <div class="col-md-2">
                             <input type="text" name="detalles[{{ $i }}][descripcion]" 
                                    class="form-control" 
                                    placeholder="Descripción (opcional)"

@@ -44,7 +44,11 @@ class CategoriaController extends Controller
 
     public function update(Request $request, Categoria $categoria)
     {
-        $request->validate(['nombre' => 'required|string|max:255']);
+        $request->validate([
+            'nombre' => 'required|string|max:50|unique:categorias,nombre,' . $categoria->id,
+            'descripcion' => 'nullable|string',
+            'estado' => 'required|in:activo,inactivo'
+        ]);
 
         $categoria->update($request->all());
 
@@ -78,7 +82,14 @@ class CategoriaController extends Controller
     public function checkName(Request $request)
     {
         $nombre = $request->input('nombre');
-        $exists = Categoria::where('nombre', $nombre)->exists();
+        $id = $request->input('id');
+        $query = Categoria::where('nombre', $nombre);
+        
+        if ($id) {
+            $query->where('id', '!=', $id);
+        }
+
+        $exists = $query->exists();
 
         return response()->json([
             'exists' => $exists,

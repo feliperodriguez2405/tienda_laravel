@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use Illuminate\Http\Request;
 use App\Models\{OrdenCompra, Proveedor, Producto, Categoria};
 use App\Notifications\OrdenCompraNotification;
@@ -101,6 +100,8 @@ class ProveedorController extends Controller
             'detalles' => 'required|array',
             'detalles.*.producto' => 'required|string',
             'detalles.*.cantidad' => 'required|integer|min:1',
+            'detalles.*.precio_compra' => 'required|numeric|min:0', // Added precio_compra
+            'detalles.*.precio_venta' => 'required|numeric|min:0',  // Added precio_venta
             'detalles.*.descripcion' => 'nullable|string',
         ]);
 
@@ -116,7 +117,7 @@ class ProveedorController extends Controller
             foreach ($request->detalles as $detalle) {
                 $producto = Producto::firstOrCreate(
                     ['nombre' => $detalle['producto']],
-                    ['stock' => 0]
+                    ['stock' => 0, 'precio' => $detalle['precio_venta'], 'precio_compra' => $detalle['precio_compra'], 'categoria_id' => 1] // Default categoria_id
                 );
 
                 $producto->increment('stock', $detalle['cantidad']);
@@ -207,7 +208,10 @@ class ProveedorController extends Controller
             'estado' => 'required|in:entregado,completado,cancelado',
             'detalles' => 'required|array',
             'detalles.*.producto' => 'required|string|max:255',
-            'detalles.*.precio' => 'required|numeric|min:0',
+            'detalles.*.cantidad' => 'required|integer|min:1',
+            'detalles.*.precio_compra' => 'required|numeric|min:0', // Added precio_compra
+            'detalles.*.precio_venta' => 'required|numeric|min:0',  // Added precio_venta
+            'detalles.*.descripcion' => 'nullable|string|max:500',
         ]);
 
         $orden->estado = $data['estado'];
@@ -215,17 +219,18 @@ class ProveedorController extends Controller
         foreach ($data['detalles'] as $index => $detalleInput) {
             if (isset($detalles[$index])) {
                 $detalles[$index]['producto'] = $detalleInput['producto'];
-                if (isset($detalleInput['precio'])) {
-                    $detalles[$index]['precio'] = $detalleInput['precio'];
-                }
+                $detalles[$index]['cantidad'] = $detalleInput['cantidad'];
+                $detalles[$index]['precio_compra'] = $detalleInput['precio_compra'];
+                $detalles[$index]['precio_venta'] = $detalleInput['precio_venta'];
+                $detalles[$index]['descripcion'] = $detalleInput['descripcion'] ?? '';
             }
         }
         $orden->detalles = $detalles;
 
         $monto = 0;
         foreach ($detalles as $detalle) {
-            if (isset($detalle['precio']) && isset($detalle['cantidad'])) {
-                $monto += $detalle['precio'] * $detalle['cantidad'];
+            if (isset($detalle['precio_compra']) && isset($detalle['cantidad'])) {
+                $monto += $detalle['precio_compra'] * $detalle['cantidad'];
             }
         }
         $orden->monto = $monto;
@@ -234,11 +239,10 @@ class ProveedorController extends Controller
             foreach ($detalles as $detalle) {
                 $producto = Producto::firstOrCreate(
                     ['nombre' => $detalle['producto']],
-                    ['stock' => 0]
+                    ['stock' => 0, 'precio' => $detalle['precio_venta'], 'precio_compra' => $detalle['precio_compra'], 'categoria_id' => 1] // Default categoria_id
                 );
 
                 $producto->increment('stock', $detalle['cantidad']);
-                $producto->precio_compra = $detalle['precio'];
                 $producto->save();
 
                 session()->flash('alerta_productos.' . $producto->id, [
@@ -325,6 +329,8 @@ class ProveedorController extends Controller
             'detalles' => 'required|array|min:1',
             'detalles.*.producto' => 'required|string|max:255',
             'detalles.*.cantidad' => 'required|integer|min:1',
+            'detalles.*.precio_compra' => 'required|numeric|min:0', // Added precio_compra
+            'detalles.*.precio_venta' => 'required|numeric|min:0',  // Added precio_venta
             'detalles.*.descripcion' => 'nullable|string|max:500',
         ]);
     }
@@ -337,7 +343,7 @@ class ProveedorController extends Controller
         foreach ($detalles as $detalle) {
             $producto = Producto::firstOrCreate(
                 ['nombre' => $detalle['producto']],
-                ['stock' => 0]
+                ['stock' => 0, 'precio' => $detalle['precio_venta'], 'precio_compra' => $detalle['precio_compra'], 'categoria_id' => 1] // Default categoria_id
             );
             $producto->increment('stock', $detalle['cantidad']);
             $producto->save();

@@ -69,7 +69,6 @@ body {
 }
 
 /*contenido*/
-
 h1,
 h2,
 h3,
@@ -85,7 +84,6 @@ p {
 }
 
 /*Busqueda*/
-
 .search-input:focus,
 .category-select:focus {
     box-shadow: 0 0 5px #006064;
@@ -130,7 +128,6 @@ p {
 }
 
 /* Tarjetas */
-
 .card {
     border-radius: 15px;
     transition: all 0.3s ease;
@@ -142,8 +139,9 @@ p {
 .card-header {
     padding: 1rem 1.25rem;
     border-bottom: none;
-    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
 }
+
 .card-header h5 {
     color: #fff;
     font-weight: 600;
@@ -167,7 +165,6 @@ p {
 }
 
 /* tarjetas de productos */
-
 .product-card {
     background-color: rgba(0, 96, 100, 0.25);
     border-radius: 10px;
@@ -176,6 +173,7 @@ p {
     overflow: hidden;
     margin-bottom: 1.5rem;
 }
+
 .product-card:hover {
     transform: translateY(-8px);
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.15);
@@ -204,7 +202,7 @@ p {
 
 .product-card p {
     font-size: 0.95rem;
-    color:var(--text-color);
+    color: var(--text-color);
     margin-bottom: 1.2rem;
 }
 
@@ -220,7 +218,6 @@ p {
 }
 
 /*Tablas*/
-
 table {
     width: 100%;
     margin-bottom: 1.5rem;
@@ -245,7 +242,6 @@ table {
 }
 
 /* Selectores */
-
 label {
     font-weight: 600;
     color: var(--text-color);
@@ -253,7 +249,6 @@ label {
 
 select,
 input[type="text"],
-
 input[type="number"] {
     width: 100%;
     padding: 0.5rem 0.75rem;
@@ -271,7 +266,6 @@ input[type="number"]:focus {
 }
 
 /* Listas */
-
 .list-group-item {
     border: none;
     padding: 0.75rem 0;
@@ -314,7 +308,6 @@ main {
     from {
         opacity: 0;
     }
-
     to {
         opacity: 1;
     }
@@ -323,15 +316,15 @@ main {
 [data-theme="dark"] input::placeholder,
 [data-theme="dark"] select,
 [data-theme="dark"] textarea::placeholder {
-    color: #90a4ae; /* Gris azulado suave */
+    color: #90a4ae;
 }
 
 [data-theme="dark"] input,
 [data-theme="dark"] select,
 [data-theme="dark"] textarea {
-    background-color: #1e2b30; /* Fondo del input */
-    color: #cfd8dc; /* Texto principal */
-    border: 1px solid #37474f; /* Borde oscuro tenue */
+    background-color: #1e2b30;
+    color: #cfd8dc;
+    border: 1px solid #37474f;
 }
 
 [data-theme="dark"] option {
@@ -401,22 +394,18 @@ main {
     .footer .row > div {
         text-align: center !important;
     }
-
     .footer h5 {
         font-size: 1.1rem;
     }
-
     .footer p,
     .footer a {
         font-size: 0.85rem;
     }
-
     .footer .btn-sm {
         max-width: 180px;
         margin-left: auto;
         margin-right: auto;
     }
-
     .footer .d-flex {
         justify-content: center;
     }
@@ -447,11 +436,9 @@ main {
         text-align: center;
         padding-top: 1rem;
     }
-
     .nav-item {
         margin: 0.5rem 0;
     }
-
     .theme-toggle {
         margin: 0.5rem;
     }
@@ -506,49 +493,125 @@ main {
 }
 
 .auto-contrast {
-    color: white; /* Color base para fondos oscuros */
-    mix-blend-mode: difference; /* Invierte el color según el fondo */
+    color: white;
+    mix-blend-mode: difference;
 }
 
+/* WhatsApp Floating Button */
 .whatsapp-float {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-        .whatsapp-float a {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 50px;
-            height: 50px;
-            background-color: #25D366;
-            color: white;
-            border-radius: 50%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease, background-color 0.3s ease;
-            animation: pulse 2s infinite;
-        }
-        .whatsapp-float a:hover {
-            transform: scale(1.1);
-            background-color: #20b354;
-            animation: none;
-        }
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        @media (max-width: 576px) {
-            .whatsapp-float {
-                bottom: 15px;
-                right: 15px;
-            }
-            .whatsapp-float a {
-                width: 60px;
-                height: 60px;
-            }
-            .whatsapp-float a i {
-                font-size: 1.8rem;
-            }
-        }
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.whatsapp-float a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background-color: #25D366;
+    color: white;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    animation: pulse 2s infinite;
+}
+
+.whatsapp-float a:hover {
+    transform: scale(1.1);
+    background-color: #20b354;
+    animation: none;
+}
+
+/* FAQ Floating Button */
+.faq-float {
+    position: fixed;
+    bottom: 20px;
+    right: 80px; /* Positioned to the left of WhatsApp button */
+    z-index: 1000;
+}
+
+.faq-float a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background-color: #006064;
+    color: white;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    animation: pulse 2s infinite;
+}
+
+.faq-float a:hover {
+    width: 180px; /* Expand to fit text */
+    border-radius: 25px;
+    transform: scale(1.1);
+    background-color: #004d4d;
+    animation: none;
+}
+
+.faq-float .faq-icon {
+    font-size: 1.5rem;
+    transition: opacity 0.3s ease;
+}
+
+.faq-float a:hover .faq-icon {
+    opacity: 0; /* Hide icon on hover */
+}
+
+.faq-float .faq-text {
+    position: absolute;
+    opacity: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+}
+
+.faq-float a:hover .faq-text {
+    opacity: 1; /* Show text on hover */
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@media (max-width: 576px) {
+    .whatsapp-float {
+        bottom: 15px;
+        right: 15px;
+    }
+    .whatsapp-float a {
+        width: 60px;
+        height: 60px;
+    }
+    .whatsapp-float a i {
+        font-size: 1.8rem;
+    }
+    .faq-float {
+        bottom: 15px;
+        right: 85px; /* Adjusted for smaller screens */
+    }
+    .faq-float a {
+        width: 60px;
+        height: 60px;
+    }
+    .faq-float a:hover {
+        width: 160px; /* Slightly smaller text container */
+    }
+    .faq-float .faq-icon {
+        font-size: 1.8rem;
+    }
+    .faq-float .faq-text {
+        font-size: 0.85rem;
+    }
+}

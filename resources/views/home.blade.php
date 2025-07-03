@@ -21,6 +21,12 @@
             overflow-x: hidden;
         }
 
+        h2{
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: #37474f;
+        }
+
         /* Navbar */
         .navbar {
             background: #09222F;
@@ -183,6 +189,22 @@
         .product-card .btn:hover {
             background-color: #2e6b21;
             border-color: #2e6b21;
+        }
+
+        .product-card a {
+            display: inline-block;
+            padding: 0.6rem 1.5rem;
+            background: #398129;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .product-card a:hover {
+            background: #398129;
+            transform: translateY(-2px);
         }
 
         .empty-message {
@@ -469,18 +491,18 @@
     <link rel="icon" href="{{ asset('images/djenny.png') }}" type="image/x-icon">
 </head>
 <body>
-    <!-- Navbar -->
+    <!-- Navbar <a href="{{ route('manual') }}">Manual de Usuario</a> -->
     <nav class="navbar">
         <div class="navbar-container">
             <div class="logo">
                 <img src="{{ asset('images/djenny.png') }}" alt="D'Jenny Logo">
                 <span>D'Jenny</span>
             </div>
+            
             <div class="nav-links">
-                <a href="{{ route('manual') }}">Manual de Usuario</a>
+                
                 @if (Route::has('login'))
                     @auth
-                        <a href="{{ url('/home') }}">Inicio</a>
                         <form method="POST" action="{{ route('logout') }}" style="display:inline;">
                             @csrf
                             <button type="submit" class="nav-link-btn">Cerrar Sesión</button>
@@ -495,79 +517,6 @@
             </div>
         </div>
     </nav>
-
-    <!-- Productos Destacados -->
-    <section>
-        <h2 class="text-center mb-3" style="color: #FF6608; font-weight: 800; font-size: 2rem;">Productos Destacados</h2>
-        <div class="products-grid">
-            <div class="product-card animate__animated animate__fadeInUp" data-delay="0">
-                <div class="image-container">
-                    <img src="{{ asset('images/arroz-supremo.png') }}" class="card-img-top" alt="Arroz Premium" loading="lazy">
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Arroz Premium</h5>
-                    <p class="mb-2">Granos y Cereales</p>
-                    <p class="price mb-2"><strong>12.000 COP</strong></p>
-                    <p class="small">Stock: 100</p>
-                </div>
-            </div>
-            <div class="product-card animate__animated animate__fadeInUp" data-delay="100">
-                <div class="image-container">
-                    <img src="{{ asset('images/product2.jpg') }}" class="card-img-top" alt="Aceite de Cocina" loading="lazy">
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Aceite de Cocina</h5>
-                    <p class="mb-2">Aceites y Grasas</p>
-                    <p class="price mb-2"><strong>8.500 COP</strong></p>
-                    <p class="small">Stock: 50</p>
-                </div>
-            </div>
-            <div class="product-card animate__animated animate__fadeInUp" data-delay="200">
-                <div class="image-container">
-                    <img src="{{ asset('images/product3.jpg') }}" class="card-img-top" alt="Leche Entera" loading="lazy">
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Leche Entera</h5>
-                    <p class="mb-2">Lácteos</p>
-                    <p class="price mb-2"><strong>3.200 COP</strong></p>
-                    <p class="small">Stock: 200</p>
-                </div>
-            </div>
-            <div class="product-card animate__animated animate__fadeInUp" data-delay="300">
-                <div class="image-container">
-                    <img src="{{ asset('images/product4.jpg') }}" class="card-img-top" alt="Café Molido" loading="lazy">
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Café Molido</h5>
-                    <p class="mb-2">Bebidas</p>
-                    <p class="price mb-2"><strong>15.000 COP</strong></p>
-                    <p class="small">Stock: 75</p>
-                </div>
-            </div>
-            <div class="product-card animate__animated animate__fadeInUp" data-delay="400">
-                <div class="image-container">
-                    <img src="{{ asset('images/product5.jpg') }}" class="card-img-top" alt="Pan Integral" loading="lazy">
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Pan Integral</h5>
-                    <p class="mb-2">Panadería</p>
-                    <p class="price mb-2"><strong>4.500 COP</strong></p>
-                    <p class="small">Stock: 60</p>
-                </div>
-            </div>
-            <div class="product-card animate__animated animate__fadeInUp" data-delay="500">
-                <div class="image-container">
-                    <img src="{{ asset('images/product6.jpg') }}" class="card-img-top" alt="Huevos AA" loading="lazy">
-                </div>
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">Huevos AA</h5>
-                    <p class="mb-2">Huevos y Derivados</p>
-                    <p class="price mb-2"><strong>10.000 COP</strong></p>
-                    <p class="small">Stock: 90</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Hero -->
     <section class="hero-section">
@@ -591,6 +540,85 @@
         </div>
     </section>
 
+    <!-- Productos Destacados -->
+    <section>
+        <h2 class="text-center mb-3" style="color: #FF6608; font-weight: 800; font-size: 2rem;">Productos Destacados</h2>
+        <div class="products-grid">
+            <div class="product-card animate__animated animate__fadeInUp" data-delay="0">
+                <div class="image-container">
+                    <img src="{{ asset('images/arroz-supremo.png') }}" class="card-img-top" alt="Arroz Premium" loading="lazy">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Arroz Premium</h5>
+                    <p class="mb-2">Granos y Cereales</p>
+                    <p class="price mb-2"><strong>12.000 COP</strong></p>
+                    <p class="small">Stock: 100</p>
+                    <a href="{{ route('login') }}"><i class="bi bi-cart3 me-1"></i>Ver más</a>
+                </div>
+            </div>
+            <div class="product-card animate__animated animate__fadeInUp" data-delay="100">
+                <div class="image-container">
+                    <img src="{{ asset('images/aceite.png') }}" class="card-img-top" alt="Aceite de Cocina" loading="lazy">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Aceite de Cocina</h5>
+                    <p class="mb-2">Aceites y Grasas</p>
+                    <p class="price mb-2"><strong>8.500 COP</strong></p>
+                    <p class="small">Stock: 50</p>
+                    <a href="{{ route('login') }}"><i class="bi bi-cart3 me-1"></i>Ver más</a>                    
+                </div>
+            </div>
+            <div class="product-card animate__animated animate__fadeInUp" data-delay="200">
+                <div class="image-container">
+                    <img src="{{ asset('images/leche.png') }}" class="card-img-top" alt="Leche Entera" loading="lazy">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Leche Entera</h5>
+                    <p class="mb-2">Lácteos</p>
+                    <p class="price mb-2"><strong>3.200 COP</strong></p>
+                    <p class="small">Stock: 200</p>
+                    <a href="{{ route('login') }}"><i class="bi bi-cart3 me-1"></i>Ver más</a>
+                </div>
+            </div>
+            <div class="product-card animate__animated animate__fadeInUp" data-delay="300">
+                <div class="image-container">
+                    <img src="{{ asset('images/cafe.png') }}" class="card-img-top" alt="Café Molido" loading="lazy">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Café Molido</h5>
+                    <p class="mb-2">Bebidas</p>
+                    <p class="price mb-2"><strong>15.000 COP</strong></p>
+                    <p class="small">Stock: 75</p>
+                    <a href="{{ route('login') }}"><i class="bi bi-cart3 me-1"></i>Ver más</a>
+                </div>
+            </div>
+            <div class="product-card animate__animated animate__fadeInUp" data-delay="400">
+                <div class="image-container">
+                    <img src="{{ asset('images/pan.png') }}" class="card-img-top" alt="Pan Integral" loading="lazy">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Pan Integral</h5>
+                    <p class="mb-2">Panadería</p>
+                    <p class="price mb-2"><strong>4.500 COP</strong></p>
+                    <p class="small">Stock: 60</p>
+                    <a href="{{ route('login') }}"><i class="bi bi-cart3 me-1"></i>Ver más</a>
+                </div>
+            </div>
+            <div class="product-card animate__animated animate__fadeInUp" data-delay="500">
+                <div class="image-container">
+                    <img src="{{ asset('images/huevos.png') }}" class="card-img-top" alt="Huevos AA" loading="lazy">
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Huevos AA</h5>
+                    <p class="mb-2">Huevos y Derivados</p>
+                    <p class="price mb-2"><strong>10.000 COP</strong></p>
+                    <p class="small">Stock: 90</p>
+                    <a href="{{ route('login') }}"><i class="bi bi-cart3 me-1"></i>Ver más</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-container">
@@ -599,7 +627,7 @@
                 <div class="footer-section social-links">
                     <h5>Síguenos</h5>
                     <div class="social-icons">
-                        <a href="https://wa.me/1234567890" target="_blank" aria-label="WhatsApp">
+                        <a href="https://wa.me/573172343575?text=¡Hola! Estoy interesado en obtener más información sobre el software D'Jenny para tiendas de abarrotes." target="_blank" title="Contactar por WhatsApp">
                             <img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/whatsapp.svg" alt="WhatsApp" class="social-icon">
                         </a>
                         <a href="https://facebook.com" target="_blank" aria-label="Facebook">

@@ -78,18 +78,20 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     // Rutas de reportes
     Route::get('/reportes', [ReporteController::class, 'index'])->name('admin.reportes');
 
-    // Rutas para gestión de usuarios
+       // Rutas para gestión de usuarios
     Route::get('/users', [AdminController::class, 'usersIndex'])->name('admin.users.index');
     Route::get('/users/create', [AdminController::class, 'create'])->name('admin.users.create');
     Route::post('/users', [AdminController::class, 'store'])->name('admin.users.store');
     Route::get('/users/{user}/edit', [AdminController::class, 'edit'])->name('admin.users.edit');
     Route::put('/users/{user}', [AdminController::class, 'update'])->name('admin.users.update');
     Route::delete('/users/{user}', [AdminController::class, 'destroy'])->name('admin.users.destroy');
-    Route::put('/pedidos/{orden}/status', [AdminController::class, 'updateStatus'])->name('admin.pedidos.updateStatus');
-    Route::post('/pedidos/{orden}/refund', [AdminController::class, 'refund'])->name('admin.pedidos.refund');
-    Route::get('/pedidos/{orden}/invoice', [AdminController::class, 'generateInvoice'])->name('admin.pedidos.invoice');
-
-    // Rutas para gestión de proveedores
+    Route::get('/pedidos', [AdminController::class, 'pedidos'])->name('admin.pedidos');
+    Route::post('/pedidos/{orden}/update-status', [AdminController::class, 'updateStatus'])->name('admin.updateStatus');
+    Route::post('/pedidos/{orden}/refund', [AdminController::class, 'refund'])->name('admin.refund');
+    Route::get('/pedidos/{orden}/invoice', [AdminController::class, 'invoice'])->name('admin.invoice');
+    Route::get('/pedidos/{orden}/generate-invoice', [AdminController::class, 'generateInvoice'])->name('admin.generateInvoice');
+    
+  // Rutas para gestión de proveedores
     Route::get('/proveedores', [ProveedorController::class, 'index'])->name('proveedores.index');
     Route::get('/proveedores/create', [ProveedorController::class, 'create'])->name('proveedores.create');
     Route::post('/proveedores', [ProveedorController::class, 'store'])->name('proveedores.store');
@@ -154,6 +156,9 @@ Route::prefix('cajero')->middleware(['auth', 'role:cajero'])->group(function () 
     Route::post('/order/{id}/pay', [CajeroController::class, 'payOrder'])->name('cajero.order.pay');
     Route::get('/close', [CajeroController::class, 'close'])->name('cajero.close');
     Route::post('/cajero/order/{order}/refund', [CajeroController::class, 'refundOrder'])->name('cajero.order.refunded');
+
+        // Rutas para facturación
+    Route::get('/pedidos/{orden}/factura', [AdminController::class, 'factura'])->name('admin.pedidos.factura');
     Route::post('/close', [CajeroController::class, 'close']);
 });
 
@@ -161,3 +166,15 @@ Route::prefix('cajero')->middleware(['auth', 'role:cajero'])->group(function () 
 Route::get('/manual', function () {
     return view('manual');
 })->name('manual');
+// Ruta para manual de cajero
+Route::get('/manual/cajero', function () {
+    return view('cajero.manualc');
+})->name('manualc');
+// Ruta para manual de usuario
+Route::get('/manual/usuario', function () {
+    return view('users.manualu');
+})->name('manualu');
+// Ruta para manual de administrador
+Route::get('/manual/administrador', function () {
+    return view('admin.manuala');
+})->name('manuala');   

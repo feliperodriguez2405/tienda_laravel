@@ -11,6 +11,10 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
+    @if (session('error'))
+        <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+
     <!-- Added search form for filtering by client name, order ID, and status -->
     <div class="card shadow-sm mb-3">
         <div class="card-body">
@@ -79,7 +83,7 @@
                                     </td>
                                     <td>${{ number_format($orden->total, 2) }}</td>
                                     <td>
-                                        <form action="{{ route('admin.pedidos.updateStatus', $orden) }}" method="POST" class="d-inline">
+                                        <form action="{{ route('admin.updateStatus', $orden) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('POST')
                                             <select name="estado" class="form-select form-select-sm" onchange="this.form.submit()">
@@ -92,7 +96,8 @@
                                         </form>
                                     </td>
                                     <td>
-                                        <a href="{{ route('admin.pedidos.invoice', $orden) }}" class="btn btn-sm btn-info">Factura</a>
+                                        <a href="{{ route('admin.invoice', $orden) }}" class="btn btn-sm btn-info">Factura (HTML)</a>
+                                        <a href="{{ route('admin.generateInvoice', $orden) }}" class="btn btn-sm btn-success">Factura (PDF)</a>
                                         @if ($orden->estado != 'cancelado')
                                             <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#refundModal{{ $orden->id }}">Reembolsar</button>
                                         @endif
@@ -107,7 +112,7 @@
                                                 <h5 class="modal-title" id="refundModalLabel">Reembolsar Pedido #{{ $orden->id }}</h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
-                                            <form action="{{ route('admin.pedidos.refund', $orden) }}" method="POST">
+                                            <form action="{{ route('admin.refund', $orden) }}" method="POST">
                                                 @csrf
                                                 @method('POST')
                                                 <div class="modal-body">

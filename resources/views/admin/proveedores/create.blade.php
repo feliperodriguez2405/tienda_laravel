@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container py-4">
-    <h2 class="text-primary fw-bold mb-4">Registrar Nuevo Proveedor</h2>
+    <h1 class="fw-bold mb-4">Registrar Nuevo Proveedor</h1>
 
     <div class="card shadow-sm">
         <div class="card-body">

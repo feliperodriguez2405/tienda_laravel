@@ -81,6 +81,12 @@
 <div class="container">
     <p class="mb-4">© {{ date('Y') }} D'jenny - Todos los derechos reservados.</p>
 </div>
+<div class="faq-float">
+        <a href="{{ route('manualu') }}" class="faq-btn">
+            <span class="faq-icon"><i class="bi bi-question-circle"></i></span>
+            <span class="faq-text">Preguntas Frecuentes</span>
+        </a>
+    </div>
 @endsection
 
 <!-- Scripts -->

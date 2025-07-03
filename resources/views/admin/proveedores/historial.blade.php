@@ -6,7 +6,7 @@
 <div class="container py-5">
     <div class="row mb-5 align-items-center">
         <div class="col-md-6">
-            <h2 class="mb-1 title-mode">Historial de Compras - {{ $proveedor->nombre }}</h2>
+            <h1 class="mb-1 title-mode">Historial de Compras - {{ $proveedor->nombre }}</h1>
             <p class="text-mode mb-0">Registro completo de tus órdenes (Estado: {{ ucfirst($proveedor->estado) }})</p>
         </div>
         <div class="col-md-6 text-end">

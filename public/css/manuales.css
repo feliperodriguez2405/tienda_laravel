@@ -1,0 +1,216 @@
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f0f4f8;
+            animation: fadeIn 1s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto 0 220px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .container:hover {
+            transform: translateY(-5px);
+        }
+        h1 {
+            color: #006400;
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 20px;
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .nav-sidebar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 180px;
+            background: #e6f3e6;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-sidebar ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .nav-sidebar li {
+            margin: 5px 0;
+        }
+        .nav-sidebar a {
+            color: #006400;
+            text-decoration: none;
+            font-size: 16px;
+            display: block;
+            padding: 8px;
+            border-radius: 3px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .nav-sidebar a:hover {
+            background-color: #d0e8d0;
+            color: #004d00;
+        }
+        .accordion {
+            margin-bottom: 10px;
+        }
+        .accordion-header {
+            background-color: #e6f3e6;
+            color: #006400;
+            font-size: 20px;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .accordion-header:hover {
+            background-color: #d0e8d0;
+            color: #004d00;
+        }
+        .accordion-header::after {
+            content: '\25BC';
+            font-size: 14px;
+            transition: transform 0.3s ease;
+        }
+        .accordion-header.active::after {
+            transform: rotate(180deg);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            padding: 0 15px;
+            background: #f9f9f9;
+            border-radius: 0 0 5px 5px;
+            transition: max-height 0.3s ease, padding 0.3s ease;
+        }
+        .accordion-content.open {
+            max-height: 3000px;
+            padding: 15px;
+        }
+        h2 {
+            font-size: 20px;
+            color: #444;
+            margin-top: 15px;
+        }
+        h3 {
+            font-size: 18px;
+            color: #444;
+            margin-top: 15px;
+        }
+        p, li {
+            font-size: 16px;
+            margin: 10px 0;
+            transition: color 0.3s ease;
+        }
+        li:hover {
+            color: #006400;
+        }
+        ul, ol {
+            list-style-position: outside;
+            margin-left: 20px;
+        }
+        .highlight {
+            background-color: #e6f3e6;
+            padding: 15px;
+            border-left: 5px solid #006400;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .highlight:hover {
+            background-color: #d0e8d0;
+        }
+        .print-button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #006400;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .print-button:hover {
+            background-color: #004d00;
+            transform: scale(1.05);
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 14px;
+        }
+        @media print {
+            body {
+                background: #fff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 10px;
+                margin: 0;
+            }
+            .nav-sidebar {
+                display: none;
+            }
+            .print-button {
+                display: none;
+            }
+            .accordion-header {
+                background: none;
+                color: #333;
+                cursor: default;
+            }
+            .accordion-header::after {
+                display: none;
+            }
+            .accordion-content {
+                max-height: none;
+                padding: 15px 0;
+                background: none;
+            }
+            .accordion-content.open {
+                padding: 0;
+            }
+            .highlight {
+                background-color: #fff;
+                border-left: 4px solid #006400;
+            }
+            h1, h2, h3, li {
+                animation: none;
+                transition: none;
+                transform: none;
+                opacity: 1;
+            }
+        }
+        @media (max-width: 768px) {
+            .nav-sidebar {
+                position: static;
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            .container {
+                margin: 0 auto;
+            }
+        }

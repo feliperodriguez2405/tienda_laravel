@@ -27,7 +27,7 @@
         </div>
     @endif
 
-    <!-- Added search form for filtering by name, email, and role -->
+    <!-- Search form for filtering by name, email, and role -->
     <div class="card shadow-sm mb-3">
         <div class="card-body">
             <form method="GET" action="{{ route('admin.users.index') }}" class="row g-3">
@@ -85,10 +85,10 @@
                                     <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-outline-primary me-2">
                                         <i class="fas fa-edit"></i> Editar
                                     </a>
-                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" style="display:inline;">
+                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" style="display:inline;" class="delete-form" data-user-id="{{ $user->id }}" data-user-name="{{ $user->name }}">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de eliminar a {{ $user->name }}?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger delete-btn">
                                             <i class="fas fa-trash"></i> Eliminar
                                         </button>
                                     </form>
@@ -105,7 +105,7 @@
         </div>
     </div>
 
-    <!-- Added pagination links -->
+    <!-- Pagination links -->
     <div class="mt-3">
         {{ $users->appends(request()->query())->links('pagination::bootstrap-5') }}
     </div>
@@ -152,5 +152,58 @@
 
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+@endpush
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteForms = document.querySelectorAll('.delete-form');
+            deleteForms.forEach(form => {
+                const deleteBtn = form.querySelector('.delete-btn');
+                deleteBtn.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    const userId = form.getAttribute('data-user-id');
+                    const userName = form.getAttribute('data-user-name');
+
+                    axios.delete('{{ route('admin.users.destroy', '') }}/' + userId, {
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        }
+                    })
+                    .then(function (response) {
+                        alert(response.data.success);
+                        window.location.reload();
+                    })
+                    .catch(function (error) {
+                        let message = '¿Estás seguro de eliminar al usuario ' + userName + '?';
+                        if (error.response && error.response.data.error) {
+                            if (error.response.data.ordenes && error.response.data.estados) {
+                                message = 'El usuario ' + userName + ' tiene ' + error.response.data.ordenes + ' órdenes asociadas con estados: ' + error.response.data.estados + '. ¿Estás seguro de eliminar este usuario?';
+                            } else {
+                                message = 'Error al intentar eliminar al usuario ' + userName + ': ' + error.response.data.error + '. ¿Deseas forzar la eliminación?';
+                            }
+                        }
+
+                        if (confirm(message)) {
+                            axios.delete('{{ route('admin.users.destroy', '') }}/' + userId, {
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'X-Force-Delete': 'true'
+                                }
+                            })
+                            .then(function (response) {
+                                alert(response.data.success);
+                                window.location.reload();
+                            })
+                            .catch(function (error) {
+                                alert(error.response?.data?.error || 'Error al forzar la eliminación del usuario: No se pudo completar la operación.');
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 @endpush
 @endsection

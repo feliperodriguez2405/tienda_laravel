@@ -29,7 +29,7 @@
             @endif
 
             <!-- Formulario de edición de categoría -->
-            <form method="POST" action="{{ route('categorias.update', $categoria) }}">
+            <form method="POST" action="{{ route('categorias.update', $categoria) }}" id="categoryForm">
                 @csrf
                 @method('PUT')
 
@@ -42,9 +42,11 @@
                            name="nombre" 
                            value="{{ old('nombre', $categoria->nombre) }}" 
                            required 
+                           maxlength="50"
                            placeholder="Ej: Bebidas">
+                    <span id="nombreError" class="invalid-feedback d-block" style="display: none;"></span>
                     @error('nombre')
-                        <span class="invalid-feedback">{{ $message }}</span>
+                        <span class="invalid-feedback d-block">{{ $message }}</span>
                     @enderror
                 </div>
 
@@ -75,7 +77,7 @@
 
                 <!-- Botones -->
                 <div class="d-flex justify-content-end gap-3">
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-primary" id="submitButton">
                         <i class="fas fa-save"></i> Guardar Cambios
                     </button>
                     <a href="{{ route('categorias.index') }}" class="btn btn-outline-secondary">
@@ -87,34 +89,55 @@
     </div>
 </div>
 
-<style>
-    .card {
-        border-radius: 10px;
-        overflow: hidden;
-    }
-    .form-control, .form-select, .form-control:focus, .form-select:focus {
-        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-    }
-    .form-control:focus, .form-select:focus {
-        border-color: #007bff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-    }
-    .btn {
-        padding: 0.5rem 1.25rem;
-        transition: all 0.2s ease-in-out;
-    }
-    .btn-primary:hover {
-        background-color: #0056b3;
-    }
-    .btn-outline-secondary:hover {
-        background-color: #6c757d;
-        color: white;
-    }
-    .alert-danger {
-        border-radius: 5px;
-    }
-</style>
-
 <!-- Incluir Font Awesome para íconos (si no está en layouts.app) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<!-- Incluir Axios para validación en tiempo real -->
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const nombreInput = document.getElementById('nombre');
+        const nombreError = document.getElementById('nombreError');
+        const submitButton = document.getElementById('submitButton');
+        const categoriaId = {{ $categoria->id }};
+        let timeout = null;
+
+        nombreInput.addEventListener('input', function () {
+            // Clear previous timeout
+            clearTimeout(timeout);
+
+            // Debounce: wait 500ms before sending request
+            timeout = setTimeout(function () {
+                const nombre = nombreInput.value.trim();
+
+                if (nombre.length > 0) {
+                    axios.post('{{ route('categorias.checkName') }}', { 
+                        nombre: nombre,
+                        id: categoriaId
+                    })
+                        .then(function (response) {
+                            if (response.data.exists) {
+                                nombreInput.classList.add('is-invalid');
+                                nombreError.textContent = response.data.message;
+                                nombreError.style.display = 'block';
+                                submitButton.disabled = true;
+                            } else {
+                                nombreInput.classList.remove('is-invalid');
+                                nombreError.textContent = '';
+                                nombreError.style.display = 'none';
+                                submitButton.disabled = false;
+                            }
+                        })
+                        .catch(function (error) {
+                            console.error('Error checking name:', error);
+                        });
+                } else {
+                    nombreInput.classList.remove('is-invalid');
+                    nombreError.textContent = '';
+                    nombreError.style.display = 'none';
+                    submitButton.disabled = false;
+                }
+            }, 500);
+        });
+    });
+</script>
 @endsection

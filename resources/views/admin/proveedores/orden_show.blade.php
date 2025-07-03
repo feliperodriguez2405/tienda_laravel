@@ -3,7 +3,7 @@
 @section('content')
     <div class="container py-4">
         <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header text-white">
                 <h1 class="h4 mb-0">Orden de Compra #{{ $orden->id }}</h1>
             </div>
             <div class="card-body">
@@ -15,7 +15,7 @@
                     </div>
                     <div class="col-md-6">
                         <p class="mb-2">
-                            <strong class="text-muted">Estado:</strong> 
+                            <strong>Estado:</strong> 
                             <span class="badge {{ $orden->estado === 'pendiente' ? 'bg-warning' : ($orden->estado === 'entregado' ? 'bg-success' : 'bg-secondary') }}">
                                 {{ ucfirst($orden->estado) }}
                             </span>
@@ -35,7 +35,8 @@
                                     <tr>
                                         <th>Producto</th>
                                         <th>Cantidad</th>
-                                        <th>Precio Unitario (COP)</th>
+                                        <th>Precio Compra (COP)</th>
+                                        <th>Precio Venta (COP)</th>
                                         <th>Descripción</th>
                                     </tr>
                                 </thead>
@@ -43,9 +44,7 @@
                                     @foreach ($orden->detalles as $index => $detalle)
                                         <tr>
                                             <td>
-                                                <!-- Texto plano del nombre del producto -->
                                                 <div>{{ $detalle['producto'] ?? 'No especificado' }}</div>
-                                                <!-- Select con lista de productos disponibles -->
                                                 <select name="detalles[{{ $index }}][producto]" 
                                                         class="form-select mt-2 @error('detalles.' . $index . '.producto') is-invalid @enderror"
                                                         {{ $orden->estado !== 'pendiente' ? 'disabled' : '' }}>
@@ -62,21 +61,54 @@
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </td>
-                                            <td>{{ $detalle['cantidad'] ?? 0 }}</td>
                                             <td>
                                                 <input type="number" 
-                                                       name="detalles[{{ $index }}][precio]" 
-                                                       value="{{ $detalle['precio'] ?? '' }}" 
-                                                       class="form-control @error('detalles.' . $index . '.precio') is-invalid @enderror" 
-                                                       step="0.01" 
-                                                       min="0" 
-                                                       placeholder="Ingrese precio en COP"
+                                                       name="detalles[{{ $index }}][cantidad]" 
+                                                       value="{{ $detalle['cantidad'] ?? 0 }}" 
+                                                       class="form-control @error('detalles.' . $index . '.cantidad') is-invalid @enderror" 
+                                                       min="1" 
                                                        {{ $orden->estado !== 'pendiente' ? 'disabled' : '' }}>
-                                                @error('detalles.' . $index . '.precio')
+                                                @error('detalles.' . $index . '.cantidad')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </td>
-                                            <td>{{ $detalle['descripcion'] ?? '-' }}</td>
+                                            <td>
+                                                <input type="number" 
+                                                       name="detalles[{{ $index }}][precio_compra]" 
+                                                       value="{{ $detalle['precio_compra'] ?? 0 }}" 
+                                                       class="form-control @error('detalles.' . $index . '.precio_compra') is-invalid @enderror" 
+                                                       step="0.01" 
+                                                       min="0" 
+                                                       placeholder="Precio Compra"
+                                                       {{ $orden->estado !== 'pendiente' ? 'disabled' : '' }}>
+                                                @error('detalles.' . $index . '.precio_compra')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </td>
+                                            <td>
+                                                <input type="number" 
+                                                       name="detalles[{{ $index }}][precio_venta]" 
+                                                       value="{{ $detalle['precio_venta'] ?? 0 }}" 
+                                                       class="form-control @error('detalles.' . $index . '.precio_venta') is-invalid @enderror" 
+                                                       step="0.01" 
+                                                       min="0" 
+                                                       placeholder="Precio Venta"
+                                                       {{ $orden->estado !== 'pendiente' ? 'disabled' : '' }}>
+                                                @error('detalles.' . $index . '.precio_venta')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </td>
+                                            <td>
+                                                <input type="text" 
+                                                       name="detalles[{{ $index }}][descripcion]" 
+                                                       value="{{ $detalle['descripcion'] ?? '' }}" 
+                                                       class="form-control @error('detalles.' . $index . '.descripcion') is-invalid @enderror" 
+                                                       placeholder="Descripción (opcional)"
+                                                       {{ $orden->estado !== 'pendiente' ? 'disabled' : '' }}>
+                                                @error('detalles.' . $index . '.descripcion')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>

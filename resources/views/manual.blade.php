@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manual de Usuario: Sistema D'Jenny</title>
     <link rel="stylesheet" href="{{ asset('css/manuales.css') }}">
+    <link rel="icon" href="{{ asset('images/djenny.png') }}" type="image/x-icon">
 </head>
 <body>
     <div class="nav-sidebar">

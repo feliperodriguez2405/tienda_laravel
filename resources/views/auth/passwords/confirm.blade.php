@@ -4,12 +4,11 @@
 <div class="login-container">
     <div class="login-header">
         <img src="{{ asset('images/djenny.png') }}" alt="Logo de D'Jenny">
-        <h2>{{ __('Confirmar Contraseña') }}</h2>
+        <h2>Confirmar Contraseña</h2>
     </div>
 
-    <p>{{ __('Por favor, confirme su contraseña antes de continuar.') }}</p>
+    <p>Por favor, confirme su contraseña antes de continuar.</p>
 
-    {{-- Mostrar errores de validación si los hay --}}
     @if ($errors->any())
         <div class="alert alert-danger">
             <ul class="mb-0" style="list-style: none; padding-left: 0;">
@@ -24,7 +23,7 @@
         @csrf
 
         <div class="form-group">
-            <label for="password">{{ __('Contraseña') }}</label>
+            <label for="password">Contraseña</label>
             <input id="password" 
                    type="password" 
                    class="form-control @error('password') is-invalid @enderror" 
@@ -40,11 +39,11 @@
 
         <div class="form-group">
             <button type="submit" class="btn-submit">
-                {{ __('Confirmar Contraseña') }}
+                Confirmar Contraseña
             </button>
             @if (Route::has('password.request'))
                 <a class="btn btn-link" href="{{ route('password.request') }}">
-                    {{ __('¿Olvidaste tu Contraseña?') }}
+                    ¿Olvidaste tu Contraseña?
                 </a>
             @endif
         </div>

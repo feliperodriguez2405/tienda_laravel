@@ -65,16 +65,16 @@
                                 <td>
                                     <div class="action-buttons">
                                         <a href="{{ route('admin.proveedores.ordenes.historial', $proveedor) }}" class="btn btn-sm btn-info">
-                                            <i class="bi bi-clock-history"></i> Historial/Ordenes
+                                            <i class="bi bi-clock-history"></i>
                                         </a>
                                         <a href="{{ route('admin.proveedores.edit', $proveedor) }}" class="btn btn-sm btn-warning">
-                                            <i class="bi bi-pencil"></i> Editar
+                                            <i class="bi bi-pencil"></i>
                                         </a>
                                         <form action="{{ route('admin.proveedores.destroy', $proveedor) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de eliminar este proveedor?')">
-                                                <i class="bi bi-trash"></i> Eliminar
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </form>
                                     </div>

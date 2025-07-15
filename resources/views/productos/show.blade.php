@@ -33,6 +33,12 @@
                         <div class="card-body">
                             <h2 class="card-title text-primary fw-bold mb-3">{{ $producto->nombre }}</h2>
                             <p class="card-text mb-2"><strong>Descripción:</strong> {{ $producto->descripcion }}</p>
+                            <p class="card-text mb-2"><strong>Código de barras:</strong> {{ $producto->codigo_barra ?? 'No asignado' }}</p>
+                            @if ($producto->codigo_barra)
+                                <div class="mb-3">
+                                    <img src="data:image/png;base64,{{ $barcode }}" alt="Código de barras" class="img-fluid rounded" style="max-width: 200px; height: auto;">
+                                </div>
+                            @endif
                             <h4 class="text-success fw-bold mb-2">${{ number_format($producto->precio, 2) }}</h4>
                             <p class="text-secondary mb-2">Stock disponible: 
                                 <span class="{{ $producto->stock <= 10 ? 'text-danger' : 'text-dark' }}">{{ $producto->stock }}</span>
@@ -49,7 +55,7 @@
                                     @method('DELETE')
                                     <button type="submit" 
                                             class="btn btn-danger btn-sm" 
-                                            onclick="return confirm('¿Estás seguro de eliminar {{ $producto->nombre }}?')">
+                                            onclick="return confirm('¿Estás seguro de eliminar {{ addslashes($producto->nombre) }}?')">
                                         <i class="bi bi-trash me-1"></i>Eliminar
                                     </button>
                                 </form>

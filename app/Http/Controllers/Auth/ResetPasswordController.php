@@ -3,53 +3,85 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\SendsPasswordResetEmails;
+use Illuminate\Foundation\Auth\ResetsPasswords;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Password;
 
-class ForgotPasswordController extends Controller
+class ResetPasswordController extends Controller
 {
-    // Incluye el trait SendsPasswordResetEmails para la funcionalidad de envío de enlaces
-    use SendsPasswordResetEmails;
+    use ResetsPasswords;
 
     /**
-     * Envía un enlace de restablecimiento de contraseña al correo del usuario.
+     * Create a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('guest');
+    }
+
+    /**
+     * Validar el restablecimiento de contraseña con mensajes en español.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @return void
+     */
+    protected function validateReset(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ], [
+            'token.required' => 'El token es obligatorio.',
+            'email.required' => 'El correo electrónico es obligatorio.',
+            'email.email' => 'El correo electrónico debe ser una dirección válida.',
+            'password.required' => 'La contraseña es obligatoria.',
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.confirmed' => 'La confirmación de la contraseña no coincide.',
+        ]);
+    }
+
+    /**
+     * Manejar la respuesta después de restablecer la contraseña.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $response
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
      */
-    public function sendResetLinkEmail(Request $request)
+    protected function sendResetResponse(Request $request, $response)
     {
-        // Validar el campo de correo electrónico con mensajes en español desde auth.php
-        $request->validate(['email' => 'required|email'], [
-            'email.required' => trans('auth.custom.email.required'),
-            'email.email' => trans('auth.custom.email.email'),
-        ]);
-
-        // Enviar el enlace de restablecimiento usando el broker de contraseñas
-        $response = $this->broker()->sendResetLink(
-            $request->only('email')
-        );
-
-        // Mapear las claves del broker (passwords.*) a traducciones en auth.php
-        $translationMap = [
-            'passwords.sent' => 'auth.sent',
-            'passwords.user' => 'auth.user',
-            'passwords.throttled' => 'auth.throttled',
-            'passwords.token' => 'auth.token',
-            'passwords.reset' => 'auth.reset',
+        $messageMap = [
+            Password::PASSWORD_RESET => 'La contraseña se ha cambiado correctamente',
         ];
 
-        // Obtener la traducción correspondiente
-        $translatedMessage = isset($translationMap[$response]) ? trans($translationMap[$response]) : $response;
+        $message = isset($messageMap[$response]) ? $messageMap[$response] : 'Error al restablecer la contraseña.';
 
-        // Registrar la respuesta para depuración
-        \Log::info('Respuesta de restablecimiento de contraseña: ' . $response);
-        \Log::info('Mensaje traducido: ' . $translatedMessage);
+        return $request->wantsJson()
+            ? new JsonResponse(['message' => $message], 200)
+            : redirect()->route('login')->with('status', $message);
+    }
 
-        // Devolver respuesta según el resultado
-        return $response == Password::RESET_LINK_SENT
-            ? back()->with('status', $translatedMessage)
-            : back()->withErrors(['email' => $translatedMessage]);
+    /**
+     * Manejar la respuesta en caso de fallo al restablecer la contraseña.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  string  $response
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
+     */
+    protected function sendResetFailedResponse(Request $request, $response)
+    {
+        $messageMap = [
+            Password::INVALID_USER => 'No encontramos un usuario con ese correo electrónico.',
+            Password::INVALID_TOKEN => 'El token de restablecimiento de contraseña es inválido.',
+        ];
+
+        $message = isset($messageMap[$response]) ? $messageMap[$response] : 'Error al procesar la solicitud.';
+
+        return $request->wantsJson()
+            ? new JsonResponse(['message' => $message], 422)
+            : back()->withErrors(['email' => $message]);
     }
 }

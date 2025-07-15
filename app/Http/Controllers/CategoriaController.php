@@ -52,6 +52,13 @@ class CategoriaController extends Controller
 
         $categoria->update($request->all());
 
+        // Update associated products' estado to match category's estado
+        if ($request->estado === 'inactivo') {
+            $categoria->productos()->update(['estado' => 'inactivo']);
+        } elseif ($request->estado === 'activo') {
+            $categoria->productos()->update(['estado' => 'activo']);
+        }
+
         return redirect()->route('categorias.index')->with('success', 'Categoría actualizada');
     }
 
@@ -74,7 +81,14 @@ class CategoriaController extends Controller
             'estado' => 'required|in:activo,inactivo'
         ]);
 
-        Categoria::create($request->all());
+        $categoria = Categoria::create($request->all());
+
+        // Update associated products' estado to match category's estado
+        if ($request->estado === 'inactivo') {
+            $categoria->productos()->update(['estado' => 'inactivo']);
+        } elseif ($request->estado === 'activo') {
+            $categoria->productos()->update(['estado' => 'activo']);
+        }
 
         return redirect()->route('categorias.index')->with('success', '¡Categoría creada!');
     }

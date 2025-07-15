@@ -87,16 +87,16 @@
                                 <td>
                                     <div class="btn-group" role="group">
                                         <a href="{{ route('categorias.show', $categoria->id) }}" class="btn btn-sm btn-outline-info">
-                                            <i class="fas fa-eye"></i> Ver
+                                            <i class="fas fa-eye"></i>
                                         </a>
                                         <a href="{{ route('categorias.edit', $categoria->id) }}" class="btn btn-sm btn-outline-warning">
-                                            <i class="fas fa-edit"></i> Editar
+                                            <i class="fas fa-edit"></i>
                                         </a>
                                         <form action="{{ route('categorias.destroy', $categoria->id) }}" method="POST" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de eliminar la categoría {{ $categoria->nombre }}?')">
-                                                <i class="fas fa-trash"></i> Eliminar
+                                                <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
                                     </div>

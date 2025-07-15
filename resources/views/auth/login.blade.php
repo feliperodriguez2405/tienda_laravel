@@ -9,7 +9,7 @@
 </div>
 
 @if(session('status'))
-    <div class="alert">
+    <div class="alert alert-success" id="success-alert">
         {{ session('status') }}
     </div>
 @endif
@@ -60,21 +60,13 @@
         </button>
     </div>
 
-    <!-- Enlace a contraseña olvidada   @if (Route::has('password.request'))
+    <!-- Enlace a contraseña olvidada -->
+    @if (Route::has('password.request'))
         <div class="extra-links">
             <a href="{{ route('password.request') }}">
                 ¿Olvidaste tu contraseña?
             </a>
         </div>
-    @endif -->
-  
+    @endif
 </form>
-
-<!-- Registro -->
-@if (Route::has('register'))
-    <div class="register-box">
-        <span>¿No tienes una cuenta?</span>
-        <a href="{{ route('register') }}">Registrarse</a>
-    </div>
-@endif
 @endsection

@@ -16,7 +16,6 @@ class Proveedor extends Model
         'telefono',
         'email',
         'direccion',
-        'productos_suministrados',
         'condiciones_pago',
         'fecha_vencimiento_contrato',
         'recibir_notificaciones',
@@ -25,7 +24,6 @@ class Proveedor extends Model
     ];
 
     protected $casts = [
-        'productos_suministrados' => 'array',
         'fecha_vencimiento_contrato' => 'datetime',
         'recibir_notificaciones' => 'boolean',
     ];
@@ -38,5 +36,10 @@ class Proveedor extends Model
     public function categoria()
     {
         return $this->belongsTo(Categoria::class, 'categoria_id');
+    }
+
+    public function productos()
+    {
+        return $this->belongsToMany(Producto::class, 'proveedor_producto', 'proveedor_id', 'producto_id');
     }
 }

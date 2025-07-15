@@ -39,7 +39,7 @@
                     <input type="text" 
                            name="search" 
                            class="form-control search-input" 
-                           placeholder="Buscar por nombre..." 
+                           placeholder="Buscar por nombre o código de barras..." 
                            value="{{ request('search') }}">
                 </div>
                 <div class="col-md-3">
@@ -98,10 +98,11 @@
                             <div>
                                 <h5 class="card-title fw-bold mb-2">{{ \Illuminate\Support\Str::limit($producto->nombre, 20) }}</h5>
                                 <p class="card-text text-success fw-bold mb-1">${{ number_format($producto->precio, 2) }}</p>
-                                <p class="card-text text-secondary mb-3">
-                                    Stock: <span class=" {{ $producto->stock <= 10 ? 'text-danger' : 'text-succes fw-bold' }}">{{ $producto->stock }}</span>
+                                <p class="card-text text-secondary mb-1">
+                                    Stock: <span class="{{ $producto->stock <= 10 ? 'text-danger' : 'text-success fw-bold' }}">{{ $producto->stock }}</span>
                                 </p>
-                                <p class="card-text small">{{ $producto->categoria->nombre ?? 'Sin categoría' }}</p>
+                                <p class="card-text small mb-1">{{ $producto->categoria->nombre ?? 'Sin categoría' }}</p>
+                                <p class="card-text small mb-2"><strong>Código de barras:</strong> {{ $producto->codigo_barra ?? 'No asignado' }}</p>
                             </div>
                             <div class="d-flex justify-content-center gap-2">
                                 <a href="{{ route('productos.show', $producto->id) }}" 
@@ -138,4 +139,39 @@
     @endif
 </div>
 
+<style>
+    .card {
+        border-radius: 8px;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+    }
+
+    .form-control, .form-select {
+        border-radius: 6px;
+        font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.75rem;
+        border-radius: 15px;
+        font-size: 0.875rem;
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .btn-sm:hover {
+        transform: scale(1.03);
+    }
+
+    .alert {
+        border-radius: 8px;
+    }
+</style>
 @endsection

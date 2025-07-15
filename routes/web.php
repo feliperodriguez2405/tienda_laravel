@@ -12,7 +12,6 @@ use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProveedorController;
 use App\Http\Controllers\CajeroController;
-use App\Http\Controllers;
 
 /*
 |---------------------------------------------------------------------------
@@ -27,16 +26,22 @@ Route::get('/', function () {
 
 // Rutas de autenticación (registro habilitado)
 Auth::routes();
+Auth::routes(['verify' => false]);
 
 // Redirección después del login
 Route::get('/home', [HomeController::class, 'index'])->name('home')->middleware('auth');
+Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/productos', [HomeController::class, 'productos'])->name('productos.index');
 
 // Grupo de rutas protegidas con autenticación
 Route::middleware(['auth'])->group(function () {
     // CRUD de productos
     Route::resource('productos', ProductoController::class);
+    // Rutas para búsqueda y generación de códigos de barras
+    Route::get('/productos/buscar', [ProductoController::class, 'buscar'])->name('productos.buscar');
+    Route::get('/productos/generar-barcode', [ProductoController::class, 'generarBarcode'])->name('productos.generar-barcode');
 
-    // CRUD de categorías (como estaba originalmente)
+    // CRUD de categorías
     Route::get('categorias', [CategoriaController::class, 'index'])->name('categorias.index');
     Route::get('categorias/create', [CategoriaController::class, 'create'])->name('categorias.create');
     Route::post('categorias', [CategoriaController::class, 'store'])->name('categorias.store');
@@ -73,12 +78,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/usuarios', [AdminController::class, 'usuarios'])->name('admin.usuarios');
     Route::get('/pedidos', [AdminController::class, 'pedidos'])->name('admin.pedidos');
-    Route::post('productos', [ProductoController::class, 'store'])->name('productos.store');
 
     // Rutas de reportes
     Route::get('/reportes', [ReporteController::class, 'index'])->name('admin.reportes');
 
-       // Rutas para gestión de usuarios
+    // Rutas para gestión de usuarios
     Route::get('/users', [AdminController::class, 'usersIndex'])->name('admin.users.index');
     Route::get('/users/create', [AdminController::class, 'create'])->name('admin.users.create');
     Route::post('/users', [AdminController::class, 'store'])->name('admin.users.store');
@@ -90,15 +94,17 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/pedidos/{orden}/refund', [AdminController::class, 'refund'])->name('admin.refund');
     Route::get('/pedidos/{orden}/invoice', [AdminController::class, 'invoice'])->name('admin.invoice');
     Route::get('/pedidos/{orden}/generate-invoice', [AdminController::class, 'generateInvoice'])->name('admin.generateInvoice');
-    
-  // Rutas para gestión de proveedores
+
+    // Rutas para gestión de proveedores
     Route::get('/proveedores', [ProveedorController::class, 'index'])->name('proveedores.index');
     Route::get('/proveedores/create', [ProveedorController::class, 'create'])->name('proveedores.create');
     Route::post('/proveedores', [ProveedorController::class, 'store'])->name('proveedores.store');
     Route::get('/proveedores/{proveedor}/edit', [ProveedorController::class, 'edit'])->name('admin.proveedores.edit');
     Route::put('/proveedores/{proveedor}', [ProveedorController::class, 'update'])->name('proveedores.update');
     Route::delete('/proveedores/{proveedor}', [ProveedorController::class, 'destroy'])->name('admin.proveedores.destroy');
-
+    Route::delete('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraDestroy'])->name('admin.proveedores.ordenes.destroy');
+    Route::post('/admin/productos/store', [ProveedorController::class, 'storeProduct'])->name('admin.productos.store');
+    
     // Rutas para configurar correo de notificaciones
     Route::get('/proveedores/configurar-correo', [ProveedorController::class, 'configurarCorreo'])->name('admin.proveedores.configurar-correo');
     Route::post('/proveedores/configurar-correo', [ProveedorController::class, 'guardarCorreoNotificaciones'])->name('admin.proveedores.guardar-correo');
@@ -109,7 +115,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/proveedores/{proveedor}/ordenes', [ProveedorController::class, 'ordenCompraStore'])->name('admin.proveedores.ordenes.store');
     Route::get('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraShow'])->name('admin.proveedores.ordenes.show');
     Route::put('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraUpdate'])->name('admin.proveedores.ordenes.update');
-    Route::delete('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraDestroy'])->name('admin.proveedores.ordenes.destroy');
+    Route::delete('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'orden buyingDestroy'])->name('admin.proveedores.ordenes.destroy');
     Route::post('/proveedores/{proveedor}/ordenes/{orden}/update-producto', [ProveedorController::class, 'updateProducto'])->name('admin.proveedores.ordenes.updateProducto');
 });
 
@@ -138,8 +144,8 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/user/settings', [UserController::class, 'updateSettings'])->name('user.settings.update');
     Route::get('/user/orders/{orden}', [UserController::class, 'showOrder'])->name('user.orders.show');
     Route::get('/user/profile', [UserController::class, 'profile'])->name('user.profile');
-    Route::get('/reseñas', [ReseñaController::class, 'index'])->name('user.reviews');  
-    Route::post('/reseñas', [ReseñaController::class, 'store'])->middleware('auth')->name('user.reviews.store'); 
+    Route::get('/reseñas', [ReseñaController::class, 'index'])->name('user.reviews');
+    Route::post('/reseñas', [ReseñaController::class, 'store'])->middleware('auth')->name('user.reviews.store');
 });
 
 // Rutas adicionales para cajero
@@ -155,26 +161,29 @@ Route::prefix('cajero')->middleware(['auth', 'role:cajero'])->group(function () 
     Route::delete('/order/{id}', [CajeroController::class, 'deleteOrder'])->name('cajero.order.delete');
     Route::post('/order/{id}/pay', [CajeroController::class, 'payOrder'])->name('cajero.order.pay');
     Route::get('/close', [CajeroController::class, 'close'])->name('cajero.close');
-    Route::post('/cajero/order/{order}/refund', [CajeroController::class, 'refundOrder'])->name('cajero.order.refunded');
-
-        // Rutas para facturación
-    Route::get('/pedidos/{orden}/factura', [AdminController::class, 'factura'])->name('admin.pedidos.factura');
     Route::post('/close', [CajeroController::class, 'close']);
+    Route::post('/order/{order}/refund', [CajeroController::class, 'refundOrder'])->name('cajero.order.refunded');
+
+    // Rutas para facturación
+    Route::get('/pedidos/{orden}/factura', [AdminController::class, 'factura'])->name('admin.pedidos.factura');
 });
 
-//Ruta para manual de usuario
+// Rutas para más inormación y manuales
 Route::get('/manual', function () {
     return view('manual');
 })->name('manual');
-// Ruta para manual de cajero
 Route::get('/manual/cajero', function () {
     return view('cajero.manualc');
 })->name('manualc');
-// Ruta para manual de usuario
 Route::get('/manual/usuario', function () {
     return view('users.manualu');
 })->name('manualu');
-// Ruta para manual de administrador
 Route::get('/manual/administrador', function () {
     return view('admin.manuala');
-})->name('manuala');   
+})->name('manuala');
+Route::get('/manual/tecnico', function () {
+    return view('manualTec');
+})->name('manualTec');
+Route::get('/developers', function () {
+    return view('developers');
+})->name('developers');

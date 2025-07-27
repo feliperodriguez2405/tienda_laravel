@@ -17,13 +17,11 @@ class OrdenCompra extends Model
         'monto',
         'estado',
         'detalles',
-        'confirmado_por_vendedor',
     ];
 
     protected $casts = [
         'detalles' => 'array',
         'fecha' => 'datetime',
-        'confirmado_por_vendedor' => 'boolean',
     ];
 
     public function proveedor()

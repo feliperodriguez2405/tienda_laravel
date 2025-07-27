@@ -39,7 +39,7 @@ class ProductoController extends Controller
             }
 
             $productos = $query->paginate(9);
-            Log::info('Productos paginated', ['count' => $productos->count(), 'total' => $productos->total(), 'per_page' => $productos->perPage()]);
+            Log::info('Productos paginated', ['count' => count($productos->items()), 'total' => $productos->total(), 'per_page' => $productos->perPage()]);
 
             $categorias = Categoria::all();
 
@@ -112,9 +112,17 @@ class ProductoController extends Controller
             $data['precio'] = $request->precio_compra * (1 + $request->porcentaje_ganancia / 100);
         }
 
+        // Verificar si los datos obligatorios están completos; si no, establecer estado como inactivo
+        if ($data['precio'] <= 0 || empty($data['nombre']) || empty($data['descripcion']) || empty($data['categoria_id'])) {
+            $data['estado'] = 'inactivo';
+            $message = 'Producto agregado correctamente, pero está inactivo porque faltan datos obligatorios (precio, nombre, descripción o categoría). Complete todos los datos para activarlo.';
+        } else {
+            $message = 'Producto agregado correctamente.';
+        }
+
         Producto::create($data);
 
-        return redirect()->route('productos.index')->with('success', 'Producto agregado correctamente.');
+        return redirect()->route('productos.index')->with('success', $message);
     }
 
     public function show(Producto $producto)
@@ -173,9 +181,17 @@ class ProductoController extends Controller
             $data['precio'] = $request->precio_compra * (1 + $request->porcentaje_ganancia / 100);
         }
 
+        // Verificar si los datos obligatorios están completos; si no, establecer estado como inactivo
+        if ($data['precio'] <= 0 || empty($data['nombre']) || empty($data['descripcion']) || empty($data['categoria_id'])) {
+            $data['estado'] = 'inactivo';
+            $message = 'Producto actualizado correctamente, pero está inactivo porque faltan datos obligatorios (precio, nombre, descripción o categoría). Complete todos los datos para activarlo.';
+        } else {
+            $message = 'Producto actualizado correctamente.';
+        }
+
         $producto->update($data);
 
-        return redirect()->route('productos.index')->with('success', 'Producto actualizado correctamente.');
+        return redirect()->route('productos.index')->with('success', $message);
     }
 
     public function destroy(Producto $producto)

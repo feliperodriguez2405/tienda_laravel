@@ -1,405 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Http\Request;
-use App\Models\{OrdenCompra, Proveedor, Producto, Categoria};
-use App\Notifications\OrdenCompraNotification;
-use Illuminate\Support\Facades\{Log, DB, Storage};
-
-class ProveedorController extends Controller
-{
-    /**
-     * Display a listing of the providers.
-     */
-    public function index()
-    {
-        $proveedores = Proveedor::all();
-        return view('admin.proveedores.index', compact('proveedores'));
-    }
-
-    /**
-     * Show the form for creating a new provider.
-     */
-    public function create()
-    {
-        $categorias = Categoria::all(); // Cargar todas las categorías
-        return view('admin.proveedores.create', compact('categorias'));
-    }
-
-    /**
-     * Store a newly created provider in storage.
-     */
-    public function store(Request $request)
-    {
-        $data = $this->validateProveedor($request);
-
-        // Manejar nueva categoría
-        if ($request->categoria_id === 'new' && $request->new_category_name) {
-            $categoria = Categoria::create(['nombre' => $request->new_category_name]);
-            $data['categoria_id'] = $categoria->id;
-        }
-
-        Proveedor::create($data);
-        return redirect()->route('proveedores.index')->with('success', 'Proveedor registrado correctamente.');
-    }
-
-    /**
-     * Show the form for editing the specified provider.
-     */
-    public function edit(Proveedor $proveedor)
-    {
-        $categorias = Categoria::all(); // Cargar categorías para el formulario de edición
-        return view('admin.proveedores.edit', compact('proveedor', 'categorias'));
-    }
-
-    /**
-     * Update the specified provider in storage.
-     */
-    public function update(Request $request, Proveedor $proveedor)
-    {
-        $data = $this->validateProveedor($request, $proveedor->id);
-
-        // Manejar nueva categoría
-        if ($request->categoria_id === 'new' && $request->new_category_name) {
-            $categoria = Categoria::create(['nombre' => $request->new_category_name]);
-            $data['categoria_id'] = $categoria->id;
-        }
-
-        $proveedor->update($data);
-        return redirect()->route('proveedores.index')->with('success', 'Proveedor actualizado correctamente.');
-    }
-
-    /**
-     * Remove the specified provider from storage.
-     */
-    public function destroy(Proveedor $proveedor)
-    {
-        if ($proveedor->ordenesCompra()->exists()) {
-            return redirect()->route('proveedores.index')->with('error', 'No se puede eliminar el proveedor porque tiene órdenes de compra asociadas.');
-        }
-        $proveedor->delete();
-        return redirect()->route('proveedores.index')->with('success', 'Proveedor eliminado correctamente.');
-    }
-
-    /**
-     * Show the form for creating a new purchase order for the specified provider.
-     */
-    public function ordenCompraCreate(Proveedor $proveedor)
-    {
-        return view('admin.proveedores.orden_create', compact('proveedor'));
-    }
-
-    /**
-     * Store a newly created purchase order in storage.
-     */
-    public function ordenCompraStore(Request $request, Proveedor $proveedor)
-    {
-        $request->validate([
-            'fecha' => 'required|date',
-            'estado' => 'required|in:pendiente,entregado',
-            'detalles' => 'required|array',
-            'detalles.*.producto' => 'required|string',
-            'detalles.*.cantidad' => 'required|integer|min:1',
-            'detalles.*.precio_compra' => 'required|numeric|min:0', // Added precio_compra
-            'detalles.*.precio_venta' => 'required|numeric|min:0',  // Added precio_venta
-            'detalles.*.descripcion' => 'nullable|string',
-        ]);
-
-        $orden = OrdenCompra::create([
-            'proveedor_id' => $proveedor->id,
-            'fecha' => $request->fecha,
-            'monto' => 0,
-            'estado' => $request->estado,
-            'detalles' => $request->detalles,
-        ]);
-
-        if ($request->estado === 'entregado') {
-            foreach ($request->detalles as $detalle) {
-                $producto = Producto::firstOrCreate(
-                    ['nombre' => $detalle['producto']],
-                    ['stock' => 0, 'precio' => $detalle['precio_venta'], 'precio_compra' => $detalle['precio_compra'], 'categoria_id' => 1] // Default categoria_id
-                );
-
-                $producto->increment('stock', $detalle['cantidad']);
-                $producto->save();
-
-                session()->flash('alerta_productos.' . $producto->id, [
-                    'mensaje' => "El producto '{$producto->nombre}' necesita actualización",
-                    'url' => route('productos.edit', $producto)
-                ]);
-            }
-        }
-
-        if ($proveedor->email && $proveedor->recibir_notificaciones) {
-            try {
-                $proveedor->notify(new OrdenCompraNotification($orden, $proveedor));
-                return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-                    ->with('success', 'Orden de compra registrada y notificación enviada al proveedor.');
-            } catch (\Exception $e) {
-                Log::error('Error enviando notificación de orden de compra: ' . $e->getMessage());
-                return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-                    ->with('warning', 'Orden registrada, pero hubo un problema al enviar el correo.');
-            }
-        }
-
-        return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-            ->with('success', 'Orden de compra guardada correctamente');
-    }
-
-    /**
-     * Display the specified purchase order.
-     */
-    public function ordenCompraShow(Proveedor $proveedor, OrdenCompra $orden)
-    {
-        if ($orden->proveedor_id !== $proveedor->id) {
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-                ->with('error', 'La orden no pertenece a este proveedor.');
-        }
-
-        $productos = Producto::all();
-        $categorias = Categoria::all(); // Cargar categorías para el modal
-        return view('admin.proveedores.orden_show', compact('proveedor', 'orden', 'productos', 'categorias'));
-    }
-
-    /**
-     * Display the purchase history for the specified provider.
-     */
-    public function historialCompras(Proveedor $proveedor, Request $request)
-    {
-        $estado = $request->query('estado');
-
-        $ordenes = $proveedor->ordenesCompra()
-            ->when($estado, function ($query, $estado) {
-                return $query->where('estado', $estado);
-            })
-            ->orderBy('fecha', 'desc')
-            ->paginate(10);
-
-        return view('admin.proveedores.historial', compact('proveedor', 'ordenes'));
-    }
-
-    /**
-     * Remove the specified purchase order from storage.
-     */
-    public function ordenCompraDestroy(Proveedor $proveedor, OrdenCompra $orden)
-    {
-        if ($orden->proveedor_id !== $proveedor->id) {
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-                ->with('error', 'La orden no pertenece a este proveedor.');
-        }
-
-        $orden->delete();
-
-        return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-            ->with('success', 'Orden de compra eliminada correctamente.');
-    }
-
-    /**
-     * Update the specified purchase order in storage.
-     */
-    public function ordenCompraUpdate(Request $request, Proveedor $proveedor, OrdenCompra $orden)
-    {
-        if ($orden->proveedor_id !== $proveedor->id) {
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-                ->with('error', 'La orden no pertenece a este proveedor.');
-        }
-
-        $data = $request->validate([
-            'estado' => 'required|in:entregado,completado,cancelado',
-            'detalles' => 'required|array',
-            'detalles.*.producto' => 'required|string|max:255',
-            'detalles.*.cantidad' => 'required|integer|min:1',
-            'detalles.*.precio_compra' => 'required|numeric|min:0', // Added precio_compra
-            'detalles.*.precio_venta' => 'required|numeric|min:0',  // Added precio_venta
-            'detalles.*.descripcion' => 'nullable|string|max:500',
-        ]);
-
-        $orden->estado = $data['estado'];
-        $detalles = $orden->detalles;
-        foreach ($data['detalles'] as $index => $detalleInput) {
-            if (isset($detalles[$index])) {
-                $detalles[$index]['producto'] = $detalleInput['producto'];
-                $detalles[$index]['cantidad'] = $detalleInput['cantidad'];
-                $detalles[$index]['precio_compra'] = $detalleInput['precio_compra'];
-                $detalles[$index]['precio_venta'] = $detalleInput['precio_venta'];
-                $detalles[$index]['descripcion'] = $detalleInput['descripcion'] ?? '';
-            }
-        }
-        $orden->detalles = $detalles;
-
-        $monto = 0;
-        foreach ($detalles as $detalle) {
-            if (isset($detalle['precio_compra']) && isset($detalle['cantidad'])) {
-                $monto += $detalle['precio_compra'] * $detalle['cantidad'];
-            }
-        }
-        $orden->monto = $monto;
-
-        if ($data['estado'] === 'entregado') {
-            foreach ($detalles as $detalle) {
-                $producto = Producto::firstOrCreate(
-                    ['nombre' => $detalle['producto']],
-                    ['stock' => 0, 'precio' => $detalle['precio_venta'], 'precio_compra' => $detalle['precio_compra'], 'categoria_id' => 1] // Default categoria_id
-                );
-
-                $producto->increment('stock', $detalle['cantidad']);
-                $producto->save();
-
-                session()->flash('alerta_productos.' . $producto->id, [
-                    'mensaje' => "El producto '{$producto->nombre}' necesita actualización",
-                    'url' => route('productos.edit', $producto)
-                ]);
-            }
-        }
-
-        $orden->save();
-
-        return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-            ->with('success', 'Orden de compra actualizada correctamente.');
-    }
-
-    /**
-     * Show the form for configuring notification email.
-     */
-    public function configurarCorreo()
-    {
-        $correo_notificaciones = env('MAIL_FROM_ADDRESS', 'default@example.com');
-        return view('admin.proveedores.configurar-correo', compact('correo_notificaciones'));
-    }
-
-    /**
-     * Store the notification email configuration.
-     */
-    public function guardarCorreoNotificaciones(Request $request)
-    {
-        $request->validate([
-            'correo_notificaciones' => 'required|email',
-        ]);
-
-        $nuevoCorreo = $request->input('correo_notificaciones');
-        return redirect()->route('admin.proveedores.configurar-correo')
-            ->with('success', 'Correo de notificaciones actualizado a: ' . $nuevoCorreo);
-    }
-
-    /**
-     * Validate provider data.
-     */
-    private function validateProveedor(Request $request, $id = null): array
-    {
-        $rules = [
-            'nombre' => 'required|string|max:255',
-            'telefono' => 'nullable|string|max:20',
-            'email' => "nullable|email|unique:proveedores,email,{$id}",
-            'direccion' => 'nullable|string',
-            'productos_suministrados' => 'nullable|string',
-            'condiciones_pago' => 'nullable|string',
-            'fecha_vencimiento_contrato' => 'nullable|date',
-            'recibir_notificaciones' => 'nullable|boolean',
-            'estado' => 'nullable|in:activo,inactivo',
-            'categoria_id' => 'nullable|exists:categorias,id',
-            'new_category_name' => 'nullable|string|max:255|required_if:categoria_id,new',
-        ];
-
-        $data = $request->validate($rules);
-
-        // Convert productos_suministrados string to array
-        if ($data['productos_suministrados']) {
-            $data['productos_suministrados'] = array_map('trim', explode(',', $data['productos_suministrados']));
-        } else {
-            $data['productos_suministrados'] = [];
-        }
-
-        // Ensure recibir_notificaciones is boolean
-        $data['recibir_notificaciones'] = $request->has('recibir_notificaciones');
-
-        // Set default estado if not provided
-        $data['estado'] = $data['estado'] ?? 'activo';
-
-        return $data;
-    }
-
-    /**
-     * Validate purchase order data.
-     */
-    private function validateOrdenCompra(Request $request): array
-    {
-        return $request->validate([
-            'fecha' => 'required|date',
-            'estado' => 'required|in:pendiente,procesando,enviado,entregado,cancelado',
-            'detalles' => 'required|array|min:1',
-            'detalles.*.producto' => 'required|string|max:255',
-            'detalles.*.cantidad' => 'required|integer|min:1',
-            'detalles.*.precio_compra' => 'required|numeric|min:0', // Added precio_compra
-            'detalles.*.precio_venta' => 'required|numeric|min:0',  // Added precio_venta
-            'detalles.*.descripcion' => 'nullable|string|max:500',
-        ]);
-    }
-
-    /**
-     * Update product stock based on order details.
-     */
-    private function updateProductStock(array $detalles): void
-    {
-        foreach ($detalles as $detalle) {
-            $producto = Producto::firstOrCreate(
-                ['nombre' => $detalle['producto']],
-                ['stock' => 0, 'precio' => $detalle['precio_venta'], 'precio_compra' => $detalle['precio_compra'], 'categoria_id' => 1] // Default categoria_id
-            );
-            $producto->increment('stock', $detalle['cantidad']);
-            $producto->save();
-        }
-    }
-
-    /**
-     * Send purchase order notification to the provider.
-     */
-    private function sendOrdenCompraNotification(OrdenCompra $ordenCompra, Proveedor $proveedor)
-    {
-        try {
-            $proveedor->notify(new OrdenCompraNotification($ordenCompra, $proveedor));
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-                ->with('success', 'Orden de compra registrada y notificación enviada al proveedor.');
-        } catch (\Exception $e) {
-            Log::error('Error enviando notificación de orden de compra: ' . $e->getMessage());
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-                ->with('warning', 'Orden registrada, pero un problema al enviar el correo: ' . $e->getMessage());
-        }
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- <?php
-
-namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\{OrdenCompra, Proveedor, Producto, Categoria};
 use App\Notifications\OrdenCompraNotification;
-use Illuminate\Support\Facades\{Log, DB, Mail, Artisan, Config, Schema};
+use Illuminate\Support\Facades\{DB, Schema, Log, Mail, Artisan};
 
 class ProveedorController extends Controller
 {
@@ -418,86 +24,39 @@ class ProveedorController extends Controller
 
     public function store(Request $request)
     {
-        $rules = [
-            'nombre' => 'required|string|max:255',
-            'telefono' => 'nullable|string|max:20|regex:/^[0-9+\-\(\) ]*$/',
-            'email' => 'required|email|max:255|unique:proveedores,email',
-            'direccion' => 'nullable|string|max:500',
-            'productos_suministrados' => 'nullable|array',
-            'condiciones_pago' => 'nullable|string|max:1000',
-            'fecha_vencimiento_contrato' => 'nullable|date',
-            'recibir_notificaciones' => 'nullable|boolean',
-            'estado' => 'required|in:activo,inactivo',
-            'new_category_name' => 'nullable|string|max:255|required_if:categoria_id,new',
-        ];
+        $data = $request->only([
+            'nombre', 'telefono', 'email', 'direccion', 'condiciones_pago',
+            'fecha_vencimiento_contrato', 'recibir_notificaciones', 'estado', 'categoria_id'
+        ]);
+        $data['nombre'] = ucfirst(trim($data['nombre'] ?? 'Proveedor Anónimo'));
+        $data['recibir_notificaciones'] = $request->has('recibir_notificaciones');
+        $data['estado'] = $data['estado'] ?? 'activo';
+        $productos_suministrados = $request->input('productos_suministrados', []);
 
-        $messages = [
-            'nombre.required' => 'El nombre del proveedor es obligatorio.',
-            'nombre.string' => 'El nombre del proveedor debe ser un texto.',
-            'nombre.max' => 'El nombre del proveedor no puede exceder 255 caracteres.',
-            'telefono.string' => 'El teléfono debe ser un texto.',
-            'telefono.max' => 'El teléfono no puede exceder 20 caracteres.',
-            'telefono.regex' => 'El teléfono debe contener solo números, signos (+, -, (), y espacios).',
-            'email.required' => 'El correo electrónico es obligatorio.',
-            'email.email' => 'El correo electrónico debe ser una dirección válida.',
-            'email.max' => 'El correo electrónico no puede exceder 255 caracteres.',
-            'email.unique' => 'El correo electrónico ya está registrado.',
-            'direccion.string' => 'La dirección debe ser un texto.',
-            'direccion.max' => 'La dirección no puede exceder 500 caracteres.',
-            'productos_suministrados.array' => 'Los productos suministrados deben ser un arreglo.',
-            'condiciones_pago.string' => 'Las condiciones de pago deben ser un texto.',
-            'condiciones_pago.max' => 'Las condiciones de pago no pueden exceder 1000 caracteres.',
-            'fecha_vencimiento_contrato.date' => 'La fecha de vencimiento del contrato debe ser una fecha válida.',
-            'recibir_notificaciones.boolean' => 'La opción de recibir notificaciones debe ser un valor booleano.',
-            'estado.required' => 'El estado es obligatorio.',
-            'estado.in' => 'El estado debe ser activo o inactivo.',
-            'new_category_name.string' => 'El nombre de la nueva categoría debe ser un texto.',
-            'new_category_name.max' => 'El nombre de la nueva categoría no puede exceder 255 caracteres.',
-            'new_category_name.required_if' => 'El nombre de la nueva categoría es obligatorio cuando se selecciona "Crear nueva categoría".',
-        ];
+        if ($request->input('categoria_id') === 'new' && $request->filled('new_category_name')) {
+            $categoria = Categoria::create([
+                'nombre' => ucfirst(trim($request->input('new_category_name') ?? 'Categoría Genérica')),
+                'estado' => 'activo'
+            ]);
+            $data['categoria_id'] = $categoria->id;
+        } else {
+            $data['categoria_id'] = $request->filled('categoria_id') && $request->input('categoria_id') !== 'new' ? $request->input('categoria_id') : null;
+        }
 
+        DB::beginTransaction();
         try {
-            $data = $request->validateWithBag('default', $rules, $messages);
-            $data['nombre'] = ucfirst(trim($data['nombre']));
-
-            $categoria_id = $request->input('categoria_id');
-            if ($categoria_id === 'new' && $request->filled('new_category_name')) {
-                $categoria = Categoria::create([
-                    'nombre' => ucfirst(trim($request->new_category_name)),
-                    'estado' => 'activo'
-                ]);
-                $categoria_id = $categoria->id;
-            } else {
-                $categoria_id = $request->filled('categoria_id') && $request->categoria_id !== 'new' ? $request->categoria_id : null;
-            }
-
-            $productos_suministrados = $request->input('productos_suministrados', []);
-            $data['categoria_id'] = $categoria_id;
-            $data['recibir_notificaciones'] = $request->has('recibir_notificaciones');
-            $data['estado'] = $data['estado'] ?? 'activo';
-
-            DB::beginTransaction();
             $proveedor = Proveedor::create($data);
 
             if (!empty($productos_suministrados) && Schema::hasTable('proveedor_producto')) {
-                try {
-                    $proveedor->productos()->sync($productos_suministrados);
-                } catch (\Exception $e) {
-                    Log::warning('Failed to sync products for provider: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
-                }
-            } elseif (!empty($productos_suministrados)) {
-                Log::warning('Pivot table proveedor_producto does not exist. Skipping product sync for provider ID: ' . $proveedor->id);
+                $proveedor->productos()->sync($productos_suministrados);
             }
 
             DB::commit();
             return redirect()->route('proveedores.index')->with('success', 'Proveedor registrado correctamente.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Validation error while registering provider: ' . json_encode($e->errors()));
-            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al registrar proveedor: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
-            return redirect()->back()->with('error', 'Error al registrar el proveedor: ' . $e->getMessage());
+            Log::error('Error in store: ' . $e->getMessage(), ['request_data' => $request->all()]);
+            return redirect()->route('proveedores.index')->with('error', 'Error al registrar el proveedor.');
         }
     }
 
@@ -511,72 +70,39 @@ class ProveedorController extends Controller
 
     public function update(Request $request, Proveedor $proveedor)
     {
-        $rules = [
-            'nombre' => 'required|string|max:255',
-            'telefono' => 'nullable|string|max:20|regex:/^[0-9+\-\(\) ]*$/',
-            'email' => "required|email|max:255|unique:proveedores,email,{$proveedor->id}",
-            'direccion' => 'nullable|string|max:500',
-            'productos_suministrados' => 'nullable|array',
-            'condiciones_pago' => 'nullable|string|max:1000',
-            'fecha_vencimiento_contrato' => 'nullable|date',
-            'recibir_notificaciones' => 'nullable|boolean',
-            'estado' => 'required|in:activo,inactivo',
-            'new_category_name' => 'nullable|string|max:255|required_if:categoria_id,new',
-        ];
+        $data = $request->only([
+            'nombre', 'telefono', 'email', 'direccion', 'condiciones_pago',
+            'fecha_vencimiento_contrato', 'recibir_notificaciones', 'estado', 'categoria_id'
+        ]);
+        $data['nombre'] = ucfirst(trim($data['nombre'] ?? 'Proveedor Anónimo'));
+        $data['recibir_notificaciones'] = $request->has('recibir_notificaciones');
+        $data['estado'] = $data['estado'] ?? 'activo';
+        $productos_suministrados = $request->input('productos_suministrados', []);
 
-        $messages = [
-            'nombre.required' => 'El nombre del proveedor es obligatorio.',
-            'email.required' => 'El correo electrónico es obligatorio.',
-            'estado.required' => 'El estado es obligatorio.',
-            'new_category_name.required_if' => 'El nombre de la nueva categoría es obligatorio cuando se selecciona "Crear nueva categoría".',
-        ];
+        if ($request->input('categoria_id') === 'new' && $request->filled('new_category_name')) {
+            $categoria = Categoria::create([
+                'nombre' => ucfirst(trim($request->input('new_category_name') ?? 'Categoría Genérica')),
+                'estado' => 'activo'
+            ]);
+            $data['categoria_id'] = $categoria->id;
+        } else {
+            $data['categoria_id'] = $request->filled('categoria_id') && $request->input('categoria_id') !== 'new' ? $request->input('categoria_id') : null;
+        }
 
+        DB::beginTransaction();
         try {
-            $data = $request->validateWithBag('default', $rules, $messages);
-            $data['nombre'] = ucfirst(trim($data['nombre']));
-
-            $categoria_id = $request->input('categoria_id');
-            if ($categoria_id === 'new' && $request->filled('new_category_name')) {
-                $categoria = Categoria::create([
-                    'nombre' => ucfirst(trim($request->new_category_name)),
-                    'estado' => 'activo'
-                ]);
-                $categoria_id = $categoria->id;
-            } else {
-                $categoria_id = $request->filled('categoria_id') && $request->categoria_id !== 'new' ? $request->categoria_id : null;
-            }
-
-            $productos_suministrados = $request->input('productos_suministrados', []);
-            $data['categoria_id'] = $categoria_id;
-            $data['recibir_notificaciones'] = $request->has('recibir_notificaciones');
-            $data['estado'] = $data['estado'] ?? 'activo';
-
-            DB::beginTransaction();
             $proveedor->update($data);
 
-            if (!empty($productos_suministrados) && Schema::hasTable('proveedor_producto')) {
-                try {
-                    $proveedor->productos()->sync($productos_suministrados);
-                } catch (\Exception $e) {
-                    Log::warning('Failed to sync products for provider: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
-                }
-            } elseif (!empty($productos_suministrados)) {
-                Log::warning('Pivot table proveedor_producto does not exist. Skipping product sync for provider ID: ' . $proveedor->id);
-            } else {
-                if (Schema::hasTable('proveedor_producto')) {
-                    $proveedor->productos()->detach();
-                }
+            if (Schema::hasTable('proveedor_producto')) {
+                $proveedor->productos()->sync($productos_suministrados);
             }
 
             DB::commit();
             return redirect()->route('proveedores.index')->with('success', 'Proveedor actualizado correctamente.');
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            Log::error('Validation error while updating provider: ' . json_encode($e->errors()));
-            return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al actualizar proveedor: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
-            return redirect()->back()->with('error', 'Error al actualizar el proveedor: ' . $e->getMessage());
+            Log::error('Error in update: ' . $e->getMessage(), ['proveedor_id' => $proveedor->id, 'request_data' => $request->all()]);
+            return redirect()->route('proveedores.index')->with('error', 'Error al actualizar el proveedor.');
         }
     }
 
@@ -585,8 +111,9 @@ class ProveedorController extends Controller
         if ($proveedor->ordenesCompra()->exists()) {
             return redirect()->route('proveedores.index')->with('error', 'No se puede eliminar el proveedor porque tiene órdenes de compra asociadas.');
         }
+
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
             if (Schema::hasTable('proveedor_producto')) {
                 $proveedor->productos()->detach();
             }
@@ -595,102 +122,187 @@ class ProveedorController extends Controller
             return redirect()->route('proveedores.index')->with('success', 'Proveedor eliminado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al eliminar proveedor: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
-            return redirect()->route('proveedores.index')->with('error', 'Error al eliminar el proveedor: ' . $e->getMessage());
+            Log::error('Error in destroy: ' . $e->getMessage(), ['proveedor_id' => $proveedor->id]);
+            return redirect()->route('proveedores.index')->with('error', 'Error al eliminar el proveedor.');
         }
     }
 
     public function ordenCompraCreate(Proveedor $proveedor)
     {
         $categorias = Categoria::all();
-        $productos = Producto::all();
+        $productos = Producto::with('categoria')->get();
         return view('admin.proveedores.orden_create', compact('proveedor', 'categorias', 'productos'));
     }
 
     public function ordenCompraStore(Request $request, Proveedor $proveedor)
     {
-        $data = $this->validateOrdenCompra($request);
-        foreach ($data['detalles'] as &$detalle) {
-            if (isset($detalle['categoria_id']) && $detalle['categoria_id'] === 'new' && !empty($detalle['new_category_name'])) {
-                $categoria = Categoria::create([
-                    'nombre' => ucfirst(trim($detalle['new_category_name'])),
-                    'estado' => 'activo'
-                ]);
-                $detalle['categoria_id'] = $categoria->id;
-            }
-            $detalle['producto'] = $this->getProductNames($detalle['producto_ids'] ?? []);
+        if (!$proveedor->exists || !$proveedor->id) {
+            Log::error('Proveedor inválido', ['proveedor_id' => $proveedor->id ?? null]);
+            return redirect()->route('proveedores.index')->with('error', 'Proveedor no encontrado.');
         }
 
+        $data = $request->only(['fecha', 'detalles', 'estado']);
+        $data['estado'] = $data['estado'] ?? 'procesando';
+
+        if (empty($data['detalles']) || !is_array($data['detalles'])) {
+            $data['detalles'] = [[
+                'producto_ids' => [],
+                'producto' => 'Producto genérico',
+                'cantidad' => 1,
+                'categoria_id' => $proveedor->categoria_id ?? null,
+            ]];
+            Log::warning('No detalles provided, using default', ['proveedor_id' => $proveedor->id]);
+        }
+
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
-            $orden = OrdenCompra::create([
+            $newProducts = [];
+
+            foreach ($data['detalles'] as &$detalle) {
+                $detalle['producto_ids'] = $detalle['producto_ids'] ?? [];
+                $detalle['cantidad'] = $detalle['cantidad'] ?? 1;
+                $detalle['categoria_id'] = $detalle['categoria_id'] ?? $proveedor->categoria_id ?? null;
+
+                if (isset($detalle['new_product_name']) && !empty($detalle['new_product_name'])) {
+                    $correctedName = $this->correctSpelling(ucfirst(trim($detalle['new_product_name'] ?? 'Producto Genérico')));
+                    $categoriaId = $detalle['categoria_id'] ?? null;
+                    if ($categoriaId === 'new' && !empty($detalle['new_category_name'])) {
+                        $categoria = Categoria::create([
+                            'nombre' => ucfirst(trim($detalle['new_category_name'] ?? 'Categoría Genérica')),
+                            'estado' => 'activo'
+                        ]);
+                        $categoriaId = $categoria->id;
+                    } elseif ($categoriaId === 'new') {
+                        $categoriaId = $proveedor->categoria_id ?? null;
+                    }
+
+                    $producto = Producto::firstOrCreate(
+                        ['nombre' => $correctedName],
+                        [
+                            'stock' => 0,
+                            'precio' => 0,
+                            'precio_compra' => 0,
+                            'estado' => 'inactivo',
+                            'categoria_id' => $categoriaId
+                        ]
+                    );
+                    $detalle['producto_ids'] = [$producto->id];
+                    $detalle['producto'] = $producto->nombre;
+                    $newProducts[] = $producto;
+                } else {
+                    $detalle['producto'] = !empty($detalle['producto_ids']) ? $this->getProductNames($detalle['producto_ids']) : ($detalle['producto'] ?? 'Producto genérico');
+                    if (!empty($detalle['producto_ids']) && is_numeric($detalle['producto_ids'][0])) {
+                        $producto = Producto::find($detalle['producto_ids'][0]);
+                        $detalle['categoria_id'] = $producto ? $producto->categoria_id : ($proveedor->categoria_id ?? null);
+                        if ($producto) {
+                            $producto->estado = 'inactivo';
+                            $producto->save();
+                        }
+                    }
+                }
+                unset($detalle['new_product_name'], $detalle['new_category_name']);
+            }
+
+            $orderData = [
                 'proveedor_id' => $proveedor->id,
-                'fecha' => $data['fecha'],
-                'monto' => 0,
+                'fecha' => $data['fecha'] ? \Carbon\Carbon::parse($data['fecha'])->toDateTimeString() : null,
+                'monto' => $data['monto'] ?? null,
                 'estado' => $data['estado'],
                 'detalles' => $data['detalles'],
-            ]);
+            ];
 
-            $monto = 0;
-            foreach ($data['detalles'] as $detalle) {
-                if (isset($detalle['precio_compra']) && isset($detalle['cantidad'])) {
-                    $monto += $detalle['precio_compra'] * $detalle['cantidad'];
-                }
+            Log::info('Attempting to create OrdenCompra', ['order_data' => $orderData]);
+
+            $orden = OrdenCompra::create($orderData);
+
+            if (!$orden->exists || !$orden->id) {
+                throw new \Exception('Failed to create OrdenCompra: No ID assigned');
             }
-            $orden->monto = $monto;
-            $orden->save();
 
-            if ($data['estado'] === 'entregado') {
-                $this->updateProductStock($data['detalles']);
+            try {
+                $proveedor->notify(new OrdenCompraNotification($orden, $proveedor));
+            } catch (\Exception $e) {
+                Log::error('Notification failed: ' . $e->getMessage(), [
+                    'proveedor_id' => $proveedor->id,
+                    'orden_id' => $orden->id
+                ]);
             }
 
             DB::commit();
 
-            $emailStatus = '';
-            if ($proveedor->email) {
-                try {
-                    $proveedor->notify(new OrdenCompraNotification($orden, $proveedor));
-                    $emailStatus = ' y notificación enviada al proveedor.';
-                } catch (\Exception $e) {
-                    Log::error('Error enviando notificación de orden de compra: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
-                    $emailStatus = ', pero hubo un problema al enviar la notificación: ' . $e->getMessage();
-                }
-            } else {
-                $emailStatus = ', pero el proveedor no tiene correo registrado.';
+            $alerts = [];
+            foreach ($newProducts as $producto) {
+                $alerts['alerta_productos.' . $producto->id] = [
+                    'mensaje' => "El producto '{$producto->nombre}' necesita actualización de precios",
+                    'url' => route('productos.edit', $producto)
+                ];
             }
 
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-                ->with('success', 'Orden de compra guardada correctamente' . $emailStatus);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error al registrar orden de compra: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
-            return redirect()->back()->with('error', 'Error al registrar la orden de compra: ' . $e->getMessage());
-        }
-    }
-
-    public function storeProduct(Request $request)
-    {
-        try {
-            $request->validate([
-                'nombre' => 'required|string|max:255',
+            Log::info('Redirecting to historialCompras', [
+                'proveedor_id' => $proveedor->id,
+                'orden_id' => $orden->id
             ]);
 
-            $producto = Producto::firstOrCreate(
-                ['nombre' => ucfirst(trim($request->nombre))],
-                ['stock' => 0, 'precio' => 0, 'precio_compra' => 0, 'estado' => 'activo']
-            );
-
-            return response()->json(['success' => true, 'producto' => $producto]);
+            return redirect()->route('admin.proveedores.ordenes.historial', ['proveedor' => $proveedor->id])
+                ->with('success', 'Orden de compra registrada correctamente.')
+                ->with($alerts);
         } catch (\Exception $e) {
-            Log::error('Error al guardar producto: ' . $e->getMessage());
-            return response()->json(['success' => false, 'error' => $e->getMessage()], 500);
+            DB::rollBack();
+            Log::error('Error in ordenCompraStore: ' . $e->getMessage(), [
+                'proveedor_id' => $proveedor->id ?? null,
+                'request_data' => $request->all(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->route('proveedores.index')->with('error', 'Error al crear la orden de compra: ' . $e->getMessage());
         }
     }
+
+    public function ordenCompraHistorial(Proveedor $proveedor)
+{
+    try {
+        $query = OrdenCompra::where('proveedor_id', $proveedor->id);
+
+        // Filtro por búsqueda
+        if ($search = request('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhereHas('proveedor', function ($q) use ($search) {
+                      $q->where('nombre', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Filtro por estado
+        if ($estado = request('estado')) {
+            $query->where('estado', $estado);
+        }
+
+        $ordenes = $query->paginate(9);
+        Log::info('Órdenes paginadas', [
+            'proveedor_id' => $proveedor->id,
+            'count' => count($ordenes->items()),
+            'total' => $ordenes->total(),
+            'per_page' => $ordenes->perPage()
+        ]);
+
+        return view('admin.proveedores.historial', compact('proveedor', 'ordenes'));
+    } catch (\Exception $e) {
+        Log::error('Error al obtener historial de órdenes', [
+            'proveedor_id' => $proveedor->id,
+            'error' => $e->getMessage()
+        ]);
+        return back()->with('error', 'Error al cargar el historial de órdenes.');
+    }
+}
 
     public function ordenCompraShow(Proveedor $proveedor, OrdenCompra $orden)
     {
-        if ($orden->proveedor_id !== $proveedor->id) {
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
+        if (!$proveedor->exists || !$orden->exists || $orden->proveedor_id !== $proveedor->id) {
+            Log::error('Invalid proveedor or orden in ordenCompraShow', [
+                'proveedor_id' => $proveedor->id ?? null,
+                'orden_id' => $orden->id ?? null
+            ]);
+            return redirect()->route('admin.proveedores.ordenes.historial', ['proveedor' => $proveedor->id])
                 ->with('error', 'La orden no pertenece a este proveedor.');
         }
 
@@ -701,8 +313,12 @@ class ProveedorController extends Controller
 
     public function historialCompras(Proveedor $proveedor, Request $request)
     {
-        $estado = $request->query('estado');
+        if (!$proveedor->exists) {
+            Log::error('Proveedor inválido en historialCompras', ['proveedor_id' => $proveedor->id ?? null]);
+            return redirect()->route('proveedores.index')->with('error', 'Proveedor no encontrado.');
+        }
 
+        $estado = $request->query('estado');
         $ordenes = $proveedor->ordenesCompra()
             ->when($estado, function ($query, $estado) {
                 return $query->where('estado', $estado);
@@ -715,205 +331,232 @@ class ProveedorController extends Controller
 
     public function ordenCompraDestroy(Proveedor $proveedor, OrdenCompra $orden)
     {
-        if ($orden->proveedor_id !== $proveedor->id) {
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
+        if (!$proveedor->exists || !$orden->exists || $orden->proveedor_id !== $proveedor->id) {
+            Log::error('Invalid proveedor or orden in ordenCompraDestroy', [
+                'proveedor_id' => $proveedor->id ?? null,
+                'orden_id' => $orden->id ?? null
+            ]);
+            return redirect()->route('admin.proveedores.ordenes.historial', ['proveedor' => $proveedor->id])
                 ->with('error', 'La orden no pertenece a este proveedor.');
         }
 
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
+            foreach ($orden->detalles ?? [] as $detalle) {
+                if (!empty($detalle['producto_ids'])) {
+                    $producto = Producto::find($detalle['producto_ids'][0]);
+                    if ($producto && $producto->estado === 'inactivo' && $producto->stock === 0) {
+                        $producto->delete();
+                    }
+                }
+            }
             $orden->delete();
             DB::commit();
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
+            return redirect()->route('admin.proveedores.ordenes.historial', ['proveedor' => $proveedor->id])
                 ->with('success', 'Orden de compra eliminada correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al eliminar orden de compra: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
-            return redirect()->back()->with('error', 'Error al eliminar la orden de compra: ' . $e->getMessage());
+            Log::error('Error in ordenCompraDestroy: ' . $e->getMessage(), [
+                'proveedor_id' => $proveedor->id,
+                'orden_id' => $orden->id
+            ]);
+            return redirect()->route('admin.proveedores.ordenes.historial', ['proveedor' => $proveedor->id])
+                ->with('error', 'Error al eliminar la orden de compra.');
         }
     }
 
     public function ordenCompraUpdate(Request $request, Proveedor $proveedor, OrdenCompra $orden)
     {
-        if ($orden->proveedor_id !== $proveedor->id) {
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
+        if (!$proveedor->exists || !$orden->exists || $orden->proveedor_id !== $proveedor->id) {
+            Log::error('Invalid proveedor or orden in ordenCompraUpdate', [
+                'proveedor_id' => $proveedor->id ?? null,
+                'orden_id' => $orden->id ?? null
+            ]);
+            return redirect()->route('admin.proveedores.ordenes.historial', ['proveedor' => $proveedor->id])
                 ->with('error', 'La orden no pertenece a este proveedor.');
         }
 
-        $data = $this->validateOrdenCompra($request);
-        foreach ($data['detalles'] as &$detalle) {
-            if (isset($detalle['categoria_id']) && $detalle['categoria_id'] === 'new' && !empty($detalle['new_category_name'])) {
-                $categoria = Categoria::create([
-                    'nombre' => ucfirst(trim($detalle['new_category_name'])),
-                    'estado' => 'activo'
-                ]);
-                $detalle['categoria_id'] = $categoria->id;
-            }
-            $detalle['producto'] = $this->getProductNames($detalle['producto_ids'] ?? []);
+        $data = $request->only(['estado', 'detalles']);
+        $monto = 0;
+
+        if (empty($data['detalles']) || !is_array($data['detalles'])) {
+            $data['detalles'] = [[
+                'producto_ids' => [],
+                'producto' => 'Producto genérico',
+                'cantidad' => 1,
+                'categoria_id' => $proveedor->categoria_id ?? null,
+            ]];
+            Log::warning('No detalles provided in ordenCompraUpdate, using default', ['proveedor_id' => $proveedor->id]);
         }
 
         try {
             DB::beginTransaction();
-            $orden->estado = $data['estado'];
-            $orden->detalles = $data['detalles'];
-
-            $monto = 0;
-            foreach ($data['detalles'] as $detalle) {
-                if (isset($detalle['precio_compra']) && isset($detalle['cantidad'])) {
-                    $monto += $detalle['precio_compra'] * $detalle['cantidad'];
+            $alerts = [];
+            foreach ($data['detalles'] as &$detalle) {
+                $detalle['producto'] = $this->getProductNames($detalle['producto_ids'] ?? []);
+                if (!empty($detalle['producto_ids'])) {
+                    $producto = Producto::find($detalle['producto_ids'][0]);
+                    $detalle['categoria_id'] = $producto ? $producto->categoria_id : ($proveedor->categoria_id ?? null);
+                    if ($producto && isset($detalle['precio_compra']) && $detalle['precio_compra'] != $producto->precio_compra) {
+                        $alerts['alerta_precio.' . $producto->id] = [
+                            'mensaje' => "El precio de compra del producto '{$producto->nombre}' ha cambiado. ¿Desea actualizar el precio actual?",
+                            'url' => route('productos.edit', $producto)
+                        ];
+                    }
+                    if (isset($detalle['precio_compra']) && isset($detalle['cantidad'])) {
+                        $monto += $detalle['precio_compra'] * $detalle['cantidad'];
+                    }
                 }
             }
-            $orden->monto = $monto;
 
-            if ($data['estado'] === 'entregado') {
+            $orden->update([
+                'estado' => $data['estado'] ?? 'procesando',
+                'detalles' => $data['detalles'],
+                'monto' => $monto,
+            ]);
+
+            if (($data['estado'] ?? '') === 'entregado') {
                 $this->updateProductStock($data['detalles']);
+                $firstProducto = !empty($data['detalles'][0]['producto_ids']) ? Producto::find($data['detalles'][0]['producto_ids'][0]) : null;
+                DB::commit();
+                if ($firstProducto) {
+                    return redirect()->route('productos.edit', $firstProducto->id)
+                        ->with('success', 'Orden de compra actualizada correctamente. Por favor, revise los productos.')
+                        ->with($alerts);
+                }
             }
 
-            $orden->save();
             DB::commit();
 
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-                ->with('success', 'Orden de compra actualizada correctamente.');
+            foreach ($data['detalles'] as $detalle) {
+                if (!empty($detalle['producto_ids'])) {
+                    $producto = Producto::find($detalle['producto_ids'][0]);
+                    if ($producto && $producto->estado === 'inactivo') {
+                        $alerts['alerta_productos.' . $producto->id] = [
+                            'mensaje' => "El producto '{$producto->nombre}' necesita actualización",
+                            'url' => route('productos.edit', $producto)
+                        ];
+                    }
+                }
+            }
+
+            return redirect()->route('admin.proveedores.ordenes.historial', ['proveedor' => $proveedor->id])
+                ->with('success', 'Orden de compra actualizada correctamente. Por favor, revise los productos.')
+                ->with($alerts);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error al actualizar orden de compra: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
-            return redirect()->back()->with('error', 'Error al actualizar la orden de compra: ' . $e->getMessage());
+            Log::error('Error in ordenCompraUpdate: ' . $e->getMessage(), [
+                'proveedor_id' => $proveedor->id,
+                'orden_id' => $orden->id
+            ]);
+            return redirect()->route('admin.proveedores.ordenes.historial', ['proveedor' => $proveedor->id])
+                ->with('error', 'Error al actualizar la orden de compra.');
+        }
+    }
+
+    public function storeProduct(Request $request)
+    {
+        $nombre = ucfirst(trim($request->input('nombre', 'Producto Genérico')));
+        $categoria_id = $request->input('categoria_id');
+
+        try {
+            $correctedName = $this->correctSpelling($nombre);
+            $producto = Producto::firstOrCreate(
+                ['nombre' => $correctedName],
+                [
+                    'stock' => 0,
+                    'precio' => 0,
+                    'precio_compra' => 0,
+                    'estado' => 'inactivo',
+                    'categoria_id' => $categoria_id
+                ]
+            );
+
+            return response()->json([
+                'success' => true,
+                'producto' => [
+                    'id' => $producto->id,
+                    'nombre' => $producto->nombre,
+                    'categoria_id' => $producto->categoria_id
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in storeProduct: ' . $e->getMessage(), ['request_data' => $request->all()]);
+            return response()->json(['success' => false, 'error' => 'Error al crear el producto'], 500);
         }
     }
 
     public function configurarCorreo()
     {
-        Artisan::call('config:clear');
         $correo_notificaciones = config('mail.from.address', 'default@example.com');
-        $password_configurada = config('mail.mailers.smtp.password') ? true : false;
-        $smtpTestResult = $this->testSmtpConnection();
-        return view('admin.proveedores.configurar-correo', compact('correo_notificaciones', 'password_configurada', 'smtpTestResult'));
+        return view('admin.proveedores.configurar-correo', compact('correo_notificaciones'));
     }
 
-    public function guardarCorreoNotificaciones(Request $request)
-    {
-        $request->validate([
-            'correo_notificaciones' => 'required|email',
-            'password_notificaciones' => 'required|string|min:6',
-        ], [
-            'correo_notificaciones.required' => 'El correo de notificaciones es obligatorio.',
-            'correo_notificaciones.email' => 'El correo de notificaciones debe ser una dirección válida.',
-            'password_notificaciones.required' => 'La contraseña es obligatoria.',
-            'password_notificaciones.string' => 'La contraseña debe ser un texto.',
-            'password_notificaciones.min' => 'La contraseña debe tener al menos 6 caracteres.',
-        ]);
+   public function guardarCorreoNotificaciones(Request $request)
+{
+    $correo_notificaciones = $request->input('correo_notificaciones', 'default@example.com');
+    $password_notificaciones = $request->input('password_notificaciones');
 
-        $nuevoCorreo = $request->input('correo_notificaciones');
-        $nuevaPassword = $request->input('password_notificaciones');
+    if (!filter_var($correo_notificaciones, FILTER_VALIDATE_EMAIL)) {
+        return redirect()->route('admin.proveedores.configurar-correo')
+            ->with('error', 'El correo de notificaciones debe ser una dirección válida.');
+    }
 
-        try {
-            $this->updateEnvFile([
-                'MAIL_FROM_ADDRESS' => $nuevoCorreo,
-                'MAIL_USERNAME' => $nuevoCorreo,
-                'MAIL_PASSWORD' => $nuevaPassword,
-            ]);
+    try {
+        // Ruta al archivo .env
+        $envFile = base_path('.env');
+        
+        // Leer el contenido actual del .env
+        $envContent = file_get_contents($envFile);
+        
+        // Preparar las nuevas variables
+        $newEnv = [
+            'MAIL_FROM_ADDRESS' => '"'.addslashes($correo_notificaciones).'"',
+            'MAIL_USERNAME' => '"'.addslashes($correo_notificaciones).'"',
+            'MAIL_PASSWORD' => '"'.addslashes($password_notificaciones).'"',
+            'MAIL_FROM_NAME' => '"Tienda D\'jenny"',
+        ];
 
-            Artisan::call('config:clear');
-            $smtpTestResult = $this->testSmtpConnection();
-
-            if ($smtpTestResult['success']) {
-                return redirect()->route('admin.proveedores.configurar-correo')
-                    ->with('success', 'Correo de notificaciones actualizado a: ' . $nuevoCorreo . '. La conexión SMTP es exitosa.');
+        // Actualizar o añadir las variables en el .env
+        foreach ($newEnv as $key => $value) {
+            $pattern = "/^{$key}=.*$/m";
+            if (preg_match($pattern, $envContent)) {
+                $envContent = preg_replace($pattern, "{$key}={$value}", $envContent);
             } else {
-                return redirect()->route('admin.proveedores.configurar-correo')
-                    ->with('error', 'Correo actualizado, pero la conexión SMTP falló: ' . $smtpTestResult['message']);
+                $envContent .= "\n{$key}={$value}";
             }
-        } catch (\Exception $e) {
-            Log::error('Error al guardar la configuración de correo: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
-            return redirect()->route('admin.proveedores.configurar-correo')
-                ->with('error', 'Error al actualizar el correo: ' . $e->getMessage());
         }
-    }
 
-    private function testSmtpConnection()
-    {
+        // Escribir los cambios en el archivo .env
+        file_put_contents($envFile, $envContent);
+
+        // Limpiar la caché de configuración para reflejar los cambios
+        Artisan::call('config:cache');
+        Artisan::call('config:clear');
+
+        // Enviar un correo de prueba
         try {
-            Mail::raw('Este es un correo de prueba para verificar la conexión SMTP.', function ($message) {
-                $message->to(config('mail.from.address', 'default@example.com'))
-                        ->subject('Prueba de Conexión SMTP')
-                        ->from(config('mail.from.address', 'default@example.com'), config('mail.from.name', 'Tienda D\'jenny'));
+            Mail::raw('Este es un correo de prueba para verificar que la configuración SMTP de Tienda D\'jenny se ha actualizado correctamente.', function ($message) use ($correo_notificaciones) {
+                $message->to($correo_notificaciones)
+                        ->subject('Verificación de Configuración de Correo - Tienda D\'jenny')
+                        ->from(config('mail.from.address'), config('mail.from.name'));
             });
-            return ['success' => true, 'message' => 'Conexión SMTP exitosa.'];
+
+            return redirect()->route('admin.proveedores.configurar-correo')
+                ->with('success', 'Correo de notificaciones actualizado a: ' . $correo_notificaciones)
+                ->with('smtp_success', 'Se envió un correo de verificación a ' . $correo_notificaciones . '. Por favor, revisa tu bandeja de entrada (o spam).');
         } catch (\Exception $e) {
-            Log::error('Error en la conexión SMTP: ' . $e->getMessage());
-            return ['success' => false, 'message' => $e->getMessage()];
+            Log::error('Error al enviar correo de prueba: ' . $e->getMessage());
+            return redirect()->route('admin.proveedores.configurar-correo')
+                ->with('success', 'Correo de notificaciones actualizado a: ' . $correo_notificaciones)
+                ->with('smtp_error', 'La configuración se guardó, pero no se pudo enviar el correo de verificación: ' . $e->getMessage());
         }
+    } catch (\Exception $e) {
+        Log::error('Error al actualizar .env: ' . $e->getMessage());
+        return redirect()->route('admin.proveedores.configurar-correo')
+            ->with('error', 'Error al guardar la configuración del correo: ' . $e->getMessage());
     }
-
-    private function updateEnvFile(array $data)
-    {
-        $envPath = base_path('.env');
-        if (!file_exists($envPath)) {
-            throw new \Exception('El archivo .env no existe en la ruta: ' . $envPath);
-        }
-        if (!is_writable($envPath)) {
-            throw new \Exception('El archivo .env no es escribible. Verifica los permisos del archivo en: ' . $envPath);
-        }
-        $envContent = file_get_contents($envPath);
-        $lines = explode("\n", $envContent);
-        foreach ($data as $key => $value) {
-            $found = false;
-            foreach ($lines as &$line) {
-                if (strpos($line, $key . '=') === 0) {
-                    $line = $key . '="' . addslashes($value) . '"';
-                    $found = true;
-                    break;
-                }
-            }
-            if (!$found) {
-                $lines[] = $key . '="' . addslashes($value) . '"';
-            }
-        }
-        if (!file_put_contents($envPath, implode("\n", $lines))) {
-            throw new \Exception('No se pudo escribir en el archivo .env en: ' . $envPath);
-        }
-    }
-
-    private function validateOrdenCompra(Request $request): array
-    {
-        return $request->validate([
-            'fecha' => 'required|date',
-            'estado' => 'required|in:pendiente,procesando,enviado,entregado,cancelado',
-            'detalles' => 'required|array|min:1',
-            'detalles.*.producto_ids' => 'required|array|min:1',
-            'detalles.*.producto_ids.*' => 'required|exists:productos,id',
-            'detalles.*.new_product_name' => 'nullable|string|max:255',
-            'detalles.*.categoria_id' => 'nullable|exists:categorias,id',
-            'detalles.*.new_category_name' => 'nullable|string|max:255|required_if:detalles.*.categoria_id,new',
-            'detalles.*.cantidad' => 'required|integer|min:1',
-            'detalles.*.precio_compra' => 'required|numeric|min:0',
-            'detalles.*.precio_venta' => 'required|numeric|min:0',
-        ], [
-            'fecha.required' => 'La fecha es obligatoria.',
-            'fecha.date' => 'La fecha debe ser una fecha válida.',
-            'estado.required' => 'El estado es obligatorio.',
-            'estado.in' => 'El estado debe ser pendiente, procesando, enviado, entregado o cancelado.',
-            'detalles.required' => 'Los detalles de la orden son obligatorios.',
-            'detalles.array' => 'Los detalles deben ser un arreglo.',
-            'detalles.min' => 'Debe haber al menos un detalle en la orden.',
-            'detalles.*.producto_ids.required' => 'Debe seleccionar al menos un producto.',
-            'detalles.*.producto_ids.array' => 'Los productos deben ser un arreglo.',
-            'detalles.*.producto_ids.*.exists' => 'El producto seleccionado no es válido.',
-            'detalles.*.new_product_name.string' => 'El nombre del nuevo producto debe ser un texto.',
-            'detalles.*.new_product_name.max' => 'El nombre del nuevo producto no puede exceder 255 caracteres.',
-            'detalles.*.categoria_id.exists' => 'La categoría seleccionada no es válida.',
-            'detalles.*.new_category_name.required_if' => 'El nombre de la nueva categoría es obligatorio cuando se selecciona "Crear nueva categoría".',
-            'detalles.*.cantidad.required' => 'La cantidad es obligatoria.',
-            'detalles.*.cantidad.integer' => 'La cantidad debe ser un número entero.',
-            'detalles.*.cantidad.min' => 'La cantidad debe ser al menos 1.',
-            'detalles.*.precio_compra.required' => 'El precio de compra es obligatorio.',
-            'detalles.*.precio_compra.numeric' => 'El precio de compra debe ser un número.',
-            'detalles.*.precio_compra.min' => 'El precio de compra no puede ser negativo.',
-            'detalles.*.precio_venta.required' => 'El precio de venta es obligatorio.',
-            'detalles.*.precio_venta.numeric' => 'El precio de venta debe ser un número.',
-            'detalles.*.precio_venta.min' => 'El precio de venta no puede ser negativo.',
-        ]);
-    }
+}
 
     private function getProductNames(array $producto_ids): string
     {
@@ -931,14 +574,13 @@ class ProveedorController extends Controller
     private function updateProductStock(array $detalles): void
     {
         foreach ($detalles as $detalle) {
-            foreach ($detalle['producto_ids'] as $producto_id) {
+            foreach ($detalle['producto_ids'] ?? [] as $producto_id) {
                 if (is_numeric($producto_id)) {
                     $producto = Producto::find($producto_id);
                     if ($producto) {
-                        $producto->increment('stock', $detalle['cantidad']);
-                        $producto->precio = $detalle['precio_venta'];
-                        $producto->precio_compra = $detalle['precio_compra'];
-                        $producto->categoria_id = $detalle['categoria_id'] ?? null;
+                        $producto->increment('stock', $detalle['cantidad'] ?? 0);
+                        $producto->precio = $detalle['precio_venta'] ?? 0;
+                        $producto->precio_compra = $detalle['precio_compra'] ?? 0;
                         $producto->save();
                     }
                 }
@@ -946,16 +588,26 @@ class ProveedorController extends Controller
         }
     }
 
-    private function sendOrdenCompraNotification(OrdenCompra $ordenCompra, Proveedor $proveedor)
+    private function correctSpelling(string $text): string
     {
-        try {
-            $proveedor->notify(new OrdenCompraNotification($ordenCompra, $proveedor));
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-                ->with('success', 'Orden de compra registrada y notificación enviada al proveedor.');
-        } catch (\Exception $e) {
-            Log::error('Error enviando notificación de orden de compra: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
-            return redirect()->route('admin.proveedores.ordenes.historial', $proveedor)
-                ->with('warning', 'Orden registrada, pero hubo un problema al enviar el correo: ' . $e->getMessage());
+        $corrections = [
+            'nesesario' => 'necesario',
+            'nesecario' => 'necesario',
+            'nesesidad' => 'necesidad',
+            'desarollo' => 'desarrollo',
+            'prodcto' => 'producto',
+            'proveedor' => 'proveedor',
+            'cantida' => 'cantidad',
+            'recivido' => 'recibido',
+            'entrega' => 'entregado',
+            'procesando' => 'procesando',
+            'cancelado' => 'cancelado',
+        ];
+
+        $text = strtolower($text);
+        foreach ($corrections as $wrong => $correct) {
+            $text = str_replace($wrong, $correct, $text);
         }
+        return ucfirst($text);
     }
-} -->
+}

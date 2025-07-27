@@ -15,11 +15,11 @@
         <!-- Ventas Section -->
         <div class="accordion-item">
             <h2 class="accordion-header" id="ventas-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ventas-collapse" aria-expanded="true" aria-controls="ventas-collapse">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#ventas-collapse" aria-expanded="false" aria-controls="ventas-collapse">
                     Reportes de Ventas
                 </button>
             </h2>
-            <div id="ventas-collapse" class="accordion-collapse collapse show" aria-labelledby="ventas-heading" data-bs-parent="#reportesAccordion">
+            <div id="ventas-collapse" class="accordion-collapse collapse" aria-labelledby="ventas-heading" data-bs-parent="#reportesAccordion">
                 <div class="accordion-body">
                     <div class="row g-4">
                         <!-- Ventas por Día -->

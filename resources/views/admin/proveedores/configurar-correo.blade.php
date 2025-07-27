@@ -6,6 +6,18 @@
 <div class="container py-4">
     <h2 class="text-primary fw-bold mb-4">Configurar Correo de Notificaciones</h2>
 
+    <!-- Alerta sobre cómo obtener la contraseña -->
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+        <strong>Nota:</strong> La contraseña requerida no es la contraseña de tu cuenta de Gmail. Debes generar una <strong>contraseña de aplicación</strong> habilitando la autenticación en dos pasos en los ajustes de tu cuenta de Google. Sigue estos pasos:
+        <ol>
+            <li>Ve a la configuración de tu cuenta de Google.</li>
+            <li>Activa la autenticación en dos pasos en la sección de Seguridad.</li>
+            <li>Genera una contraseña de aplicación para tu aplicación (Tienda D'jenny).</li>
+            <li>Usa esa contraseña en el campo de abajo.</li>
+        </ol>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <!-- Mostrar alertas -->
     @if (session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -19,18 +31,32 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
+    @if (session('smtp_success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('smtp_success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    @if (session('smtp_error'))
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{ session('smtp_error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
     <!-- Mostrar estado actual del correo -->
     <div class="card shadow-sm mb-4">
         <div class="card-body">
             <h5 class="card-title">Estado Actual del Correo</h5>
             <p><strong>Correo Configurado:</strong> {{ $correo_notificaciones }}</p>
-            <p><strong>Contraseña Configurada:</strong> {{ $password_configurada ? 'Sí' : 'No' }}</p>
+            <p><strong>Contraseña Configurada:</strong> {{ config('mail.mailers.smtp.password') ? config('mail.mailers.smtp.password') : 'No' }}</p>
             <p><strong>Estado de la Conexión SMTP:</strong> 
-                @if ($smtpTestResult['success'])
-                    <span class="text-success">Conexión exitosa</span>
+                @if (session('smtp_success'))
+                    <span class="text-success">Conexión verificada</span>
+                @elseif (session('smtp_error'))
+                    <span class="text-danger">Conexión fallida</span>
                 @else
-                    <span class="text-danger">Conexión fallida: {{ $smtpTestResult['message'] }}</span>
+                    <span class="text-success">Conexión no probada en esta vista</span>
                 @endif
             </p>
         </div>

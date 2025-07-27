@@ -104,6 +104,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::delete('/proveedores/{proveedor}', [ProveedorController::class, 'destroy'])->name('admin.proveedores.destroy');
     Route::delete('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraDestroy'])->name('admin.proveedores.ordenes.destroy');
     Route::post('/admin/productos/store', [ProveedorController::class, 'storeProduct'])->name('admin.productos.store');
+    Route::get('admin/proveedores/{proveedor}/ordenes/{orden}/edit', [ProveedorController::class, 'edit'])->name('admin.proveedores.ordenes.edit'); 
     
     // Rutas para configurar correo de notificaciones
     Route::get('/proveedores/configurar-correo', [ProveedorController::class, 'configurarCorreo'])->name('admin.proveedores.configurar-correo');
@@ -115,7 +116,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::post('/proveedores/{proveedor}/ordenes', [ProveedorController::class, 'ordenCompraStore'])->name('admin.proveedores.ordenes.store');
     Route::get('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraShow'])->name('admin.proveedores.ordenes.show');
     Route::put('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraUpdate'])->name('admin.proveedores.ordenes.update');
-    Route::delete('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'orden buyingDestroy'])->name('admin.proveedores.ordenes.destroy');
+Route::delete('/proveedores/{proveedor}/ordenes/{orden}', [ProveedorController::class, 'ordenCompraDestroy'])->name('admin.proveedores.ordenes.destroy');
     Route::post('/proveedores/{proveedor}/ordenes/{orden}/update-producto', [ProveedorController::class, 'updateProducto'])->name('admin.proveedores.ordenes.updateProducto');
 });
 

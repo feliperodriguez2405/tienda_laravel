@@ -22,4 +22,19 @@ class Producto extends Model
     {
         return $this->hasMany(DetalleOrden::class, 'producto_id');
     }
+
+    /**
+     * Boot the model and register event listeners.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        // Automatically set estado to 'inactivo' if precio is 0 or null during save
+        static::saving(function ($producto) {
+            if ($producto->precio <= 0 || is_null($producto->precio)) {
+                $producto->estado = 'inactivo';
+            }
+        });
+    }
 }

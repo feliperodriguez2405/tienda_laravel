@@ -32,6 +32,11 @@
             <i class="bi bi-check-circle me-1"></i>{{ session('success') }}
         </div>
     @endif
+    @if (session('error'))
+        <div class="alert alert-danger alert-sm shadow-sm mb-3" role="alert">
+            <i class="bi bi-exclamation-circle me-1"></i>{{ session('error') }}
+        </div>
+    @endif
 
     <!-- Formulario -->
     <div class="card shadow-lg border-0 p-4">
@@ -50,13 +55,29 @@
                     <!-- Código de barras -->
                     <div class="mt-3">
                         <label class="form-label fw-medium small">Código de Barras</label>
-                        <p class="text-muted small mb-2">{{ $producto->codigo_barra ?? 'No asignado' }}</p>
-                        @if ($producto->codigo_barra)
-                            <img src="{{ route('productos.generar-barcode', ['codigo_barra' => $producto->codigo_barra]) }}" 
+                        <div class="input-group input-group-sm">
+                            <input type="text" 
+                                   name="codigo_barra" 
+                                   id="codigo_barra" 
+                                   class="form-control form-control-sm @error('codigo_barra') is-invalid @enderror" 
+                                   value="{{ old('codigo_barra', $producto->codigo_barra) }}" 
+                                   placeholder="Escanea o ingresa el código de barras"
+                                   autofocus>
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="buscarProducto">
+                                <i class="bi bi-search"></i> Buscar
+                            </button>
+                        </div>
+                        <small class="text-muted" style="font-size: 0.75rem;">Escanea con el lector o ingresa manualmente</small>
+                        @error('codigo_barra')
+                            <div class="invalid-feedback small">{{ $message }}</div>
+                        @enderror
+                        <div id="barcodePreview" class="mt-2" style="{{ $producto->codigo_barra ? '' : 'display: none;' }}">
+                            <img id="barcodeImage" 
+                                 src="{{ $producto->codigo_barra ? route('productos.generar-barcode', ['codigo_barra' => $producto->codigo_barra]) : '' }}" 
                                  alt="Código de barras" 
                                  class="img-fluid" 
                                  style="max-width: 150px; height: auto;">
-                        @endif
+                        </div>
                     </div>
                 </div>
             </div>
@@ -69,7 +90,7 @@
 
                     <!-- Nombre -->
                     <div class="mb-3">
-                        <label for="nombre" class="form-label fw-medium small">Nombre del Producto</label>
+                        <label for="nombre" class="form-label fw-medium small">Nombre del Producto *</label>
                         <input type="text" 
                                name="nombre" 
                                id="nombre" 
@@ -84,7 +105,7 @@
 
                     <!-- Descripción -->
                     <div class="mb-3">
-                        <label for="descripcion" class="form-label fw-medium small">Descripción</label>
+                        <label for="descripcion" class="form-label fw-medium small">Descripción *</label>
                         <textarea name="descripcion" 
                                   id="descripcion" 
                                   class="form-control form-control-sm @error('descripcion') is-invalid @enderror" 
@@ -92,22 +113,6 @@
                                   required 
                                   placeholder="Describe el producto...">{{ old('descripcion', $producto->descripcion) }}</textarea>
                         @error('descripcion')
-                            <div class="invalid-feedback small">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <!-- Precio -->
-                    <div class="mb-3">
-                        <label for="precio" class="form-label fw-medium small">Precio ($)</label>
-                        <input type="number" 
-                               name="precio" 
-                               id="precio" 
-                               class="form-control form-control-sm @error('precio') is-invalid @enderror" 
-                               step="0.01" 
-                               value="{{ old('precio', $producto->precio) }}" 
-                               required 
-                               placeholder="Ej: 12.34">
-                        @error('precio')
                             <div class="invalid-feedback small">{{ $message }}</div>
                         @enderror
                     </div>
@@ -127,9 +132,43 @@
                         @enderror
                     </div>
 
+                    <!-- Porcentaje de Ganancia -->
+                    <div class="mb-3">
+                        <label for="porcentaje_ganancia" class="form-label fw-medium small">Porcentaje de Ganancia</label>
+                        <select name="porcentaje_ganancia" 
+                                id="porcentaje_ganancia" 
+                                class="form-select form-select-sm @error('porcentaje_ganancia') is-invalid @enderror">
+                            <option value="">Selecciona un porcentaje</option>
+                            <option value="20" {{ old('porcentaje_ganancia') == '20' ? 'selected' : '' }}>20%</option>
+                            <option value="25" {{ old('porcentaje_ganancia') == '25' ? 'selected' : '' }}>25%</option>
+                            <option value="30" {{ old('porcentaje_ganancia') == '30' ? 'selected' : '' }}>30%</option>
+                            <option value="40" {{ old('porcentaje_ganancia') == '40' ? 'selected' : '' }}>40%</option>
+                            <option value="50" {{ old('porcentaje_ganancia') == '50' ? 'selected' : '' }}>50%</option>
+                        </select>
+                        @error('porcentaje_ganancia')
+                            <div class="invalid-feedback small">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Precio -->
+                    <div class="mb-3">
+                        <label for="precio" class="form-label fw-medium small">Precio Venta ($)</label>
+                        <input type="number" 
+                               name="precio" 
+                               id="precio" 
+                               class="form-control form-control-sm @error('precio') is-invalid @enderror" 
+                               step="0.01" 
+                               value="{{ old('precio', $producto->precio) }}" 
+                               required 
+                               placeholder="Ej: 12.34">
+                        @error('precio')
+                            <div class="invalid-feedback small">{{ $message }}</div>
+                        @enderror
+                    </div>
+
                     <!-- Stock -->
                     <div class="mb-3">
-                        <label for="stock" class="form-label fw-medium small">Stock</label>
+                        <label for="stock" class="form-label fw-medium small">Stock *</label>
                         <input type="number" 
                                name="stock" 
                                id="stock" 
@@ -144,7 +183,7 @@
 
                     <!-- Estado -->
                     <div class="mb-3">
-                        <label for="estado" class="form-label fw-medium small">Estado</label>
+                        <label for="estado" class="form-label fw-medium small">Estado *</label>
                         <select name="estado" 
                                 id="estado" 
                                 class="form-select form-select-sm @error('estado') is-invalid @enderror" 
@@ -159,7 +198,7 @@
 
                     <!-- Categoría -->
                     <div class="mb-3">
-                        <label for="categoria_id" class="form-label fw-medium small">Categoría</label>
+                        <label for="categoria_id" class="form-label fw-medium small">Categoría *</label>
                         <select name="categoria_id" 
                                 id="categoria_id" 
                                 class="form-select form-select-sm @error('categoria_id') is-invalid @enderror" 
@@ -250,9 +289,158 @@
     .alert-sm ul {
         padding-left: 1rem;
     }
+
+    #barcodeImage img {
+        max-width: 200px;
+        height: auto;
+    }
 </style>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+$(document).ready(function() {
+    let lastKeyTime = 0;
+    let keyTimeout = 200; // Tiempo en milisegundos para considerar una entrada como escaneada
+    let inputBuffer = '';
+
+    // Función para capitalizar la primera letra de cada palabra
+    function capitalizeWords(str) {
+        return str.replace(/\b\w/g, char => char.toUpperCase());
+    }
+
+    // Capitalizar nombre y descripción al escribir
+    $('#nombre').on('input', function() {
+        let value = $(this).val();
+        if (value) {
+            $(this).val(capitalizeWords(value));
+        }
+    });
+
+    $('#descripcion').on('input', function() {
+        let value = $(this).val();
+        if (value) {
+            $(this).val(capitalizeWords(value));
+        }
+    });
+
+    // Calcular precio de venta basado en porcentaje
+    $('#porcentaje_ganancia').on('change', function() {
+        let precioCompra = parseFloat($('#precio_compra').val()) || 0;
+        let porcentaje = parseFloat($(this).val()) || 0;
+        if (precioCompra > 0 && porcentaje > 0) {
+            let precioVenta = precioCompra * (1 + porcentaje / 100);
+            $('#precio').val(precioVenta.toFixed(2));
+        }
+    });
+
+    // Actualizar precio de venta al cambiar precio de compra si hay un porcentaje seleccionado
+    $('#precio_compra').on('input', function() {
+        let porcentaje = parseFloat($('#porcentaje_ganancia').val()) || 0;
+        if (porcentaje > 0) {
+            let precioCompra = parseFloat($(this).val()) || 0;
+            let precioVenta = precioCompra * (1 + porcentaje / 100);
+            $('#precio').val(precioVenta.toFixed(2));
+        }
+    });
+
+    // Limpiar porcentaje si se modifica manualmente el precio de venta
+    $('#precio').on('input', function() {
+        $('#porcentaje_ganancia').val('');
+    });
+
+    // Manejo de código de barras
+    $('#codigo_barra').on('input', function(e) {
+        let currentTime = new Date().getTime();
+        inputBuffer = $(this).val();
+
+        // Detectar si la entrada es rápida (probablemente un escáner)
+        if (currentTime - lastKeyTime < keyTimeout) {
+            clearTimeout($(this).data('timeout'));
+            $(this).data('timeout', setTimeout(function() {
+                if (inputBuffer) {
+                    buscarProducto(inputBuffer);
+                }
+            }, keyTimeout));
+        } else {
+            // Actualizar vista previa del código de barras al escribir manualmente
+            if (inputBuffer) {
+                actualizarBarcodePreview(inputBuffer);
+            } else {
+                $('#barcodePreview').hide();
+            }
+        }
+        lastKeyTime = currentTime;
+    });
+
+    $('#codigo_barra').on('keypress', function(e) {
+        // Si se presiona Enter, buscar el producto
+        if (e.which === 13) {
+            e.preventDefault();
+            buscarProducto($(this).val());
+        }
+    });
+
+    $('#buscarProducto').on('click', function() {
+        buscarProducto($('#codigo_barra').val());
+    });
+
+    function buscarProducto(codigo) {
+        if (!codigo) {
+            $('#barcodePreview').hide();
+            return;
+        }
+
+        $.ajax({
+            url: '{{ route("productos.buscar") }}',
+            method: 'GET',
+            data: { codigo_barra: codigo },
+            success: function(response) {
+                if (response.success && response.producto.id !== {{ $producto->id }}) {
+                    // Rellenar los campos con los datos del producto encontrado, si no es el producto actual
+                    $('#nombre').val(capitalizeWords(response.producto.nombre));
+                    $('#descripcion').val(capitalizeWords(response.producto.descripcion));
+                    $('#precio').val(response.producto.precio);
+                    $('#precio_compra').val(response.producto.precio_compra);
+                    $('#stock').val(response.producto.stock);
+                    $('#estado').val(response.producto.estado);
+                    $('#categoria_id').val(response.producto.categoria_id);
+                    $('#porcentaje_ganancia').val(''); // No hay porcentaje almacenado
+                    $('#barcodeImage').attr('src', 'data:image/png;base64,' + response.barcode);
+                    $('#barcodePreview').show();
+                    $('#editProductoForm').attr('action', '{{ url("productos") }}/' + response.producto.id);
+                    $('#editProductoForm').find('input[name="_method"]').val('PUT');
+                } else {
+                    // Actualizar solo la vista previa del código de barras
+                    actualizarBarcodePreview(codigo);
+                }
+            },
+            error: function() {
+                alert('Error al buscar el producto. Por favor, intenta de nuevo.');
+                actualizarBarcodePreview(codigo);
+            }
+        });
+    }
+
+    function actualizarBarcodePreview(codigo) {
+        if (codigo) {
+            $.ajax({
+                url: '{{ route("productos.generar-barcode") }}',
+                method: 'GET',
+                data: { codigo_barra: codigo },
+                success: function(barcodeResponse) {
+                    $('#barcodeImage').attr('src', 'data:image/png;base64,' + barcodeResponse.barcode);
+                    $('#barcodePreview').show();
+                },
+                error: function() {
+                    $('#barcodePreview').hide();
+                }
+            });
+        } else {
+            $('#barcodePreview').hide();
+        }
+    }
+
+    // Vista previa de la imagen
     function mostrarVistaPrevia(event) {
         const file = event.target.files[0];
         if (file) {
@@ -269,11 +457,13 @@
         }
     }
 
+    // Confirmación al enviar el formulario
     document.querySelector('form').addEventListener('submit', function(e) {
         const nombre = document.getElementById('nombre').value;
         if (!confirm(`¿Estás seguro de guardar los cambios para "${nombre}"?`)) {
             e.preventDefault();
         }
     });
+});
 </script>
 @endsection

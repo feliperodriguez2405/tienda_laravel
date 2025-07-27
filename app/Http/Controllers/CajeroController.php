@@ -40,10 +40,10 @@ class CajeroController extends Controller
             $subtotal = 0;
             $items = [];
             foreach ($request->productos as $index => $producto_id) {
-                $producto = Producto::find($producto_id);
+                $producto = Producto::where('id', $producto_id)->where('estado', 'activo')->first();
                 if (!$producto) {
-                    Log::error("Producto ID {$producto_id} not found");
-                    return back()->with('error', 'Producto no encontrado.');
+                    Log::error("Producto ID {$producto_id} not found or inactive");
+                    return back()->with('error', 'Producto no encontrado o inactivo.');
                 }
                 $cantidad = (int) $request->cantidades[$index];
                 if ($producto->stock < $cantidad) {
@@ -107,7 +107,7 @@ class CajeroController extends Controller
             }
         }
 
-        $query = Producto::query();
+        $query = Producto::where('estado', 'activo');
         $search = $request->query('search');
         if ($search) {
             $query->where('nombre', 'like', '%' . $search . '%');
@@ -403,6 +403,6 @@ class CajeroController extends Controller
             ->orderByDesc('cantidad_vendida')
             ->take(5)
             ->get();
-            return view('cajero.close', compact('ordenes', 'totalVentas', 'metodosPago', 'ventasPorHora', 'productosMasVendidos'));
-}
+        return view('cajero.close', compact('ordenes', 'totalVentas', 'metodosPago', 'ventasPorHora', 'productosMasVendidos'));
+    }
 }

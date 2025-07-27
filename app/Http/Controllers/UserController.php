@@ -40,12 +40,25 @@ class UserController extends Controller
     public function cart()
     {
         $cart = session()->get('cart', []);
-        $productos = Producto::whereIn('id', array_keys($cart))->get();
+        $productos = Producto::whereIn('id', array_keys($cart))->where('estado', 'activo')->get();
+        // Remove inactive products from the cart
+        $updatedCart = array_intersect_key($cart, $productos->pluck('id')->toArray());
+        if ($cart !== $updatedCart) {
+            session()->put('cart', $updatedCart);
+            if (empty($updatedCart)) {
+                return view('users.cart', compact('cart', 'productos'))->with('info', 'Algunos productos fueron eliminados del carrito porque ya no están disponibles.');
+            }
+        }
         return view('users.cart', compact('cart', 'productos'));
     }
 
     public function addToCart(Request $request, Producto $producto)
     {
+        // Check if product is active
+        if ($producto->estado !== 'activo') {
+            return redirect()->route('user.dashboard')->with('error', 'El producto no está disponible.');
+        }
+
         $request->validate([
             'cantidad' => 'required|integer|min:1|max:' . $producto->stock,
         ]);
@@ -59,6 +72,11 @@ class UserController extends Controller
 
     public function updateCart(Request $request, Producto $producto)
     {
+        // Check if product is active
+        if ($producto->estado !== 'activo') {
+            return redirect()->route('user.cart')->with('error', 'El producto no está disponible.');
+        }
+
         $request->validate([
             'cantidad' => 'required|integer|min:1|max:' . $producto->stock,
         ]);
@@ -96,7 +114,13 @@ class UserController extends Controller
             return redirect()->route('user.cart')->with('error', 'El carrito está vacío.');
         }
 
-        $productos = Producto::whereIn('id', array_keys($cart))->get();
+        $productos = Producto::whereIn('id', array_keys($cart))->where('estado', 'activo')->get();
+        if ($productos->count() < count($cart)) {
+            // Update cart to remove inactive products
+            $updatedCart = array_intersect_key($cart, $productos->pluck('id')->toArray());
+            session()->put('cart', $updatedCart);
+            return redirect()->route('user.cart')->with('error', 'Algunos productos en el carrito no están disponibles. Por favor, revisa tu carrito.');
+        }
 
         // Validate stock
         foreach ($productos as $producto) {
@@ -252,7 +276,7 @@ class UserController extends Controller
 
     private function getFilteredProducts(Request $request)
     {
-        $query = Producto::where('stock', '>', 0);
+        $query = Producto::where('stock', '>', 0)->where('estado', 'activo');
 
         if ($search = $request->query('search')) {
             $query->where('nombre', 'like', '%' . $search . '%');

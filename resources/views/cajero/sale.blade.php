@@ -1,129 +1,177 @@
 @extends('layouts.app3')
 @section('title', 'Registrar Venta')
 @section('content')
-<div class="container">
-    <h1 class="mb-4">Registrar Venta</h1>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <h1 class="mb-4">Registrar Venta</h1>
 
-    <!-- Barra de búsqueda -->
-    <form id="search-form" class="mb-4">
-        <div class="input-group">
-            <input type="text" name="search" class="form-control" placeholder="Buscar productos por nombre..." value="{{ request('search') }}" id="search-input">
-            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
-        </div>
-    </form>
+            <!-- Barra de búsqueda -->
+            <form id="search-form" class="mb-4">
+                <div class="input-group">
+                    <input type="text" name="search" class="form-control" placeholder="Buscar productos por nombre..." value="{{ request('search') }}" id="search-input">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
 
-    <!-- Lista de productos -->
-    <h3>Productos Disponibles</h3>
-    <div id="product-list">
-        <div class="row">
-            @forelse ($productos as $producto)
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">{{ $producto->nombre }}</h5>
-                            <p class="card-text mb-2">
-                                Precio (sin IVA): ${{ number_format($producto->precio, 2) }}<br>
-                                Precio (con IVA): ${{ number_format($producto->precio * 1.19, 2) }}<br>
-                                Stock: {{ $producto->stock }}
-                            </p>
-                            <button class="btn btn-success btn-sm mt-auto add-to-cart"
-                                    data-id="{{ $producto->id }}"
-                                    data-name="{{ $producto->nombre }}"
-                                    data-price="{{ $producto->precio }}"
-                                    data-stock="{{ $producto->stock }}">
-                                Añadir
-                            </button>
+            <!-- Lista de productos -->
+            <h3>Productos Disponibles</h3>
+            <div id="product-list">
+                <div class="row">
+                    @forelse ($productos as $producto)
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            <div class="card h-100 shadow-sm">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">{{ $producto->nombre }}</h5>
+                                    <p class="card-text mb-2">
+                                        Precio (sin IVA): ${{ number_format($producto->precio, 2) }}<br>
+                                        Precio (con IVA): ${{ number_format($producto->precio * 1.19, 2) }}<br>
+                                        Stock: {{ $producto->stock }}
+                                    </p>
+                                    <button class="btn btn-success btn-sm mt-auto add-to-cart"
+                                            data-id="{{ $producto->id }}"
+                                            data-name="{{ $producto->nombre }}"
+                                            data-price="{{ $producto->precio }}"
+                                            data-stock="{{ $producto->stock }}">
+                                        Añadir
+                                    </button>
+                                </div>
+                            </div>
                         </div>
+                    @empty
+                        <div class="col-12">
+                            <p class="text-center text-muted">No se encontraron productos.</p>
+                        </div>
+                    @endforelse
+                </div>
+                <div id="pagination-links" class="d-flex justify-content-center mt-4">
+                    {{ $productos->links() }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Carrito Modal -->
+        <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-end modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="cartModalLabel">Carrito de Venta</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="{{ route('cajero.sale') }}" id="sale-form">
+                            @csrf
+                            <table class="table table-bordered table-sm" id="cart-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Cantidad</th>
+                                        <th>Subtotal (con IVA)</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cart-items">
+                                    <!-- Productos añadidos aparecerán aquí -->
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2" class="text-end"><strong>Subtotal (sin IVA):</strong></td>
+                                        <td colspan="2" id="subtotal-amount">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="text-end"><strong>IVA (19%):</strong></td>
+                                        <td colspan="2" id="iva-amount">$0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="text-end"><strong>Total (con IVA):</strong></td>
+                                        <td colspan="2" id="total-amount">$0.00</td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+
+                            <div class="mb-3">
+                                <label class="form-label">Método de Pago</label>
+                                <select name="metodo_pago" class="form-select" required>
+                                    <option value="efectivo">Efectivo</option>
+                                    <option value="nequi">Nequi</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100">Registrar Venta</button>
+                        </form>
                     </div>
                 </div>
-            @empty
-                <div class="col-12">
-                    <p class="text-center">No se encontraron productos.</p>
-                </div>
-            @endforelse
-        </div>
-        <div id="pagination-links" class="d-flex justify-content-center mt-4">
-            {{ $productos->links() }}
-        </div>
-    </div>
-
-    <!-- Calculadora de venta -->
-    <div class="card mt-4 sticky-cart">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">Carrito de Venta</h5>
-        </div>
-        <div class="card-body">
-            <form method="POST" action="{{ route('cajero.sale') }}" id="sale-form">
-                @csrf
-                <table class="table table-bordered table-sm" id="cart-table">
-                    <thead>
-                        <tr>
-                            <th>Producto</th>
-                            <th>Cantidad</th>
-                            <th>Subtotal (con IVA)</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cart-items">
-                        <!-- Productos añadidos aparecerán aquí -->
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <td colspan="2" class="text-end"><strong>Subtotal (sin IVA):</strong></td>
-                            <td colspan="2" id="subtotal-amount">$0.00</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-end"><strong>IVA (19%):</strong></td>
-                            <td colspan="2" id="iva-amount">$0.00</td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="text-end"><strong>Total (con IVA):</strong></td>
-                            <td colspan="2" id="total-amount">$0.00</td>
-                        </tr>
-                    </tfoot>
-                </table>
-
-                <div class="mb-3">
-                    <label class="form-label">Método de Pago</label>
-                    <select name="metodo_pago" class="form-control" required>
-                        <option value="efectivo">Efectivo</option>
-                        <option value="nequi">Nequi</option>
-                    </select>
-                </div>
-
-                <button type="submit" class="btn btn-success w-100">Registrar Venta</button>
-            </form>
+            </div>
         </div>
     </div>
 </div>
 
 @push('styles')
 <style>
-    .sticky-cart {
-        position: sticky;
-        top: 20px;
-        z-index: 1000;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
     .card {
         border-radius: 8px;
-        transition: transform 0.2s;
+        transition: transform 0.2s ease-in-out;
     }
     .card:hover {
-        transform: translateY(-2px);
+        transform: translateY(-3px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
     }
     .table-sm th, .table-sm td {
         padding: 0.5rem;
         font-size: 0.9rem;
+        vertical-align: middle;
     }
     .quantity-input:disabled {
         opacity: 0.6;
         cursor: not-allowed;
     }
+    .modal-dialog-end {
+        margin-left: auto;
+        margin-right: 0;
+        margin-top: 20px;
+    }
+    .modal-content {
+        transition: opacity 0.3s ease-in-out;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .modal-content.transparent {
+        opacity: 0.3;
+        pointer-events: none;
+    }
+    .modal-content:not(.transparent) {
+        pointer-events: auto;
+    }
+    .modal.fade .modal-dialog {
+        transform: translateX(100%);
+        transition: transform 0.3s ease-in-out;
+    }
+    .modal.show .modal-dialog {
+        transform: translateX(0);
+    }
+    .modal-backdrop {
+        display: none !important; /* Remove backdrop to allow background interaction */
+    }
+    .btn-close-white {
+        filter: invert(1);
+    }
+    .table thead th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+    }
+    .btn-success {
+        transition: background-color 0.2s;
+    }
+    .btn-success:hover {
+        background-color: #28a745;
+    }
 </style>
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 <script>
@@ -137,7 +185,35 @@
         const productList = document.getElementById('product-list');
         const paginationLinks = document.getElementById('pagination-links');
         const IVA_RATE = 1.19;
-        const stockCache = new Map(); // Cache for stock values
+        const stockCache = new Map();
+        const cartModal = new bootstrap.Modal(document.getElementById('cartModal'), {
+            backdrop: false, // Disable backdrop
+            keyboard: false
+        });
+
+        // Show modal on page load
+        cartModal.show();
+
+        // Modal transparency on mouse leave
+        const modalContent = document.querySelector('#cartModal .modal-content');
+        modalContent.addEventListener('mouseleave', () => {
+            modalContent.classList.add('transparent');
+        });
+        modalContent.addEventListener('mouseenter', () => {
+            modalContent.classList.remove('transparent');
+        });
+
+        // Close modal when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!modalContent.contains(e.target) && !modalContent.classList.contains('transparent')) {
+                cartModal.hide();
+            }
+        });
+
+        // Ensure background elements remain interactive
+        document.querySelectorAll('.container-fluid, #product-list, #search-form, #pagination-links').forEach(element => {
+            element.style.pointerEvents = 'auto';
+        });
 
         // Debounced search
         const debouncedSearch = _.debounce((search) => {
@@ -193,10 +269,12 @@
                 }
             } else {
                 cart.push({ id, name, price, quantity: 1, stock });
-                stockCache.set(id, stock); // Cache initial stock
+                stockCache.set(id, stock);
             }
 
             updateCart();
+            cartModal.show();
+            modalContent.classList.remove('transparent'); // Ensure modal is fully visible after adding item
         }
 
         bindAddToCartButtons();
@@ -286,11 +364,9 @@
             const newQuantity = parseInt(input.value);
             const originalQuantity = cart[index].quantity;
 
-            // Disable input during stock check
             input.disabled = true;
 
             try {
-                // Use cached stock if available and not stale
                 let stock = stockCache.get(productId) || cart[index].stock;
                 let useCache = !!stockCache.get(productId);
 
@@ -331,7 +407,6 @@
                     title: 'Advertencia',
                     text: 'No se pudo verificar el stock. Usando stock local (' + cart[index].stock + ').',
                 });
-                // Fallback to local stock
                 if (newQuantity <= cart[index].stock && newQuantity > 0) {
                     cart[index].quantity = newQuantity;
                     const hiddenInput = input.nextElementSibling.nextElementSibling;
@@ -349,7 +424,6 @@
             const index = parseInt(this.dataset.index);
             const productId = cart[index].id;
             cart.splice(index, 1);
-            // Optionally clear stock cache for removed item
             stockCache.delete(productId);
             updateCart();
         }

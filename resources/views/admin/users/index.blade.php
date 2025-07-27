@@ -49,8 +49,12 @@
                     </select>
                 </div>
                 <div class="col-md-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary me-2">Filtrar</button>
-                    <a href="{{ route('admin.users.index') }}" class="btn btn-secondary">Limpiar</a>
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                    <a href="{{ route('admin.users.index') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-undo"></i> Limpiar
+                    </a>
                 </div>
             </form>
         </div>
@@ -82,16 +86,14 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-outline-primary me-2">
-                                        <i class="fas fa-edit"></i> Editar
-                                    </a>
-                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" style="display:inline;" class="delete-form" data-user-id="{{ $user->id }}" data-user-name="{{ $user->name }}">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger delete-btn">
-                                            <i class="fas fa-trash"></i> Eliminar
-                                        </button>
-                                    </form>
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-sm btn-outline-warning">Editar</a>
+                                        <form action="{{ route('admin.users.destroy', $user) }}" method="POST" style="display:inline;" class="delete-form" data-user-id="{{ $user->id }}" data-user-name="{{ $user->name }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger delete-btn">Eliminar</button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -114,7 +116,7 @@
 
 <style>
     .card {
-        border-radius: 8px;
+        border-radius: 10px;
         overflow: hidden;
     }
     .table th, .table td {
@@ -124,29 +126,45 @@
         background-color: #f8f9fa;
     }
     .badge {
-        font-size: 0.8rem;
-        padding: 0.3em 0.5em;
+        font-size: 0.9rem;
+        padding: 0.4em 0.6em;
     }
     .btn-sm {
         padding: 0.25rem 0.75rem;
-        border-radius: 15px;
+        border-radius: 0.375rem;
         font-size: 0.875rem;
     }
-    .btn-outline-primary, .btn-outline-danger {
+    .btn-outline-primary, .btn-outline-warning, .btn-outline-danger {
         transition: all 0.2s ease-in-out;
     }
     .btn-outline-primary:hover {
         background-color: #007bff;
         color: white;
     }
+    .btn-outline-warning:hover {
+        background-color: #ffc107;
+        color: black;
+    }
     .btn-outline-danger:hover {
         background-color: #dc3545;
         color: white;
+    }
+    .btn-group .btn {
+        margin-right: 0.25rem;
+    }
+    .btn-primary {
+        transition: all 0.2s ease-in-out;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
     }
     .alert-sm {
         padding: 0.5rem 0.75rem;
         font-size: 0.875rem;
         border-radius: 6px;
+    }
+    .form-control, .form-select {
+        border-radius: 0.375rem;
     }
 </style>
 

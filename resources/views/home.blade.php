@@ -212,7 +212,7 @@
                         <div class="carousel-caption">
                             <div class="text-bg">
                                 <h1><span class="blu">Bienvenidos</span><br>a D'Jenny Supermercado</h1>
-                                <figure><img src="{{ asset('images/aceite.png') }}" alt="Aceite" class="banner-img"/></figure>
+                                <figure><img src="{{ asset('images/tendero.png') }}" alt="Aceite" class="banner-img"/></figure>
                                 <a class="read_more" href="{{ route('login') }}">Comprar Ahora</a>
                             </div>
                         </div>
@@ -223,7 +223,7 @@
                         <div class="carousel-caption">
                             <div class="text-bg">
                                 <h1><span class="blu">Productos Frescos</span><br>de D'Jenny Supermercado</h1>
-                                <figure><img src="{{ asset('images/cafe.png') }}" alt="Café" class="banner-img"/></figure>
+                                <figure><img src="{{ asset('images/productos.jpg') }}" alt="Café" class="banner-img"/></figure>
                                 <a class="read_more" href="{{ route('login') }}">Comprar Ahora</a>
                             </div>
                         </div>
@@ -256,7 +256,7 @@
             <div class="row d_flex">
                 <div class="col-md-5">
                     <div class="about_img">
-                        <figure><img src="{{ asset('images/arroz-supremo.png') }}" alt="Arroz Supremo" class="about-img"/></figure>
+                        <figure><img src="{{ asset('images/tienda2.png') }}" alt="Arroz Supremo" class="about-img"/></figure>
                     </div>
                 </div>
                 <div class="col-md-7">
@@ -310,7 +310,7 @@
             <div class="row">
                 <div class="col-md-5">
                     <div class="shop_img">
-                        <figure><img src="{{ asset('images/huevos.png') }}" alt="Huevos" class="shop-img"/></figure>
+                        <figure><img src="{{ asset('images/fresco.png') }}" alt="Huevos" class="shop-img"/></figure>
                     </div>
                 </div>
                 <div class="col-md-7 padding_right0">

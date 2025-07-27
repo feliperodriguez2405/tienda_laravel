@@ -54,14 +54,14 @@
 
                 <!-- Manuales -->
                 <div class="col-12 col-md-4 text-center">
-                    <h5 class="text-uppercase fw-bold mb-3">Manuales</h5>
+                    {{-- <h5 class="text-uppercase fw-bold mb-3">Manuales</h5> --}}
                     <div class="d-grid gap-2 mx-auto" style="max-width: 200px;">
-                        <a href="{{ route('manual') }}" target="_blank" class="btn btn-outline-light btn-sm">
+                        {{-- <a href="{{ route('manual') }}" target="_blank" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-file-earmark-text-fill me-1"></i> Manual de Usuario
                         </a>
                         <a href="{{ route('manual') }}" target="_blank" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-file-earmark-text-fill me-1"></i> Manual Técnico
-                        </a>
+                        </a> --}}
                     </div>
                 </div>
 

@@ -44,13 +44,15 @@
                                 <div class="product-card h-100 shadow-sm">
                                     <div class="image-container">
                                         <img src="{{ $producto->imagen ? asset('storage/' . $producto->imagen) : asset('images/placeholder.png') }}" 
-                         class="card-img-top" 
-                         alt="{{ $producto->nombre }}">
+                                             class="card-img-top" 
+                                             alt="{{ $producto->nombre }}">
                                     </div>
                                     <div class="card-body d-flex flex-column">
                                         <h5 class="card-title">{{ Str::limit($producto->nombre, 20) }}</h5>
                                         <p class="mb-2">{{ $producto->categoria->nombre ?? 'Sin categoría' }}</p>
-                                        <p class="price mb-2"><strong>${{ number_format($producto->precio, 2) }}</strong></p>
+                                        @if ($producto->precio > 0)
+                                            <p class="price mb-2"><strong>${{ number_format($producto->precio, $producto->precio == floor($producto->precio) ? 0 : 2) }}</strong></p>
+                                        @endif
                                         <p class="small">Stock: {{ $producto->stock }}</p>
                                         <form action="{{ route('user.cart.add', $producto) }}" method="POST" class="mt-auto d-flex align-items-center">
                                             @csrf

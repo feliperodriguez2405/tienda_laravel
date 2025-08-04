@@ -83,8 +83,17 @@
             @forelse ($ordenes as $orden)
                 <tr>
                     <td>{{ $orden->id }}</td>
-                    <td>{{ $orden->user->name }}</td>
-                    <td>${{ number_format($orden->total, 2) }}</td>
+                    <td>
+                        @if ($orden->user)
+                            {{ $orden->user->name }}
+                            @if ($orden->user->trashed())
+                                <span class="badge bg-warning text-dark">Eliminado</span>
+                            @endif
+                        @else
+                            Usuario eliminado
+                        @endif
+                    </td>
+                    <td>${{ number_format($orden->total, $orden->total == floor($orden->total) ? 0 : 2) }}</td>
                     <td>{{ isset($orden->metodo_pago) ? ucfirst($orden->metodo_pago) : 'N/A' }}</td>
                     <td>
                         <span class="badge bg-{{ $orden->estado == 'pendiente' ? 'warning' : ($orden->estado == 'procesando' ? 'info' : ($orden->estado == 'entregado' ? 'success' : ($orden->estado == 'cancelado' ? 'danger' : 'primary'))) }}">
@@ -203,6 +212,11 @@
     document.addEventListener('DOMContentLoaded', () => {
         console.log('Transactions page loaded');
 
+        // Format price function
+        function formatPrice(value) {
+            return value === Math.floor(value) ? `$${value}` : `$${value.toFixed(2)}`;
+        }
+
         // Manejar eliminación con confirmación
         document.querySelectorAll('.delete-form').forEach(form => {
             form.addEventListener('submit', (e) => {
@@ -271,7 +285,7 @@
                     row.innerHTML = `
                         <td>${detail.producto}</td>
                         <td>${detail.cantidad}</td>
-                        <td>$${parseFloat(detail.subtotal).toFixed(2)}</td>
+                        <td>${formatPrice(parseFloat(detail.subtotal))}</td>
                     `;
                     tbody.appendChild(row);
                 });

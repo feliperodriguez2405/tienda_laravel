@@ -42,7 +42,7 @@
                 <a class="nav-link d-flex align-items-center pe-1" href="{{ route('admin.reportes') }}">
                     <i class="bi bi-bar-chart me-1"></i>Reportes
                 </a>
-                <button type="button" class="btn btn-sm dropdown-toggle dropdown-toggle-split p-1" data-bs-toggle="dropdown" aria-expanded="false" style="color: white; margin-left:-2px;">
+                {{-- <button type="button" class="btn btn-sm dropdown-toggle dropdown-toggle-split p-1" data-bs-toggle="dropdown" aria-expanded="false" style="color: white; margin-left:-2px;">
                     <span class="visually-hidden">Toggle Dropdown</span>
                 </button>
                 <ul class="dropdown-menu" aria-labelledby="dropdownReportes">
@@ -54,7 +54,7 @@
                     <li><a class="dropdown-item" href="#">Cierre Hoy</a></li>
                     <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="{{ route('admin.reportes') }}">Reporte General</a></li>
-                </ul>
+                </ul> --}}
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('proveedores.index') }}">

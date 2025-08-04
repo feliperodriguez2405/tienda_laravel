@@ -17,7 +17,7 @@ class ProductoController extends Controller
         try {
             Log::info('ProductoController::index called');
 
-            $query = Producto::query()->with('categoria');
+            $query = Producto::query()->with('categoria')->orderBy('created_at', 'desc');
 
             if ($request->filled('search')) {
                 $query->where('nombre', 'like', '%' . $request->search . '%')
@@ -112,15 +112,15 @@ class ProductoController extends Controller
             $data['precio'] = $request->precio_compra * (1 + $request->porcentaje_ganancia / 100);
         }
 
-        // Verificar si los datos obligatorios están completos; si no, establecer estado como inactivo
-        if ($data['precio'] <= 0 || empty($data['nombre']) || empty($data['descripcion']) || empty($data['categoria_id'])) {
-            $data['estado'] = 'inactivo';
-            $message = 'Producto agregado correctamente, pero está inactivo porque faltan datos obligatorios (precio, nombre, descripción o categoría). Complete todos los datos para activarlo.';
-        } else {
-            $message = 'Producto agregado correctamente.';
-        }
+        // Crear el producto (el modelo manejará el estado si precio <= 0)
+        $producto = Producto::create($data);
 
-        Producto::create($data);
+        // Verificar si el producto está inactivo debido a datos faltantes o precio 0
+        if ($producto->estado === 'inactivo') {
+            $message = 'Producto "' . $data['nombre'] . '" agregado correctamente, pero está inactivo porque el precio de venta es 0 o faltan datos obligatorios (nombre, descripción o categoría). Por favor, edite el producto para completar los datos y activarlo.';
+        } else {
+            $message = 'Producto "' . $data['nombre'] . '" agregado correctamente.';
+        }
 
         return redirect()->route('productos.index')->with('success', $message);
     }

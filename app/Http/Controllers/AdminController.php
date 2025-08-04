@@ -116,7 +116,18 @@ class AdminController extends Controller
         }
 
         try {
-            $user->delete();
+            // Check for non-delivered or non-cancelled orders
+            $hasPendingOrders = $user->ordenes()->whereNotIn('estado', ['entregado', 'cancelado'])->exists();
+            if ($hasPendingOrders) {
+                Log::warning('Attempt to delete user with pending orders', [
+                    'user_id' => $user->id,
+                    'user_name' => $user->name
+                ]);
+                return response()->json(['error' => 'No se puede eliminar el usuario porque tiene pedidos pendientes o en proceso.'], 400);
+            }
+
+            $user->delete(); // Soft delete
+            Log::info('User soft deleted', ['user_id' => $user->id, 'user_name' => $user->name]);
             return response()->json(['success' => 'Usuario eliminado correctamente.']);
         } catch (\Exception $e) {
             Log::error('Error eliminando usuario ID ' . $user->id . ': ' . $e->getMessage());
@@ -129,11 +140,13 @@ class AdminController extends Controller
      */
     public function pedidos(Request $request)
     {
-        $query = Orden::with(['detalles.producto', 'user']);
+        $query = Orden::with(['detalles.producto', 'user' => function ($query) {
+            $query->withTrashed(); // Include soft-deleted users
+        }]);
 
         if ($request->filled('client_name')) {
             $query->whereHas('user', function ($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->input('client_name') . '%');
+                $q->withTrashed()->where('name', 'like', '%' . $request->input('client_name') . '%');
             });
         }
 
@@ -158,6 +171,10 @@ class AdminController extends Controller
 
         try {
             $orden->update(['estado' => $request->estado]);
+            Log::info('Order status updated', [
+                'orden_id' => $orden->id,
+                'new_status' => $request->estado
+            ]);
             return redirect()->route('admin.pedidos')->with('success', 'Estado actualizado correctamente.');
         } catch (\Exception $e) {
             Log::error('Error actualizando estado de orden ID ' . $orden->id . ': ' . $e->getMessage());
@@ -176,6 +193,7 @@ class AdminController extends Controller
 
         try {
             $orden->update(['estado' => 'cancelado']);
+            Log::info('Order refunded', ['orden_id' => $orden->id]);
             return redirect()->route('admin.pedidos')->with('success', 'Reembolso procesado correctamente.');
         } catch (\Exception $e) {
             Log::error('Error procesando reembolso para orden ID ' . $orden->id . ': ' . $e->getMessage());

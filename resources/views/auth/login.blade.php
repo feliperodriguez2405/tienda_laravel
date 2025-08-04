@@ -9,7 +9,7 @@
 </div>
 
 @if(session('status'))
-    <div class="alert alert-success" id="success-alert">
+    <div class="alert alert-success" id="$(success-alert)">
         {{ session('status') }}
     </div>
 @endif
@@ -59,6 +59,15 @@
             Iniciar Sesión
         </button>
     </div>
+
+    <!-- Botón de Registro -->
+    @if (Route::has('register'))
+        <div class="form-group">
+            <a href="{{ route('register') }}" class="btn-submit" style="display: block; text-align: center; text-decoration: none;">
+                Registrarse
+            </a>
+        </div>
+    @endif
 
     <!-- Enlace a contraseña olvidada -->
     @if (Route::has('password.request'))

@@ -20,7 +20,8 @@ class CajeroController extends Controller
 
     public function dashboard()
     {
-        return view('cajero.dashboard');
+        $ordenes = Orden::where('estado', 'pendiente_pago')->latest()->paginate(10);
+        return view('cajero.dashboard', compact('ordenes'));
     }
 
     public function sale(Request $request)
@@ -40,10 +41,14 @@ class CajeroController extends Controller
             $subtotal = 0;
             $items = [];
             foreach ($request->productos as $index => $producto_id) {
-                $producto = Producto::where('id', $producto_id)->where('estado', 'activo')->first();
+                $producto = Producto::where('id', $producto_id)
+                    ->where('estado', 'activo')
+                    ->where('precio', '>', 0)
+                    ->where('stock', '>', 0)
+                    ->first();
                 if (!$producto) {
-                    Log::error("Producto ID {$producto_id} not found or inactive");
-                    return back()->with('error', 'Producto no encontrado o inactivo.');
+                    Log::error("Producto ID {$producto_id} not found, inactive, zero-priced, or out of stock");
+                    return back()->with('error', 'Producto no encontrado, inactivo, sin precio, o sin stock.');
                 }
                 $cantidad = (int) $request->cantidades[$index];
                 if ($producto->stock < $cantidad) {
@@ -93,7 +98,10 @@ class CajeroController extends Controller
 
                 DB::commit();
 
-                Log::info("Sale created successfully for order ID {$orden->id}", ['total' => $total, 'metodo_pago' => $request->metodo_pago]);
+                Log::info("Sale created successfully for order ID {$orden->id}", [
+                    'total' => $total,
+                    'metodo_pago' => $request->metodo_pago
+                ]);
 
                 if ($request->metodo_pago === 'nequi') {
                     return redirect()->route('cajero.payment', $orden->id);
@@ -102,12 +110,17 @@ class CajeroController extends Controller
                 return redirect()->route('cajero.transactions')->with('success', 'Venta registrada correctamente.');
             } catch (\Exception $e) {
                 DB::rollBack();
-                Log::error("Error creating sale: {$e->getMessage()}", ['trace' => $e->getTraceAsString()]);
+                Log::error("Error creating sale: {$e->getMessage()}", [
+                    'trace' => $e->getTraceAsString()
+                ]);
                 return back()->with('error', 'Error al registrar la venta: ' . $e->getMessage());
             }
         }
 
-        $query = Producto::where('estado', 'activo');
+        $query = Producto::where('estado', 'activo')
+            ->where('precio', '>', 0)
+            ->where('stock', '>', 0)
+            ->orderBy('created_at', 'desc');
         $search = $request->query('search');
         if ($search) {
             $query->where('nombre', 'like', '%' . $search . '%');
@@ -163,22 +176,67 @@ class CajeroController extends Controller
             $orden->update(['estado' => 'entregado']);
             DB::commit();
 
-            Log::info("Payment confirmed for order: {$orden_id}", ['transaction_id' => $request->transaction_id]);
+            Log::info("Payment confirmed for order: {$orden_id}", [
+                'transaction_id' => $request->transaction_id
+            ]);
             return redirect()->route('cajero.transactions')->with('success', 'Pago Nequi confirmado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Error confirming payment for order: {$orden_id}: {$e->getMessage()}", ['trace' => $e->getTraceAsString()]);
+            Log::error("Error confirming payment for order: {$orden_id}: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->route('cajero.transactions')->with('error', 'Error al confirmar el pago: ' . $e->getMessage());
+        }
+    }
+
+    public function confirmCashPayment(Request $request, Orden $orden)
+    {
+        try {
+            DB::beginTransaction();
+
+            if ($orden->metodo_pago !== 'efectivo' || $orden->estado !== 'pendiente_pago') {
+                Log::warning('Invalid cash payment confirmation attempt', [
+                    'order_id' => $orden->id,
+                    'metodo_pago' => $orden->metodo_pago,
+                    'estado' => $orden->estado
+                ]);
+                return redirect()->route('cajero.dashboard')->with('error', 'Esta orden no puede ser confirmada como pago en efectivo.');
+            }
+
+            $orden->estado = 'entregado';
+            $orden->save();
+
+            $pago = Pago::where('orden_id', $orden->id)->where('estado', 'pendiente')->firstOrFail();
+            $pago->estado = 'completado';
+            $pago->save();
+
+            DB::commit();
+
+            Log::info('Cash payment confirmed for order: ' . $orden->id, [
+                'user_id' => $orden->user_id,
+                'total' => $orden->total
+            ]);
+
+            return redirect()->route('cajero.dashboard')->with('success', 'Pago en efectivo confirmado. Orden completada.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error confirming cash payment for order: ' . $orden->id, [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->route('cajero.dashboard')->with('error', 'Error al confirmar el pago en efectivo: ' . $e->getMessage());
         }
     }
 
     public function transactions(Request $request)
     {
-        $query = Orden::with(['detalles.producto', 'user', 'pagos']);
+        $query = Orden::with(['detalles.producto', 'user' => function ($query) {
+            $query->withTrashed(); // Include soft-deleted users
+        }, 'pagos']);
 
         if ($search = $request->query('search')) {
             $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
+                $q->withTrashed()->where('name', 'like', '%' . $search . '%')
                   ->orWhere('email', 'like', '%' . $search . '%');
             });
         }
@@ -204,7 +262,7 @@ class CajeroController extends Controller
     public function updateOrder(Request $request, $id)
     {
         $request->validate([
-            'estado' => 'required|in:pendiente,procesando,entregado,cancelado',
+            'estado' => 'required|in:pendiente,pendiente_pago,procesando,entregado,cancelado',
         ]);
 
         try {
@@ -213,7 +271,9 @@ class CajeroController extends Controller
             Log::info("Order {$id} updated to estado: {$request->estado}");
             return redirect()->route('cajero.transactions')->with('success', 'Estado de la orden actualizado correctamente.');
         } catch (\Exception $e) {
-            Log::error("Error updating order {$id}: {$e->getMessage()}", ['trace' => $e->getTraceAsString()]);
+            Log::error("Error updating order {$id}: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->route('cajero.transactions')->with('error', 'Error al actualizar la orden: ' . $e->getMessage());
         }
     }
@@ -240,7 +300,9 @@ class CajeroController extends Controller
             return redirect()->route('cajero.transactions')->with('success', 'Orden eliminada correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Error deleting order {$id}: {$e->getMessage()}", ['trace' => $e->getTraceAsString()]);
+            Log::error("Error deleting order {$id}: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->route('cajero.transactions')->with('error', 'Error al eliminar la orden: ' . $e->getMessage());
         }
     }
@@ -282,18 +344,22 @@ class CajeroController extends Controller
             return redirect()->route('cajero.transactions')->with('success', 'Pago en efectivo confirmado correctamente.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error("Error paying order {$id}: {$e->getMessage()}", ['trace' => $e->getTraceAsString()]);
+            Log::error("Error paying order {$id}: {$e->getMessage()}", [
+                'trace' => $e->getTraceAsString()
+            ]);
             return redirect()->route('cajero.transactions')->with('error', 'Error al confirmar el pago: ' . $e->getMessage());
         }
     }
 
     public function exportTransactions(Request $request)
     {
-        $query = Orden::with(['detalles.producto', 'user', 'pagos']);
+        $query = Orden::with(['detalles.producto', 'user' => function ($query) {
+            $query->withTrashed(); // Include soft-deleted users
+        }, 'pagos']);
 
         if ($search = $request->query('search')) {
             $query->whereHas('user', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
+                $q->withTrashed()->where('name', 'like', '%' . $search . '%')
                   ->orWhere('email', 'like', '%' . $search . '%');
             });
         }
@@ -321,9 +387,9 @@ class CajeroController extends Controller
             $metodo_pago = isset($orden->metodo_pago) ? ucfirst($orden->metodo_pago) : 'N/A';
             $csv->insertOne([
                 $orden->id,
-                isset($orden->user->name) ? $orden->user->name : 'N/A',
+                $orden->user ? $orden->user->name : 'Usuario eliminado',
                 $orden->created_at->format('d/m/Y H:i'),
-                number_format($orden->total, 2, ',', '.'),
+                number_format($orden->total, $orden->total == floor($orden->total) ? 0 : 2, ',', '.'),
                 $metodo_pago,
                 ucfirst($orden->estado),
                 $detalles ? $detalles : 'N/A',
@@ -342,7 +408,9 @@ class CajeroController extends Controller
             try {
                 $pagos = Pago::where('estado', 'completado')
                     ->whereDate('created_at', today())
-                    ->with('orden.detalles.producto')
+                    ->with(['orden.detalles.producto', 'orden.user' => function ($query) {
+                        $query->withTrashed(); // Include soft-deleted users
+                    }])
                     ->get();
                 $totalVentas = $pagos->sum('monto');
 
@@ -354,7 +422,7 @@ class CajeroController extends Controller
 
                 $report = "Reporte de cierre de caja:\n" .
                           "Cajero: " . Auth::user()->name . "\n" .
-                          "Total ventas del día: $" . number_format($totalVentas, 2) . "\n" .
+                          "Total ventas del día: $" . number_format($totalVentas, $totalVentas == floor($totalVentas) ? 0 : 2) . "\n" .
                           "Número de transacciones: " . $pagos->count() . "\n" .
                           "Transacciones de cajero: " . $pagos->where('orden.user_id', Auth::id())->count() . "\n" .
                           "Transacciones de clientes: " . $pagos->where('orden.user_id', '!=', Auth::id())->count();
@@ -364,18 +432,24 @@ class CajeroController extends Controller
                             ->subject('Cierre de Caja - ' . now()->toDateString());
                 });
 
-                Log::info("Cash register closed by user: " . Auth::id(), ['total_ventas' => $totalVentas]);
+                Log::info("Cash register closed by user: " . Auth::id(), [
+                    'total_ventas' => $totalVentas
+                ]);
 
                 return redirect()->route('cajero.close')->with('success', 'Cierre de caja enviado al administrador.');
             } catch (\Exception $e) {
-                Log::error("Error closing cash register: {$e->getMessage()}", ['trace' => $e->getTraceAsString()]);
+                Log::error("Error closing cash register: {$e->getMessage()}", [
+                    'trace' => $e->getTraceAsString()
+                ]);
                 return redirect()->route('cajero.close')->with('error', 'Error al enviar el cierre de caja: ' . $e->getMessage());
             }
         }
 
         $pagos = Pago::where('estado', 'completado')
             ->whereDate('created_at', today())
-            ->with('orden.detalles.producto')
+            ->with(['orden.detalles.producto', 'orden.user' => function ($query) {
+                $query->withTrashed(); // Include soft-deleted users
+            }])
             ->get();
         $ordenes = $pagos->pluck('orden')->unique('id');
         $totalVentas = $pagos->sum('monto');

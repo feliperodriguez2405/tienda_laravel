@@ -58,9 +58,9 @@
                         <a class="nav-link d-flex align-items-center pe-1" href="{{ route('admin.reportes') }}">
                             <i class="bi bi-bar-chart me-1"></i>Reportes
                         </a>
-                        <button type="button" class="btn btn-sm dropdown-toggle dropdown-toggle-split p-1" data-bs-toggle="dropdown" aria-expanded="false" style="color: white; margin-left:-2px;">
+                        {{-- <button type="button" class="btn btn-sm dropdown-toggle dropdown-toggle-split p-1" data-bs-toggle="dropdown" aria-expanded="false" style="color: white; margin-left:-2px;">
                             <span class="visually-hidden">Toggle Dropdown</span>
-                        </button>
+                        </button> --}}
                         <ul class="dropdown-menu" aria-labelledby="dropdownReportes">
                             <li><a class="dropdown-item" href="#">Últimos 7 Días</a></li>
                             <li><a class="dropdown-item" href="#">Top 5</a></li>
@@ -259,14 +259,14 @@
                     </div>
                 </div>
                 <div class="col-12 col-md-4 text-center">
-                    <h5 class="text-uppercase fw-bold mb-3">Manuales</h5>
+                    {{-- <h5 class="text-uppercase fw-bold mb-3">Manuales</h5> --}}
                     <div class="d-grid gap-2 mx-auto" style="max-width: 200px;">
-                        <a href="{{ route('manual') }}" target="_blank" class="btn btn-outline-light btn-sm">
+                        {{-- <a href="{{ route('manual') }}" target="_blank" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-file-earmark-text-fill me-1"></i> Manual de Usuario
                         </a>
                         <a href="{{ route('manual') }}" target="_blank" class="btn btn-outline-light btn-sm">
                             <i class="bi bi-file-earmark-text-fill me-1"></i> Manual Técnico
-                        </a>
+                        </a> --}}
                     </div>
                 </div>
                 <div class="col-12 col-md-4 text-center text-md-end">

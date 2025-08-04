@@ -17,6 +17,7 @@
         .form-control, .form-select { max-width: 200px; }
         .bg-info { background-color: #74b9ff; }
         .new-product-input, .new-category-container { display: none; }
+        .descripcion { resize: vertical; min-height: 38px; max-height: 100px; width: 100%; }
     </style>
 </head>
 <body>
@@ -54,9 +55,6 @@
                         <a class="nav-link d-flex align-items-center pe-1" href="{{ route('admin.reportes') }}">
                             <i class="bi bi-bar-chart me-1"></i>Reportes
                         </a>
-                        <button type="button" class="btn btn-sm dropdown-toggle dropdown-toggle-split p-1" data-bs-toggle="dropdown" aria-expanded="false" style="color: white; margin-left:-2px;">
-                            <span class="visually-hidden">Toggle Dropdown</span>
-                        </button>
                         <ul class="dropdown-menu" aria-labelledby="dropdownReportes">
                             <li><a class="dropdown-item" href="#">Últimos 7 Días</a></li>
                             <li><a class="dropdown-item" href="#">Top 5</a></li>
@@ -161,6 +159,7 @@
                                         <th>Cantidad</th>
                                         <th>Stock Actual</th>
                                         <th>Precio Compra (COP)</th>
+                                        <th>Porcentaje Ganancia</th>
                                         <th>Precio Venta (COP)</th>
                                         <th>Descripción</th>
                                         <th>Acción</th>
@@ -242,7 +241,7 @@
                                             <td>
                                                 <input type="number" name="detalles[{{ $index }}][precio_compra]"
                                                        value="{{ $detalle['precio_compra'] ?? 0 }}"
-                                                       class="form-control @error('detalles.{{ $index }}.precio_compra') is-invalid @enderror"
+                                                       class="form-control precio-compra @error('detalles.{{ $index }}.precio_compra') is-invalid @enderror"
                                                        step="0.01" min="0" placeholder="Precio Compra"
                                                        required>
                                                 @error('detalles.{{ $index }}.precio_compra')
@@ -250,9 +249,24 @@
                                                 @enderror
                                             </td>
                                             <td>
+                                                <select name="detalles[{{ $index }}][porcentaje_ganancia]"
+                                                        id="porcentaje_ganancia_{{ $index }}"
+                                                        class="form-select form-select-sm porcentaje-ganancia @error('detalles.{{ $index }}.porcentaje_ganancia') is-invalid @enderror">
+                                                    <option value="">Selecciona un porcentaje</option>
+                                                    <option value="20" {{ ($detalle['porcentaje_ganancia'] ?? '') == '20' ? 'selected' : '' }}>20%</option>
+                                                    <option value="25" {{ ($detalle['porcentaje_ganancia'] ?? '') == '25' ? 'selected' : '' }}>25%</option>
+                                                    <option value="30" {{ ($detalle['porcentaje_ganancia'] ?? '') == '30' ? 'selected' : '' }}>30%</option>
+                                                    <option value="40" {{ ($detalle['porcentaje_ganancia'] ?? '') == '40' ? 'selected' : '' }}>40%</option>
+                                                    <option value="50" {{ ($detalle['porcentaje_ganancia'] ?? '') == '50' ? 'selected' : '' }}>50%</option>
+                                                </select>
+                                                @error('detalles.{{ $index }}.porcentaje_ganancia')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </td>
+                                            <td>
                                                 <input type="number" name="detalles[{{ $index }}][precio_venta]"
                                                        value="{{ $detalle['precio_venta'] ?? 0 }}"
-                                                       class="form-control @error('detalles.{{ $index }}.precio_venta') is-invalid @enderror"
+                                                       class="form-control precio-venta @error('detalles.{{ $index }}.precio_venta') is-invalid @enderror"
                                                        step="0.01" min="0" placeholder="Precio Venta"
                                                        required>
                                                 @error('detalles.{{ $index }}.precio_venta')
@@ -260,10 +274,10 @@
                                                 @enderror
                                             </td>
                                             <td>
-                                                <input type="text" name="detalles[{{ $index }}][descripcion]"
-                                                       value="{{ $detalle['descripcion'] ?? '' }}"
-                                                       class="form-control @error('detalles.{{ $index }}.descripcion') is-invalid @enderror"
-                                                       placeholder="Descripción (opcional)">
+                                                <textarea name="detalles[{{ $index }}][descripcion]"
+                                                          class="form-control descripcion @error('detalles.{{ $index }}.descripcion') is-invalid @enderror"
+                                                          placeholder="Descripción (opcional)"
+                                                          maxlength="500">{{ $detalle['descripcion'] ?? '' }}</textarea>
                                                 @error('detalles.{{ $index }}.descripcion')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -291,6 +305,10 @@
 
                         <div class="d-flex justify-content-between align-items-center mt-4">
                             <div>
+                                <button type="button" class="btn btn-success" id="add-detalle"
+                                        {{ $orden->estado !== 'procesando' ? 'disabled' : '' }}>
+                                    <i class="bi bi-plus-circle me-2"></i>Agregar Detalle
+                                </button>
                                 <a href="{{ route('admin.proveedores.ordenes.historial', $proveedor) }}"
                                    class="btn btn-secondary">
                                     <i class="bi bi-arrow-left me-2"></i>Volver al historial
@@ -326,14 +344,7 @@
                     </div>
                 </div>
                 <div class="col-12 col-md-4 text-center">
-                    <h5 class="text-uppercase fw-bold mb-3">Manuales</h5>
                     <div class="d-grid gap-2 mx-auto" style="max-width: 200px;">
-                        <a href="{{ route('manual') }}" target="_blank" class="btn btn-outline-light btn-sm">
-                            <i class="bi bi-file-earmark-text-fill me-1"></i> Manual de Usuario
-                        </a>
-                        <a href="{{ route('manual') }}" target="_blank" class="btn btn-outline-light btn-sm">
-                            <i class="bi bi-file-earmark-text-fill me-1"></i> Manual Técnico
-                        </a>
                     </div>
                 </div>
                 <div class="col-12 col-md-4 text-center text-md-end">
@@ -399,6 +410,10 @@
                 const categorySelect = row.querySelector('.categoria-select');
                 const stockInput = row.querySelector('input[name$="[stock_actual]"]');
                 const newCategoryContainer = row.querySelector('.new-category-container');
+                const precioCompraInput = row.querySelector('.precio-compra');
+                const porcentajeGananciaSelect = row.querySelector('.porcentaje-ganancia');
+                const precioVentaInput = row.querySelector('.precio-venta');
+                const descripcionInput = row.querySelector('.descripcion');
 
                 if (productSelect && newProductInput && categorySelect && stockInput) {
                     productSelect.addEventListener('change', function() {
@@ -420,6 +435,31 @@
                 if (categorySelect && newCategoryContainer) {
                     categorySelect.addEventListener('change', function() {
                         newCategoryContainer.style.display = this.value === 'new' ? 'block' : 'none';
+                    });
+                }
+
+                if (precioCompraInput && porcentajeGananciaSelect && precioVentaInput) {
+                    function updatePrecioVenta() {
+                        const precioCompra = parseFloat(precioCompraInput.value) || 0;
+                        const porcentajeGanancia = parseFloat(porcentajeGananciaSelect.value) || 0;
+                        if (precioCompra && porcentajeGanancia) {
+                            const precioVenta = precioCompra * (1 + porcentajeGanancia / 100);
+                            precioVentaInput.value = precioVenta.toFixed(2);
+                        } else {
+                            precioVentaInput.value = precioCompraInput.value || 0;
+                        }
+                    }
+
+                    precioCompraInput.addEventListener('input', updatePrecioVenta);
+                    porcentajeGananciaSelect.addEventListener('change', updatePrecioVenta);
+                }
+
+                if (descripcionInput) {
+                    descripcionInput.addEventListener('input', function() {
+                        const value = this.value.trim();
+                        if (value) {
+                            this.value = value.charAt(0).toUpperCase() + value.slice(1);
+                        }
                     });
                 }
             }
@@ -472,16 +512,28 @@
                             <input type="number" name="detalles[${index}][stock_actual]" class="form-control" value="0" readonly>
                         </td>
                         <td>
-                            <input type="number" name="detalles[${index}][precio_compra]" class="form-control"
+                            <input type="number" name="detalles[${index}][precio_compra]" class="form-control precio-compra"
                                    step="0.01" min="0" placeholder="Precio Compra" value="0" required>
                         </td>
                         <td>
-                            <input type="number" name="detalles[${index}][precio_venta]" class="form-control"
+                            <select name="detalles[${index}][porcentaje_ganancia]"
+                                    id="porcentaje_ganancia_${index}"
+                                    class="form-select form-select-sm porcentaje-ganancia">
+                                <option value="">Selecciona un porcentaje</option>
+                                <option value="20">20%</option>
+                                <option value="25">25%</option>
+                                <option value="30">30%</option>
+                                <option value="40">40%</option>
+                                <option value="50">50%</option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" name="detalles[${index}][precio_venta]" class="form-control precio-venta"
                                    step="0.01" min="0" placeholder="Precio Venta" value="0" required>
                         </td>
                         <td>
-                            <input type="text" name="detalles[${index}][descripcion]" class="form-control"
-                                   placeholder="Descripción (opcional)">
+                            <textarea name="detalles[${index}][descripcion]" class="form-control descripcion"
+                                      placeholder="Descripción (opcional)" maxlength="500"></textarea>
                         </td>
                         <td>
                             <button type="button" class="btn btn-danger btn-sm remove-detalle">

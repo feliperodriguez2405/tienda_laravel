@@ -25,8 +25,8 @@
                                 <div class="card-body d-flex flex-column">
                                     <h5 class="card-title">{{ $producto->nombre }}</h5>
                                     <p class="card-text mb-2">
-                                        Precio (sin IVA): ${{ number_format($producto->precio, 2) }}<br>
-                                        Precio (con IVA): ${{ number_format($producto->precio * 1.19, 2) }}<br>
+                                        Precio (sin IVA): ${{ number_format($producto->precio, $producto->precio == floor($producto->precio) ? 0 : 2) }}<br>
+                                        Precio (con IVA): ${{ number_format($producto->precio * 1.19, ($producto->precio * 1.19) == floor($producto->precio * 1.19) ? 0 : 2) }}<br>
                                         Stock: {{ $producto->stock }}
                                     </p>
                                     <button class="btn btn-success btn-sm mt-auto add-to-cart"
@@ -191,6 +191,11 @@
             keyboard: false
         });
 
+        // Format price function
+        function formatPrice(value) {
+            return value === Math.floor(value) ? `$${value}` : `$${value.toFixed(2)}`;
+        }
+
         // Show modal on page load
         cartModal.show();
 
@@ -329,7 +334,7 @@
                         <input type="hidden" name="productos[]" value="${item.id}">
                         <input type="hidden" name="cantidades[]" value="${item.quantity}" class="quantity-hidden">
                     </td>
-                    <td>$${subtotalWithIVA.toFixed(2)}</td>
+                    <td>${formatPrice(subtotalWithIVA)}</td>
                     <td>
                         <button class="btn btn-danger btn-sm remove-item" data-index="${index}">Eliminar</button>
                     </td>
@@ -340,9 +345,9 @@
             const iva = subtotal * (IVA_RATE - 1);
             const total = subtotal * IVA_RATE;
 
-            subtotalAmount.textContent = `$${subtotal.toFixed(2)}`;
-            ivaAmount.textContent = `$${iva.toFixed(2)}`;
-            totalAmount.textContent = `$${total.toFixed(2)}`;
+            subtotalAmount.textContent = formatPrice(subtotal);
+            ivaAmount.textContent = formatPrice(iva);
+            totalAmount.textContent = formatPrice(total);
 
             // Bind event listeners
             document.querySelectorAll('.quantity-input').forEach(input => {

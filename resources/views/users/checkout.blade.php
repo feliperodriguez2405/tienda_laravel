@@ -33,30 +33,57 @@
                 @foreach ($productos as $producto)
                     <tr>
                         <td>{{ $producto->nombre }}</td>
-                        <td>${{ number_format($producto->precio, 2) }}</td>
+                        <td>
+                            @if ($producto->precio > 0)
+                                ${{ number_format($producto->precio, $producto->precio == floor($producto->precio) ? 0 : 2) }}
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td>{{ $cart[$producto->id] }}</td>
-                        <td>${{ number_format($producto->precio * $cart[$producto->id], 2) }}</td>
+                        <td>
+                            @if ($producto->precio > 0)
+                                ${{ number_format($producto->precio * $cart[$producto->id], ($producto->precio * $cart[$producto->id]) == floor($producto->precio * $cart[$producto->id]) ? 0 : 2) }}
+                            @else
+                                -
+                            @endif
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
             <tfoot>
                 <tr>
                     <td colspan="3" class="text-end fw-bold">Subtotal:</td>
-                    <td class="fw-bold">${{ number_format($productos->sum(fn($p) => $p->precio * $cart[$p->id]), 2) }}</td>
+                    <td class="fw-bold">
+                        @php
+                            $subtotal = $productos->sum(fn($p) => $p->precio * $cart[$p->id]);
+                        @endphp
+                        ${{ number_format($subtotal, $subtotal == floor($subtotal) ? 0 : 2) }}
+                    </td>
                 </tr>
                 <tr>
                     <td colspan="3" class="text-end fw-bold">Impuesto (19% IVA):</td>
-                    <td class="fw-bold">${{ number_format($productos->sum(fn($p) => $p->precio * $cart[$p->id]) * 0.19, 2) }}</td>
+                    <td class="fw-bold">
+                        @php
+                            $iva = $subtotal * 0.19;
+                        @endphp
+                        ${{ number_format($iva, $iva == floor($iva) ? 0 : 2) }}
+                    </td>
                 </tr>
                 <tr>
                     <td colspan="3" class="text-end fw-bold">Total:</td>
-                    <td class="fw-bold">${{ number_format($productos->sum(fn($p) => $p->precio * $cart[$p->id]) * 1.19, 2) }}</td>
+                    <td class="fw-bold">
+                        @php
+                            $total = $subtotal * 1.19;
+                        @endphp
+                        ${{ number_format($total, $total == floor($total) ? 0 : 2) }}
+                    </td>
                 </tr>
             </tfoot>
         </table>
     </div>
 
-    <form action="{{ route('user.process.checkout') }}" method="POST" class="mt-4">
+    <form action="{{ route('user.cart.checkout') }}" method="POST" class="mt-4">
         @csrf
         <div class="mb-3">
             <label for="metodo_pago" class="form-label fw-bold">Método de Pago</label>

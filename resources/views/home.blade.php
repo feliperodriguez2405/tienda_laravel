@@ -68,19 +68,40 @@
             flex-direction: column;
             align-items: center;
             text-align: center;
+            height: 600px; /* Maintained height for long boxes */
+            justify-content: space-between;
+            padding: 20px;
+            box-sizing: border-box;
         }
         .glasses_box figure {
-            width: 150px;
-            height: 150px;
+            width: 200px; /* Reduced width for smaller images */
+            height: 200px; /* Reduced height for smaller images */
             display: flex;
             justify-content: center;
             align-items: center;
             margin: 0 auto;
         }
         .glasses_box img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Changed to contain to preserve image quality and aspect ratio */
+        }
+        .glasses_box h3 {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+        .glasses_box .description {
+            font-size: 16px;
+            flex-grow: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 4; /* Allows up to 4 lines of text */
+            -webkit-box-orient: vertical;
+        }
+        .glasses_box .price {
+            font-size: 18px;
+            margin: 10px 0;
         }
         .logo img {
             max-width: 150px;
@@ -130,8 +151,8 @@
             width: 100%;
         }
         .carousel-caption .banner-img {
-            width: 300px;
-            height: 200px;
+            width: 400px;
+            height: 300px;
             object-fit: contain;
             margin: 20px auto;
         }
@@ -223,7 +244,7 @@
                         <div class="carousel-caption">
                             <div class="text-bg">
                                 <h1><span class="blu">Productos Frescos</span><br>de D'Jenny Supermercado</h1>
-                                <figure><img src="{{ asset('images/productos.jpg') }}" alt="Café" class="banner-img"/></figure>
+                                <figure><img src="{{ asset('images/productos.png') }}" alt="Café" class="banner-img"/></figure>
                                 <a class="read_more" href="{{ route('login') }}">Comprar Ahora</a>
                             </div>
                         </div>

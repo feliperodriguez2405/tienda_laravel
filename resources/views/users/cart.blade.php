@@ -7,18 +7,25 @@
     <h1 class="mb-4 text-center fw-bold">Carrito de Compras</h1>
 
     @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     @endif
     @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     @endif
     @if ($errors->any())
-        <div class="alert alert-danger">
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <ul class="mb-0">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
             </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
@@ -40,7 +47,13 @@
                     @foreach ($productos as $producto)
                         <tr>
                             <td>{{ $producto->nombre }}</td>
-                            <td>${{ number_format($producto->precio, 2) }}</td>
+                            <td>
+                                @if ($producto->precio > 0)
+                                    ${{ number_format($producto->precio, $producto->precio == floor($producto->precio) ? 0 : 2) }}
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td>
                                 <form action="{{ route('user.cart.update', $producto) }}" method="POST" class="d-flex align-items-center">
                                     @csrf
@@ -59,7 +72,13 @@
                                     </button>
                                 </form>
                             </td>
-                            <td>${{ number_format($producto->precio * $cart[$producto->id], 2) }}</td>
+                            <td>
+                                @if ($producto->precio > 0)
+                                    ${{ number_format($producto->precio * $cart[$producto->id], ($producto->precio * $cart[$producto->id]) == floor($producto->precio * $cart[$producto->id]) ? 0 : 2) }}
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td>
                                 <form action="{{ route('user.cart.remove', $producto) }}" method="POST">
                                     @csrf
@@ -74,17 +93,32 @@
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-end fw-bold">Subtotal:</td>
-                        <td class="fw-bold">${{ number_format($productos->sum(fn($p) => $p->precio * $cart[$p->id]), 2) }}</td>
+                        <td class="fw-bold">
+                            @php
+                                $subtotal = $productos->sum(fn($p) => $p->precio * $cart[$p->id]);
+                            @endphp
+                            ${{ number_format($subtotal, $subtotal == floor($subtotal) ? 0 : 2) }}
+                        </td>
                         <td></td>
                     </tr>
                     <tr>
                         <td colspan="3" class="text-end fw-bold">Impuesto (19% IVA):</td>
-                        <td class="fw-bold">${{ number_format($productos->sum(fn($p) => $p->precio * $cart[$p->id]) * 0.19, 2) }}</td>
+                        <td class="fw-bold">
+                            @php
+                                $iva = $subtotal * 0.19;
+                            @endphp
+                            ${{ number_format($iva, $iva == floor($iva) ? 0 : 2) }}
+                        </td>
                         <td></td>
                     </tr>
                     <tr>
                         <td colspan="3" class="text-end fw-bold">Total:</td>
-                        <td class="fw-bold">${{ number_format($productos->sum(fn($p) => $p->precio * $cart[$p->id]) * 1.19, 2) }}</td>
+                        <td class="fw-bold">
+                            @php
+                                $total = $subtotal * 1.19;
+                            @endphp
+                            ${{ number_format($total, $total == floor($total) ? 0 : 2) }}
+                        </td>
                         <td></td>
                     </tr>
                 </tfoot>
@@ -105,7 +139,7 @@
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
                 <div id="nequi-message" class="alert alert-info mt-2 d-none">
-                    Por favor, realiza el pago con Nequi al número 3152971513.
+                    Por favor, realice el pago con Nequi al número 3152971513 mientras los trabajadores preparan su pedido.
                 </div>
             </div>
             <div class="text-end">

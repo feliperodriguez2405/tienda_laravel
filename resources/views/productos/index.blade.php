@@ -97,7 +97,7 @@
                         <div class="card-body text-center d-flex flex-column justify-content-between">
                             <div>
                                 <h5 class="card-title fw-bold mb-2">{{ \Illuminate\Support\Str::limit($producto->nombre, 20) }}</h5>
-                                <p class="card-text text-success fw-bold mb-1">${{ number_format($producto->precio, 2) }}</p>
+                                <p class="card-text text-success fw-bold mb-1">${{ rtrim(rtrim(number_format($producto->precio, 2), '0'), '.') }}</p>
                                 <p class="card-text text-secondary mb-1">
                                     Stock: <span class="{{ $producto->stock <= 10 ? 'text-danger' : 'text-success fw-bold' }}">{{ $producto->stock }}</span>
                                 </p>

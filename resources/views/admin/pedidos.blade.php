@@ -8,14 +8,20 @@
     <p>Visualiza y administra los pedidos en tiempo real.</p>
 
     @if (session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     @endif
 
     @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     @endif
 
-    <!-- Added search form for filtering by client name, order ID, and status -->
+    <!-- Search form for filtering by client name, order ID, and status -->
     <div class="card shadow-sm mb-3">
         <div class="card-body">
             <form method="GET" action="{{ route('admin.pedidos') }}" class="row g-3">
@@ -72,7 +78,12 @@
                             @foreach ($ordenes as $orden)
                                 <tr>
                                     <td>{{ $orden->id }}</td>
-                                    <td>{{ $orden->user->name ?? 'Usuario no disponible' }}</td>
+                                    <td>
+                                        {{ $orden->user->name ?? 'Usuario no disponible' }}
+                                        @if ($orden->user && $orden->user->trashed())
+                                            <span class="badge bg-danger">Usuario eliminado</span>
+                                        @endif
+                                    </td>
                                     <td>{{ $orden->direccion ?? 'No especificada' }}</td>
                                     <td>
                                         <ul class="list-unstyled mb-0">
@@ -137,7 +148,7 @@
         </div>
     </div>
 
-    <!-- Added pagination links -->
+    <!-- Pagination links -->
     <div class="mt-3">
         {{ $ordenes->appends(request()->query())->links('pagination::bootstrap-5') }}
     </div>
